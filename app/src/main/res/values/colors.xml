@@ -8,5 +8,6 @@
     <color name="green">#FF009000</color>
     <color name ="light_green">#FF00FF00</color>
     <color name ="light_blue">#FF00A0FF</color>
-    <color name="red">#FFFF0030</color>
+    <color name="red">#FF7f0026</color>
+    <color name="darker_red">#FF4c0019</color>
 </resources>
