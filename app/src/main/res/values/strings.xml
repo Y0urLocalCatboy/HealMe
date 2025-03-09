@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">HealMe</string>
+
+    <!-- Strings used for buttons -->
+    <string name="cancel_button">Cancel</string>
+    <string name="back_button">Back</string>
+    <string name="confirm_button">Confirm</string>
+    <string name="register_button">Register</string>
+    <string name="login_button">Log in</string>
+
+    <!-- Strings used for register screen -->
+    <string name="register_title">Create an account</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="login">Log in</string>
+    <string name="name">Name</string>
+    <string name="surname">Surname</string>
+    <string name="email">Email</string>
+    <string name="birthdate">Date of Birth</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
 </resources>
