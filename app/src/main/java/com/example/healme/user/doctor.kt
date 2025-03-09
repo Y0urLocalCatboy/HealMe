@@ -13,6 +13,7 @@ package com.example.healme.user
  */
 class Doctor(
     val availability: MutableList<String> = mutableListOf(),
+    val messages: MutableList<String> = mutableListOf(),
     id: String = "",
     email: String = "",
     name: String = "",
@@ -25,7 +26,9 @@ class Doctor(
 
         fun fromMap(data: Map<String, Any?>): Doctor {
             return Doctor(
-                availability = (data["availability"] as? MutableList<String> ?: mutableListOf()),
+                availability = TODO("Dodac availability sciagane z Firebase"),
+
+                messages = TODO("Dodac messages sciagane z Firebase"),
 
                 id = data["id"] as? String ?: "",
 
