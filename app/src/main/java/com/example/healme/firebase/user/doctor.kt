@@ -1,4 +1,4 @@
-package com.example.healme.user
+package com.example.healme.firebase.user
 
 /**
  * Class representing a Doctor.
@@ -9,11 +9,14 @@ package com.example.healme.user
  * @property surname The surname of the Doctor.
  * @property dateOfBirth The date of birth of the Doctor.
  * @property availability The availability of the Doctor.
+ * @property messages The messages of the Doctor.
+ * @property speciality The speciality of the Doctor.
  *
  */
 class Doctor(
     val availability: MutableList<String> = mutableListOf(),
     val messages: MutableList<String> = mutableListOf(),
+    val speciality: String = "",
     id: String = "",
     email: String = "",
     name: String = "",
@@ -24,11 +27,20 @@ class Doctor(
 ) : User(id, email, name, surname, dateOfBirth) {
     companion object {
 
+        /**
+         * Creates a Doctor object from firebase.
+         *
+         * @param data The data belonging to a Doctor.
+         * @return A Doctor object.
+         */
         fun fromMap(data: Map<String, Any?>): Doctor {
             return Doctor(
                 availability = TODO("Dodac availability sciagane z Firebase"),
 
                 messages = TODO("Dodac messages sciagane z Firebase"),
+
+                speciality = data["speciality"] as? String ?: "",
+
 
                 id = data["id"] as? String ?: "",
 
@@ -38,8 +50,7 @@ class Doctor(
 
                 surname = data["surname"] as? String ?: "",
 
-                dateOfBirth = data["dateOfBirth"] as? String ?: "",
-
+                dateOfBirth = data["dateOfBirth"] as? String ?: ""
             )
         }
     }
@@ -54,7 +65,7 @@ class Doctor(
     }
 
     /**
-     * Returns the name and surname of the Doctor.
+     * Returns the stringified representation of the Doctor.
      *
      * @return The name and surname of the Doctor as a String.
      */
