@@ -4,6 +4,7 @@ import android.content.Intent
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
@@ -26,6 +27,15 @@ open class BaseActivity : AppCompatActivity() {
     fun openActivity(activity: Class<*>, logOut: Boolean = false, extras: Bundle? = null) {
         startActivity(Intent(this, activity))
         TODO("Dodac logout z firebase i obsluge extra intentu")
+    }
+
+    /**
+     * Displays a toast message.
+     *
+     * @param message The text message to be displayed
+     */
+    fun showToast(message: String) {
+        Toast.makeText(this, message, android.widget.Toast.LENGTH_LONG).show()
     }
 
     /**

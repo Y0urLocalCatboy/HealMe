@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1058185474182",
+    "project_id": "healme-e382a",
+    "storage_bucket": "healme-e382a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1058185474182:android:70453e096b619086f82107",
+        "android_client_info": {
+          "package_name": "com.example.healme"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2Q5yvPYpzaQvGUiIRhA2wfwove1JCGiI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
