@@ -21,6 +21,25 @@
     <string name="dont_have_an_account">Don\'t Have An Account?</string>
     <string name="register">Register</string>
 
+    <!-- Strings used for name validation -->
+    <string name="name_digit">Name cannot contain numbers</string>
+    <string name="name_special_char">Name cannot contain special characters</string>
+    <string name="name_space">Name cannot contain spaces</string>
+    <string name="name_uppercase">Only the name\'s first letter can be uppercase</string>
+    <string name="name_short">Name must be longer than 2 characters</string>
+    <string name="name_long">Name must be shorter than 15 characters</string>
+
+    <string name="surname_digit">Surname cannot contain numbers</string>
+    <string name="surname_special_char">Surname cannot contain special characters</string>
+    <string name="surname_hyphenated">Use \'-\' for hyphenated surnames</string>
+    <string name="surname_uppercase">Every surname must start with an uppercase letter</string>
+    <string name="surname_short">Surname must be longer than 2 characters</string>
+    <string name="surname_long">Surname must be shorter than 15 characters</string>
+
+    <!-- Strings used for birthdate validation -->
+    <string name="invalid_age">You must be at least 18 years old to use this application</string>
+    <string name="invalid_birthdate">Please enter a valid birthdate</string>
+
 
 
 
