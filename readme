@@ -1,7 +1,7 @@
 📋 To-Do List for the E-Clinic App
 Core Features
 ✅ User Authentication & Roles – Set up Firebase Authentication to handle admins, doctors, and patients. Each role should have different permissions.
-✅ Different Doctor Specializations – Implement at least three specializations (e.g., Cardiologist, Dermatologist, Neurologist), each with a unique UI and functionalities.
+✅ Different Doctor Specializations – Implement at least three specializations (e.g.General Physician, Cardiologist, Dermatologist, Neurologist), each with a unique UI and functionalities.
 ✅ Appointment Scheduling – Patients should be able to book, cancel, and reschedule appointments. Doctors should manage their availability.
 ✅ Doctor Profile Management – Doctors should update their profiles, set availability, and manage consultations.
 ✅ E-Consultations via Chat – Real-time chat for patients and doctors, with file-sharing support for prescriptions and test results.
