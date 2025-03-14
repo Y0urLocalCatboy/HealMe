@@ -56,7 +56,7 @@ open class BaseActivity : AppCompatActivity() {
             if (isError) R.color.red else R.color.light_blue))
 
         snackbar.setTextColor(ContextCompat.getColor(this,
-            if (isError) R.color.white else R.color.black))
+            if (isError) R.color.gray else R.color.black))
 
         snackbar.show()
     }
