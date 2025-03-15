@@ -14,8 +14,8 @@ package com.example.healme.firebase.user
  *
  */
 class Doctor(
-    val availability: MutableList<String> = mutableListOf(),
-    val messages: MutableList<String> = mutableListOf(),
+//    val availability: MutableList<String> = mutableListOf(),
+//    val messages: MutableList<String> = mutableListOf(),
     val speciality: String = "",
     id: String = "",
     email: String = "",
@@ -35,9 +35,9 @@ class Doctor(
          */
         fun fromMap(data: Map<String, Any?>): Doctor {
             return Doctor(
-                availability = TODO("Dodac availability sciagane z Firebase"),
-
-                messages = TODO("Dodac messages sciagane z Firebase"),
+//                availability = TODO("Dodac availability sciagane z Firebase"),
+//
+//                messages = TODO("Dodac messages sciagane z Firebase"),
 
                 speciality = data["speciality"] as? String ?: "",
 
