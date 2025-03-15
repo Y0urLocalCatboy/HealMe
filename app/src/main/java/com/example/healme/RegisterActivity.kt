@@ -4,8 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import com.example.healme.BaseActivity
 import com.example.healme.LoginActivity
 import com.example.healme.R
 import com.example.healme.firebase.user.Patient
@@ -17,7 +16,7 @@ import com.google.firebase.firestore.FirebaseFirestore
  * This includes validating input fields, creating a new user in Firebase Authentication,
  * and saving the user information in Firebase Firestore.
  */
-class RegisterActivity : AppCompatActivity() {
+class RegisterActivity : BaseActivity() {
 
     // Firebase Authentication and Firestore instances
     private lateinit var auth: FirebaseAuth
@@ -57,8 +56,20 @@ class RegisterActivity : AppCompatActivity() {
             val dateOfBirth = dateOfBirthInput.text.toString().trim()
 
             // Validate input fields
-            if (name.isEmpty() || surname.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() || dateOfBirth.isEmpty()) {
-                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+            val nameError = nameValidity(name)
+            val surnameError = surnameValidity(surname)
+            val ageError = ageValidity(dateOfBirth)
+
+            if (nameError != null) {
+                showToast(nameError)
+                return@setOnClickListener
+            }
+            if (surnameError != null) {
+                showToast(surnameError)
+                return@setOnClickListener
+            }
+            if (ageError != null) {
+                showToast(ageError)
                 return@setOnClickListener
             }
 
@@ -89,19 +100,16 @@ class RegisterActivity : AppCompatActivity() {
                     db.collection("patients").document(userId).set(newPatient)
                         .addOnSuccessListener {
                             // Success: Show confirmation and navigate to LoginActivity
-                            Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show()
-
-                            val intent = Intent(this, LoginActivity::class.java)
-                            startActivity(intent)
-                            finish()
+                            showToast("Registration successful!")
+                            openActivity(LoginActivity::class.java)
                         }
                         .addOnFailureListener { e ->
                             // Error occurred while saving data
-                            Toast.makeText(this, "Error saving user data: ${e.message}", Toast.LENGTH_SHORT).show()
+                            showToast("Error saving user data: ${e.message}")
                         }
                 } else {
                     // Error occurred while creating the user
-                    Toast.makeText(this, "Registration failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                    showToast("Registration failed: ${task.exception?.message}")
                 }
             }
         }

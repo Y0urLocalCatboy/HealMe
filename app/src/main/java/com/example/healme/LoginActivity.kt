@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import com.example.healme.activities.RegisterActivity
 import com.google.firebase.auth.FirebaseAuth
 
@@ -15,7 +13,7 @@ import com.google.firebase.auth.FirebaseAuth
  * It includes validating input fields, signing in the user using Firebase Authentication,
  * and navigating to the home screen or showing an error message on failure.
  */
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : BaseActivity() {
 
     // Firebase Authentication instance for user authentication
     private lateinit var auth: FirebaseAuth
@@ -47,7 +45,7 @@ class LoginActivity : AppCompatActivity() {
 
             // Validate input fields
             if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show()
+                showToast("Please enter email and password")
                 return@setOnClickListener
             }
 
@@ -56,14 +54,11 @@ class LoginActivity : AppCompatActivity() {
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         // If login is successful, navigate to PatientHomeActivity
-                        Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
-
-                        val intent = Intent(this, PatientHomeActivity::class.java)
-                        startActivity(intent)
-                        finish()  // Close the login activity
+                        showToast("Login successful!")
+                        openActivity(PatientHomeActivity::class.java)
                     } else {
                         // If login fails, show error message
-                        Toast.makeText(this, "Login failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                        showToast("Login failed: ${task.exception?.message}")
                     }
                 }
         }
@@ -73,8 +68,7 @@ class LoginActivity : AppCompatActivity() {
          * where a new user can register.
          */
         registerText.setOnClickListener {
-            val intent = Intent(this, RegisterActivity::class.java)
-            startActivity(intent)
+            openActivity(RegisterActivity::class.java)
         }
     }
 }
