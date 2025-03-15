@@ -11,11 +11,18 @@ class FirestoreClass: FirestoreInterface {
     private val fs = FirebaseFirestore.getInstance()
 
     override suspend fun registerUser(user: User) {
-       try {
-           db.collection(user.getCollectionName()).document(user.id).set(user)
-       } catch (e: Exception) {
-           throw e
-       }
+        try {
+            val userMap = hashMapOf(
+                "id" to user.id,
+                "email" to user.email,
+                "name" to user.name,
+                "surname" to user.surname,
+                "dateOfBirth" to user.dateOfBirth
+            )
+            db.collection(user.getCollectionName()).document(user.id).set(userMap)
+        } catch (e: Exception) {
+            throw e
+        }
     }
 
     override fun loadUser(id: String) {
