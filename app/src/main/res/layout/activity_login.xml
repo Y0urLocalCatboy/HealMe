@@ -27,7 +27,7 @@
         android:layout_marginStart="179dp"
         android:layout_marginTop="72dp"
         android:layout_marginEnd="180dp"
-        android:text="@string/email"
+        android:hint="@string/email"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/Login_Id" />
@@ -36,14 +36,14 @@
         android:id="@+id/PasswordId"
         android:layout_width="300dp"
         android:layout_height="48dp"
-        android:layout_marginStart="162dp"
-        android:layout_marginEnd="162dp"
-        android:layout_marginBottom="428dp"
-        android:text="@string/password"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginStart="55dp"
+        android:layout_marginTop="21dp"
+        android:layout_marginEnd="56dp"
+        android:hint="@string/password"
+        android:inputType="textPassword"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.502"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/EmailId" />
 
     <Button
         android:id="@+id/LogInButtonId"

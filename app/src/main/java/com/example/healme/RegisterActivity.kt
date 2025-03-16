@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import com.example.healme.BaseActivity
 import com.example.healme.LoginActivity
 import com.example.healme.R
@@ -42,6 +43,7 @@ class RegisterActivity : BaseActivity() {
         val secondPasswordInput = findViewById<EditText>(R.id.editTextPassword2)
         val dateOfBirthInput = findViewById<EditText>(R.id.editTextDate)
         val registerButton = findViewById<Button>(R.id.registerButton)
+        val loginText = findViewById<TextView>(R.id.buttonLogIn)
 
         /**
          * Handles the click event of the register button. It validates the input fields,
@@ -100,8 +102,10 @@ class RegisterActivity : BaseActivity() {
                     db.collection("patients").document(userId).set(newPatient)
                         .addOnSuccessListener {
                             // Success: Show confirmation and navigate to LoginActivity
-                            showToast("Registration successful!")
-                            openActivity(LoginActivity::class.java)
+                            showToast("Registration successful! Please log in.")
+                            val intent = Intent(this, LoginActivity::class.java)
+                            startActivity(intent)
+                            finish() // Close RegisterActivity so user can't go back
                         }
                         .addOnFailureListener { e ->
                             // Error occurred while saving data
@@ -112,6 +116,15 @@ class RegisterActivity : BaseActivity() {
                     showToast("Registration failed: ${task.exception?.message}")
                 }
             }
+        }
+
+        /**
+         * Handles the click event of the "Login" text view. Navigates to LoginActivity.
+         */
+        loginText.setOnClickListener {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish() // Close RegisterActivity so user can't go back
         }
     }
 }
