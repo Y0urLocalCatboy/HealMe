@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import com.example.healme.activities.RegisterActivity
 import com.google.firebase.auth.FirebaseAuth
 
 /**
@@ -67,8 +66,8 @@ class LoginActivity : BaseActivity() {
          * Handles the click event of the register text. It navigates to the RegisterActivity
          * where a new user can register.
          */
-        registerText.setOnClickListener {
-            openActivity(RegisterActivity::class.java)
-        }
+//        registerText.setOnClickListener {
+//            openActivity(RegisterActivity::class.java)
+//        }
     }
 }
