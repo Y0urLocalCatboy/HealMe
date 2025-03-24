@@ -1,6 +1,6 @@
-package com.example.healme.firebase
+package com.example.healme.data.network
 
-import com.example.healme.firebase.user.User
+import com.example.healme.data.models.user.User
 
 interface FirestoreInterface {
     suspend fun registerUser(user: User)

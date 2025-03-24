@@ -1,4 +1,4 @@
-package com.example.healme.firebase.shenagingans
+package com.example.healme.data.models
 
 /**
  * Data class representing a single medical history (a previous operation) of a patient

@@ -1,4 +1,4 @@
-package com.example.healme.firebase.user
+package com.example.healme.data.models.user
 
 /**
  * Data class representing a Patient

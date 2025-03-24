@@ -10,16 +10,19 @@
 
     <!-- Strings used for register and login screen -->
     <string name="register_title">Create an account</string>
-    <string name="already_have_account">Already have an account?</string>
+    <string name="already_have_account">Already have an account? Log in</string>
     <string name="login">Log in</string>
     <string name="name">Name</string>
     <string name="surname">Surname</string>
     <string name="email">Email</string>
-    <string name="birthdate">Date of Birth</string>
     <string name="password">Password</string>
     <string name="confirm_password">Confirm Password</string>
     <string name="dont_have_an_account">Don\'t Have An Account?</string>
     <string name="register">Register</string>
+    <string name="password_mismatch">Passwords do not match</string>
+    <string name="registration_successful">Registration successful</string>
+    <string name ="birthdate">Birthdate (day - month - year)</string>
+    <string name ="invalid_email">Please enter a valid email address</string>
 
     <!-- Strings used for name validation -->
     <string name="name_digit">Name cannot contain numbers</string>
@@ -40,7 +43,10 @@
     <string name="invalid_age">You must be at least 18 years old to use this application</string>
     <string name="invalid_birthdate">Please enter a valid birthdate</string>
 
-
-
+    <!-- Strings used for password validation -->
+    <string name="password_length">Password must be longer than 8 characters</string>
+    <string name="password_uppercase">Password must containt at least one uppercase letter</string>
+    <string name="password_digit">Password must contain at least one digit</string>
+    <string name="password_special_char">Password must contain at least one special character</string>
 
 </resources>
