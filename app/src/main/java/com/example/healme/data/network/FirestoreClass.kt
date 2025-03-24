@@ -1,6 +1,7 @@
-package com.example.healme.firebase
+package com.example.healme.data.network
 
-import com.example.healme.firebase.user.User
+import com.example.healme.data.models.user.User
+import com.example.healme.data.network.FirestoreInterface
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore

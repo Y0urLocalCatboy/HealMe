@@ -1,4 +1,4 @@
-package com.example.healme.firebase.user
+package com.example.healme.data.models.user
 
 /**
  * Abstract class representing a User.
