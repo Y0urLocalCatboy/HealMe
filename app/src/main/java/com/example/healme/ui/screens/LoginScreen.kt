@@ -1,3 +1,5 @@
+package com.example.healme.ui.screens
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,7 +16,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.*
-import com.example.healme.ui.screens.RegisterScreen
 import com.google.firebase.auth.FirebaseAuth
 
 /**
