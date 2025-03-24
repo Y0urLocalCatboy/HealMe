@@ -8,7 +8,7 @@ import com.example.healme.ui.screens.*
 
 @Composable
 fun NavGraph(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = "register") {
+    NavHost(navController = navController, startDestination = "login") {
         composable("register") { RegisterScreen(navController) }
         composable("login") { LoginScreen() }
     }
