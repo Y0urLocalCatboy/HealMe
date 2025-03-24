@@ -22,6 +22,7 @@ ui = "1.6.1"
 uiToolingPreviewAndroid = "1.7.8"
 navigationRuntimeAndroid = "2.9.0-alpha08"
 navigationComposeVersion = "2.8.9"
+foundationAndroid = "1.7.8"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityComposeVersion" }
@@ -48,6 +49,7 @@ firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 androidx-navigation-runtime-android = { group = "androidx.navigation", name = "navigation-runtime-android", version.ref = "navigationRuntimeAndroid" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationComposeVersion" }
+androidx-foundation-android = { group = "androidx.compose.foundation", name = "foundation-android", version.ref = "foundationAndroid" }
 
 [plugins]
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

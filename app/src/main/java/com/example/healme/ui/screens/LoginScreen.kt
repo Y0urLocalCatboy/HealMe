@@ -1,73 +1,141 @@
-//package com.example.healme.ui.screens
-//
-//import android.os.Bundle
-//import android.widget.Button
-//import android.widget.EditText
-//import android.widget.TextView
-//import com.example.healme.R
-//import com.google.firebase.auth.FirebaseAuth
-//
-///**
-// * Activity responsible for handling user login functionality.
-// * It includes validating input fields, signing in the user using Firebase Authentication,
-// * and navigating to the home screen or showing an error message on failure.
-// */
-//class LoginScreen : BaseActivity() {
-//
-//    // Firebase Authentication instance for user authentication
-//    private lateinit var auth: FirebaseAuth
-//
-//    /**
-//     * Called when the activity is created. Initializes Firebase Authentication,
-//     * sets up UI elements, and handles the login button and register link actions.
-//     */
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//        setContentView(R.layout.activity_login)
-//
-//        // Initialize Firebase Authentication instance
-//        auth = FirebaseAuth.getInstance()
-//
-//        // Define UI elements
-//        val emailInput = findViewById<EditText>(R.id.EmailId)
-//        val passwordInput = findViewById<EditText>(R.id.PasswordId)
-//        val loginButton = findViewById<Button>(R.id.LogInButtonId)
-//        val registerText = findViewById<TextView>(R.id.RegisterClickableId)
-//
-//        /**
-//         * Handles the click event of the login button. It validates the input fields,
-//         * signs the user in using Firebase Authentication, and navigates to the home activity on success.
-//         */
-//        loginButton.setOnClickListener {
-//            val email = emailInput.text.toString().trim()
-//            val password = passwordInput.text.toString().trim()
-//
-//            // Validate input fields
-//            if (email.isEmpty() || password.isEmpty()) {
-//                showToast("Please enter email and password")
-//                return@setOnClickListener
-//            }
-//
-//            // Sign in the user with email and password
-//            auth.signInWithEmailAndPassword(email, password)
-//                .addOnCompleteListener { task ->
-//                    if (task.isSuccessful) {
-//                        // If login is successful, navigate to PatientHomeActivity
-//                        showToast("Login successful!")
-//                        openActivity(PatientHomeActivity::class.java)
-//                    } else {
-//                        // If login fails, show error message
-//                        showToast("Login failed: ${task.exception?.message}")
-//                    }
-//                }
-//        }
-//
-//        /**
-//         * Handles the click event of the register text. It navigates to the RegisterActivity
-//         * where a new user can register.
-//         */
-////        registerText.setOnClickListener {
-////            openActivity(RegisterActivity::class.java)
-////        }
-//    }
-//}
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.*
+import com.example.healme.ui.screens.RegisterScreen
+import com.google.firebase.auth.FirebaseAuth
+
+/**
+ * LoginScreen is the entry point for the login activity.
+ * It sets up the navigation and handles the login logic.
+ */
+class LoginScreen : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            val navController = rememberNavController()
+
+            NavHost(navController = navController, startDestination = "login") {
+                composable("login") {
+                    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+                    LoginScreenContent(
+                        onLogin = { email, password ->
+                            val auth = FirebaseAuth.getInstance()
+                            auth.signInWithEmailAndPassword(email, password)
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        navController.navigate("home")
+                                    } else {
+                                        errorMessage = "Login failed: ${task.exception?.message}"
+                                    }
+                                }
+                        },
+                        onRegisterClick = { navController.navigate("register") },
+                        errorMessage = errorMessage
+                    )
+                }
+                composable("register") {
+                    RegisterScreen(navController)
+                }
+                composable("home") {
+                    Text("Welcome to Home Screen")
+                }
+            }
+        }
+    }
+}
+
+/**
+ * LoginScreenContent displays the UI components for login, including email, password fields,
+ * error messages, and buttons. It accepts callback functions for login and registration navigation.
+ *
+ * @param onLogin A function to handle login logic.
+ * @param onRegisterClick A function to navigate to the registration screen.
+ * @param errorMessage A string to display error messages during login.
+ */
+@Composable
+fun LoginScreenContent(
+    onLogin: (String, String) -> Unit,
+    onRegisterClick: () -> Unit,
+    errorMessage: String?
+) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Login",
+            style = MaterialTheme.typography.headlineLarge,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") },
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        errorMessage?.let {
+            Text(text = it, color = MaterialTheme.colorScheme.error)
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        Button(
+            onClick = { onLogin(email, password) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Log In")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            "Don't have an account? Register here",
+            modifier = Modifier.clickable { onRegisterClick() },
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
+}
+
+/**
+ * Preview of the LoginScreenContent composable, showing how the login screen would look
+ * in the preview without any action functionality.
+ */
+@Preview(showBackground = true)
+@Composable
+fun PreviewLoginScreen() {
+    LoginScreenContent(onLogin = { _, _ -> }, onRegisterClick = {}, errorMessage = null)
+}
