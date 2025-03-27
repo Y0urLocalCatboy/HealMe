@@ -46,7 +46,6 @@ fun RegisterScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val passwordMismatchError = stringResource(R.string.password_mismatch)
-    val invalidEmailError = stringResource(R.string.invalid_email)
     val registrationSuccess = stringResource(R.string.registration_successful)
 
     val nameError = if (name.isNotEmpty()) authViewModel.nameValidity(name) else null
