@@ -1,4 +1,5 @@
 package com.example.healme.data.models.user
+import com.example.healme.data.*
 
 /**
  * Abstract class representing a User.
@@ -32,9 +33,8 @@ abstract class User (open val id: String="",
          */
         fun fromMap(data: Map<String, Any>): User {
             return when {
-                data.containsKey("history") -> Patient.fromMap(data)
-                data.containsKey("availability") -> Doctor.fromMap(data)
-                data.containsKey("email") -> Admin.fromMap(data)
+                data.containsKey(DOCTOR_FEATURE) -> Doctor.fromMap(data)
+                data.containsKey(PATIENT_FEATURE) -> Patient.fromMap(data)
                 else -> throw Exception("(abstractuser) Collection name not recognized")
             }
         }

@@ -8,16 +8,13 @@ package com.example.healme.data.models.user
 
  */
 class Admin ( id: String = "",
-                   email: String = "",
-                   name: String = "",
-                   surname: String = "",
-                   dateOfBirth: String = "",
-) :  User(id, email, name, surname, dateOfBirth)  {
+              email: String = ""
+            ) : User(id, email) {
     companion object {
         /**
          * Creates an Admin object from firebase.
          *
-         * @param details The data belonging to an Admin.
+         * @param data The data belonging to an Admin.
          * @return An Admin object.
          */
         fun fromMap(data: Map<String, Any?>): Admin {

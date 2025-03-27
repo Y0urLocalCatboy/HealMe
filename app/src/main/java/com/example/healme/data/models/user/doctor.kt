@@ -8,14 +8,11 @@ package com.example.healme.data.models.user
  * @property name The name of the Doctor.
  * @property surname The surname of the Doctor.
  * @property dateOfBirth The date of birth of the Doctor.
- * @property availability The availability of the Doctor.
- * @property messages The messages of the Doctor.
  * @property speciality The speciality of the Doctor.
  *
  */
 class Doctor(
-//    val availability: MutableList<String> = mutableListOf(),
-//    val messages: MutableList<String> = mutableListOf(),
+
     val speciality: String = "",
     id: String = "",
     email: String = "",
@@ -35,12 +32,8 @@ class Doctor(
          */
         fun fromMap(data: Map<String, Any?>): Doctor {
             return Doctor(
-//                availability = TODO("Dodac availability sciagane z Firebase"),
-//
-//                messages = TODO("Dodac messages sciagane z Firebase"),
 
                 speciality = data["speciality"] as? String ?: "",
-
 
                 id = data["id"] as? String ?: "",
 

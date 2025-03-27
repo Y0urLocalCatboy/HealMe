@@ -12,8 +12,6 @@ package com.example.healme.data.models.user
  * @property dateOfBirth The date of birth of the Patient.
  */
 class Patient(
-    val medicalHistory: MutableList<String> = mutableListOf(),
-    val messages: MutableList<String> = mutableListOf(),
     id: String = "",
     email: String = "",
     name: String = "",
@@ -30,10 +28,6 @@ class Patient(
          */
         fun fromMap(data: Map<String, Any?>): Patient {
             return Patient(
-
-                medicalHistory = TODO("Dodac medicalHistory sciagane z Firebase"),
-
-                messages = TODO("Dodac messages sciagane z Firebase"),
 
                 id = data["id"] as? String ?: "",
 

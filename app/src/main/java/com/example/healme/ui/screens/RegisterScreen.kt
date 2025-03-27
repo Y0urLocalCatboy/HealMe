@@ -89,8 +89,6 @@ fun RegisterScreen(
                 if (task.isSuccessful) {
                     val userId = auth.currentUser?.uid ?: ""
                     val newPatient = Patient(
-                        medicalHistory = mutableListOf(),
-                        messages = mutableListOf(),
                         id = userId,
                         email = email,
                         name = name,
@@ -284,6 +282,9 @@ private fun RegisterContent(
 @Preview(showBackground = true)
 @Composable
 fun PreviewRegisterScreen() {
-    val navController = rememberNavController()
-    RegisterScreen(navController = navController)
+    RegisterContent(name = "", surname = "", email = "", dateOfBirth = "", password = "", confirmPassword = "",
+        errorMessage = null, nameError = null, surnameError = null, dobError = null, passwordError = null,
+        emailError = false, isFormValid = false, onNameChange = {}, onSurnameChange = {}, onEmailChange = {},
+        onDateOfBirthChange = {}, onPasswordChange = {}, onConfirmPasswordChange = {}, onRegisterClick = {},
+        onLoginClick = {})
 }
