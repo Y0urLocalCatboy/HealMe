@@ -3,6 +3,7 @@ package com.example.healme.data.network
 import com.example.healme.data.models.user.User
 import com.example.healme.data.network.FirestoreInterface
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 
@@ -32,5 +33,18 @@ class FirestoreClass: FirestoreInterface {
 
     override fun updateUser(user: User, data: Map<String, Any?>) {
         TODO("Not yet implemented")
+    }
+
+    override fun loginUser(email: String, password: String, onResult: (Boolean, String) -> Unit) {
+        val auth = FirebaseAuth.getInstance()
+
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onResult(true, "Login successful!")
+                } else {
+                    onResult(false, task.exception?.message ?: "Unknown error occurred")
+                }
+            }
     }
 }

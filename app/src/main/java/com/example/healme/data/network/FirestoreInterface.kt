@@ -6,5 +6,6 @@ interface FirestoreInterface {
     suspend fun registerUser(user: User)
     fun loadUser(id: String)
     fun updateUser(user: User, data: Map<String, Any?>)
+    fun loginUser(email: String, password: String, onResult: (Boolean, String) -> Unit)
 
 }

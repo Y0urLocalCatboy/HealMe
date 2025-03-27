@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.healme.data.network.FirestoreClass
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -63,22 +64,23 @@ fun LoginScreen(navController: NavController) {
 
         Button(
             onClick = {
-                val auth = FirebaseAuth.getInstance()
-                auth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            navController.navigate("patient") {
-                                popUpTo("login") { inclusive = true } // Prevent back navigation
-                            }
-                        } else {
-                            errorMessage = "Login failed: ${task.exception?.message}"
+                val firestore = FirestoreClass()
+                firestore.loginUser(email, password) { success, message ->
+                    if (success) {
+                        navController.navigate("patient") {
+                            popUpTo("login") { inclusive = true }
                         }
+                    } else {
+                        errorMessage = message
                     }
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Log In")
         }
+
+
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
