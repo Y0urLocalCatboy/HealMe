@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.healme.data.models.user.Patient
@@ -169,7 +168,7 @@ private fun RegisterContent(
     ) {
         Text(
             text = stringResource(R.string.register),
-            fontSize = 34.sp,
+            style = MaterialTheme.typography.displayLarge,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
@@ -253,6 +252,7 @@ private fun RegisterContent(
         errorMessage?.let {
             Text(
                 text = it,
+                style = MaterialTheme.typography.displaySmall,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
@@ -268,7 +268,10 @@ private fun RegisterContent(
             Text(stringResource(R.string.register))
         }
 
-        TextButton(onClick = onLoginClick) {
+        TextButton(
+            onClick = onLoginClick,
+            shape = MaterialTheme.shapes.large
+        ) {
             Text(stringResource(R.string.already_have_account))
         }
     }
