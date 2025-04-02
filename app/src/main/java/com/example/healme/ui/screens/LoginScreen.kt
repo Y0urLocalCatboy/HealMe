@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.healme.data.network.FirestoreClass
-import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun LoginScreen(navController: NavController) {

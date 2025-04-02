@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.healme.ui.theme.*
 import kotlinx.coroutines.delay
 
 /**
@@ -29,8 +29,8 @@ fun SnackBarEffect(
         Snackbar(
             snackbarData = data,
             modifier = Modifier.padding(16.dp),
-            containerColor = if (data.visuals.actionLabel == "Error") Color.Red else Color.Blue,
-            contentColor = Color.White
+            containerColor = if (data.visuals.actionLabel == "Error") Crimson else DarkTurquoise,
+            contentColor = White
         )
     }
 

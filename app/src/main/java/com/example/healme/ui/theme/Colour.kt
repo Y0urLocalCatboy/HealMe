@@ -13,5 +13,5 @@ val CreamWhite = Color(0xFFFFF5E1)
 val LightGray = Color(0xFFD3D3D3)
 val Black = Color(0xFF000000)
 val White = Color(0xFFFFFFFF)
-val Crimson = Color(0xFFDC143C)
+val Crimson = Color(0xFF880000)
 
