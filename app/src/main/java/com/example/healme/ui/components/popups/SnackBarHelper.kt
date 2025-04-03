@@ -1,4 +1,4 @@
-package com.example.healme.ui.components
+package com.example.healme.ui.components.popups
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize

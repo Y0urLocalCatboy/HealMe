@@ -1,4 +1,4 @@
-package com.example.healme.ui.components
+package com.example.healme.ui.components.popups
 
 import android.widget.Toast
 import androidx.compose.runtime.Composable
