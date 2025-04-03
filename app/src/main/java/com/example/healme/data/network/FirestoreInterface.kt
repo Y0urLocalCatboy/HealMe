@@ -62,13 +62,14 @@ interface FirestoreInterface {
     )
 
     /**
-     * Retrieves all messages between two users.
+     * Retrieves ALL messages between two users.
+     * Might be incredibly time consuming if there are a lot of messages.
      *
      * @param senderId The ID of the sender.
      * @param receiverId The ID of the receiver.
      * @param onResult Callback function with result (success, list of messages).
      */
-    fun getMessages(
+    fun getAllMessages(
         senderId: String,
         receiverId: String,
         onResult: (Boolean, List<Message>) -> Unit

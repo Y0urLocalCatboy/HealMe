@@ -146,7 +146,7 @@ class FirestoreClass: FirestoreInterface {
             }
     }
 
-    override fun getMessages(
+    override fun getAllMessages(
         senderId: String,
         receiverId: String,
         onResult: (Boolean, List<Message>) -> Unit
