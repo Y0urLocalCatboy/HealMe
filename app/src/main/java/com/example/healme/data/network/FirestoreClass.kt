@@ -1,5 +1,6 @@
 package com.example.healme.data.network
 
+import com.example.healme.data.models.Message
 import com.example.healme.data.models.user.User
 import com.example.healme.data.network.FirestoreInterface
 import com.google.firebase.Firebase
@@ -77,7 +78,8 @@ class FirestoreClass: FirestoreInterface {
 
     override suspend fun patientToDoctor(patientId: String) {
         try {
-            val userData = loadUser(auth.uid ?: "") ?: throw IllegalStateException("User data not found")
+            val userData =
+                loadUser(auth.uid ?: "") ?: throw IllegalStateException("User data not found")
             val filtered = userData.filterValues { value ->
                 value != null && !(value is String && value.isBlank())
             } as Map<String, Any>
@@ -91,11 +93,81 @@ class FirestoreClass: FirestoreInterface {
                 "dateOfBirth" to user.dateOfBirth,
                 "speciality" to "placeholder"    //ZAPAMIETAC ZE TO BAZOWO PLACEHOLDER
             )
-
-            db.collection("doctors").document(user.id).set(doctorData).await()
-            db.collection("patients").document(user.id).delete().await()
+            db.runTransaction { transaction ->
+                val patientDocRef = db.collection("patient").document(user.id)
+                transaction.delete(patientDocRef)
+                val doctorDocRef = db.collection("doctor").document(user.id)
+                transaction.set(doctorDocRef, doctorData)
+            }.await()
         } catch (e: Exception) {
             throw Exception("patientToDoctor: ${e.message}")
         }
+    }
+
+    override fun saveMessage(
+        message: Message,
+        startDate: String,
+        onResult: (Boolean, String) -> Unit
+    ) {
+        val messageData = hashMapOf(
+            "content" to message.content,
+            "timestamp" to message.timestamp,
+        )
+
+        db.collection("messages")
+            .whereEqualTo("senderId", message.senderId)
+            .whereEqualTo("receiverId", message.receiverId)
+            .whereEqualTo("startDate", startDate)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if (querySnapshot.isEmpty) {
+                    val newMessageData = hashMapOf(
+                        "senderId" to message.senderId,
+                        "receiverId" to message.receiverId,
+                        "startDate" to startDate,
+                        "weeklymessages" to arrayListOf(messageData)
+                    )
+                    db.collection("messages").add(newMessageData)
+                        .addOnSuccessListener {
+                            onResult(true, "Message sent successfully!")
+                        }
+                        .addOnFailureListener { e ->
+                            onResult(false, e.message ?: "Unknown error sending message")
+                        }
+                } else {
+                    val docRef = querySnapshot.documents[0].reference
+                    docRef.update(
+                        "weeklymessages",
+                        com.google.firebase.firestore.FieldValue.arrayUnion(messageData)
+                    )
+                        .addOnSuccessListener {
+                        }
+                }
+            }
+    }
+
+    override fun getMessages(
+        senderId: String,
+        receiverId: String,
+        onResult: (Boolean, List<Message>) -> Unit
+    ) {
+        db.collection("messages")
+            .whereEqualTo("senderId", senderId)
+            .whereEqualTo("receiverId", receiverId)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                if (querySnapshot.isEmpty) {
+                    onResult(false, emptyList())
+                } else {
+                    val messages = mutableListOf<Message>()
+                    for (document in querySnapshot.documents) {
+                        val messageData = document.data
+                        if (messageData != null) {
+                            messages.add(Message.fromMap(messageData))
+                        }
+                    }
+                    onResult(true, messages)
+                }
+            }
     }
 }

@@ -33,9 +33,9 @@ fun PatientHomeScreen(navController: NavController) {
 
         Button(
             onClick = {
-                FirebaseAuth.getInstance().signOut() // Log out the user
+                FirebaseAuth.getInstance().signOut()
                 navController.navigate("login") {
-                    popUpTo("welcome") { inclusive = true } // Clear welcome from backstack
+                    popUpTo("welcome") { inclusive = true }
                 }
             }
         ) {
