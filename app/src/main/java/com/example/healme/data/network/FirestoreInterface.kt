@@ -72,5 +72,5 @@ interface FirestoreInterface {
         senderId: String,
         receiverId: String,
         onResult: (Boolean, List<Message>) -> Unit
-    ): List<Message>
+    )
 }

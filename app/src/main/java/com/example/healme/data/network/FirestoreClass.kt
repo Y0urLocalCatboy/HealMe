@@ -161,13 +161,21 @@ class FirestoreClass: FirestoreInterface {
                 } else {
                     val messages = mutableListOf<Message>()
                     for (document in querySnapshot.documents) {
-                        val messageData = document.data
-                        if (messageData != null) {
-                            messages.add(Message.fromMap(messageData))
+                        for (messageData in document.get("weeklymessages") as List<Map<String, Any>>) {
+                            val message = Message(
+                                content = messageData["content"] as String,
+                                timestamp = messageData["timestamp"] as String,
+                                senderId = senderId,
+                                receiverId = receiverId
+                            )
+                            messages.add(message)
                         }
                     }
                     onResult(true, messages)
                 }
+            }
+            .addOnFailureListener {
+                onResult(false, emptyList())
             }
     }
 }
