@@ -46,8 +46,20 @@ class FirestoreClass: FirestoreInterface {
         }
     }
 
-    override fun updateUser(user: User, data: Map<String, Any?>) {
-        TODO("Not yet implemented")
+    override suspend fun updateUser(user: User, data: Map<String, Any?>) {
+        try {
+            val filtered = data.filterValues { value ->
+                value != null && !(value is String && value.isBlank())
+            }
+            if (filtered.isEmpty()) return
+
+            fs.collection(user.getCollectionName())
+                .document(user.id)
+                .update(filtered)
+                .await()
+        } catch (e: Exception) {
+            throw Exception("updateUser: ${e.message}")
+        }
     }
 
     override fun loginUser(email: String, password: String, onResult: (Boolean, String) -> Unit) {
@@ -58,21 +70,32 @@ class FirestoreClass: FirestoreInterface {
                 if (task.isSuccessful) {
                     onResult(true, "Login successful!")
                 } else {
-                    onResult(false, task.exception?.message ?: "Unknown error occurred")
+                    onResult(false, task.exception?.message ?: "Unknown error loginUser")
                 }
             }
     }
 
     override suspend fun patientToDoctor(patientId: String) {
-        val user = User.fromMap(loadUser(auth.uid?: "") as Map<String, Any>)
-        val doctorData = hashMapOf( "id" to user.id,
-                                    "email" to user.email,
-                                    "name" to user.name,
-                                    "surname" to user.surname,
-                                    "dateOfBirth" to user.dateOfBirth,
-                                    "speciality" to "placeholder")   //ZAPAMIETAC ZE TO BAZOWO PLACEHOLDER
-        db.collection("doctors").document(user.id).set(doctorData).await()
-        db.collection("patients").document(user.id).delete().await()
+        try {
+            val userData = loadUser(auth.uid ?: "") ?: throw IllegalStateException("User data not found")
+            val filtered = userData.filterValues { value ->
+                value != null && !(value is String && value.isBlank())
+            } as Map<String, Any>
 
+            val user = User.fromMap(filtered)
+            val doctorData = hashMapOf(
+                "id" to user.id,
+                "email" to user.email,
+                "name" to user.name,
+                "surname" to user.surname,
+                "dateOfBirth" to user.dateOfBirth,
+                "speciality" to "placeholder"    //ZAPAMIETAC ZE TO BAZOWO PLACEHOLDER
+            )
+
+            db.collection("doctors").document(user.id).set(doctorData).await()
+            db.collection("patients").document(user.id).delete().await()
+        } catch (e: Exception) {
+            throw Exception("patientToDoctor: ${e.message}")
+        }
     }
 }
