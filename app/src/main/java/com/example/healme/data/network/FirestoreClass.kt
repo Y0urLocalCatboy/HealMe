@@ -186,7 +186,8 @@ class FirestoreClass: FirestoreInterface {
             val snapshot = db.collection("doctors").get().await()
             snapshot.documents.mapNotNull { it.toObject(Doctor::class.java) }
                 .filter { it.patients.contains(id) }
-                .toMutableList()        } catch (e: Exception) {
+                .toMutableList()
+        } catch (e: Exception) {
             null
         }
     }

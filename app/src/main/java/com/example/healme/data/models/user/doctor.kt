@@ -8,13 +8,13 @@ package com.example.healme.data.models.user
  * @property name The name of the Doctor.
  * @property surname The surname of the Doctor.
  * @property dateOfBirth The date of birth of the Doctor.
- * @property speciality The speciality of the Doctor.
+ * @property specialization The speciality of the Doctor.
  *
  */
 class Doctor(
 
-    val speciality: String = "",
-    val patients: mutableListOf<String?> = mutableListOf(),
+    val specialization: String = "",
+    val patients: MutableList<String?> = mutableListOf(),
     id: String = "",
     email: String = "",
     name: String = "",
@@ -22,7 +22,7 @@ class Doctor(
     dateOfBirth: String = "",
 
 
-) : User(id, email, name, surname, dateOfBirth) {
+    ) : User(id, email, name, surname, dateOfBirth) {
     companion object {
 
         /**
@@ -34,7 +34,7 @@ class Doctor(
         fun fromMap(data: Map<String, Any?>): Doctor {
             return Doctor(
 
-                speciality = data["speciality"] as? String ?: "",
+                specialization = data["speciality"] as? String ?: "",
 
                 patients = data["patients"] as? MutableList<String?> ?: mutableListOf(),
 
