@@ -1,7 +1,8 @@
 package com.example.healme.data.network
 
 import com.example.healme.data.models.Message
-import com.example.healme.data.models.user.User
+import com.example.healme.data.models.user.*
+import kotlinx.coroutines.tasks.await
 
 interface FirestoreInterface {
 
@@ -74,4 +75,12 @@ interface FirestoreInterface {
         receiverId: String,
         onResult: (Boolean, List<Message>) -> Unit
     )
+
+    /**
+     * Gets all the doctors associated with a patient.
+     *
+     * @param id The id of the patient.
+     * @return The doctors associated with the patient, or null if no doctors are found.
+     */
+    suspend fun doctorsFromPatient(id: String): MutableList<Doctor>?
 }

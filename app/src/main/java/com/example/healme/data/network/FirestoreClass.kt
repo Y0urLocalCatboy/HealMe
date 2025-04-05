@@ -1,6 +1,7 @@
 package com.example.healme.data.network
 
 import com.example.healme.data.models.Message
+import com.example.healme.data.models.user.Doctor
 import com.example.healme.data.models.user.User
 import com.example.healme.data.network.FirestoreInterface
 import com.google.firebase.Firebase
@@ -91,7 +92,8 @@ class FirestoreClass: FirestoreInterface {
                 "name" to user.name,
                 "surname" to user.surname,
                 "dateOfBirth" to user.dateOfBirth,
-                "speciality" to "placeholder"    //ZAPAMIETAC ZE TO BAZOWO PLACEHOLDER
+                "speciality" to "placeholder",    //ZAPAMIETAC ZE TO BAZOWO PLACEHOLDER
+                "patients" to mutableListOf<String?>()
             )
             db.runTransaction { transaction ->
                 val patientDocRef = db.collection("patient").document(user.id)
@@ -177,5 +179,15 @@ class FirestoreClass: FirestoreInterface {
             .addOnFailureListener {
                 onResult(false, emptyList())
             }
+    }
+
+    override suspend fun doctorsFromPatient(id: String): MutableList<Doctor>? {
+        return try {
+            val snapshot = db.collection("doctors").get().await()
+            snapshot.documents.mapNotNull { it.toObject(Doctor::class.java) }
+                .filter { it.patients.contains(id) }
+                .toMutableList()        } catch (e: Exception) {
+            null
+        }
     }
 }

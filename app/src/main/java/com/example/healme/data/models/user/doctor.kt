@@ -14,6 +14,7 @@ package com.example.healme.data.models.user
 class Doctor(
 
     val speciality: String = "",
+    val patients: mutableListOf<String?> = mutableListOf(),
     id: String = "",
     email: String = "",
     name: String = "",
@@ -35,11 +36,13 @@ class Doctor(
 
                 speciality = data["speciality"] as? String ?: "",
 
+                patients = data["patients"] as? MutableList<String?> ?: mutableListOf(),
+
                 id = data["id"] as? String ?: "",
 
-                name = data["name"] as? String ?: "",
-
                 email = data["email"] as? String ?: "",
+
+                name = data["name"] as? String ?: "",
 
                 surname = data["surname"] as? String ?: "",
 

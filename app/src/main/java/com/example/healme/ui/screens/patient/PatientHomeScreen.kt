@@ -1,4 +1,4 @@
-package com.example.healme.ui.screens
+package com.example.healme.ui.screens.patient
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button

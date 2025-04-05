@@ -7,9 +7,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.healme.ui.components.menu.ConditionalDrawer
-import com.example.healme.ui.screens.LoginScreen
-import com.example.healme.ui.screens.RegisterScreen
-import com.example.healme.ui.screens.PatientHomeScreen
+import com.example.healme.ui.screens.mutual.LoginScreen
+import com.example.healme.ui.screens.mutual.RegisterScreen
+import com.example.healme.ui.screens.patient.PatientHomeScreen
 
 @Composable
 fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {

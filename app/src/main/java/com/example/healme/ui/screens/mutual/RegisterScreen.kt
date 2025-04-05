@@ -1,5 +1,6 @@
-package com.example.healme.ui.screens
+package com.example.healme.ui.screens.mutual
 
+import android.util.Patterns
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -13,7 +14,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
@@ -50,7 +50,7 @@ fun RegisterScreen(
     val nameError = if (name.isNotEmpty()) authViewModel.nameValidity(name) else null
     val surnameError = if (surname.isNotEmpty()) authViewModel.surnameValidity(surname) else null
     val dobError = if (dateOfBirth.isNotEmpty()) authViewModel.ageValidity(dateOfBirth) else null
-    val emailError = !android.util.Patterns.EMAIL_ADDRESS.matcher(email.toString().trim { it <= ' ' }).matches()
+    val emailError = !Patterns.EMAIL_ADDRESS.matcher(email.toString().trim { it <= ' ' }).matches()
     val passwordError = if (password.isNotEmpty()) authViewModel.passwordValidity(password) else null
     val isFormValid = name.isNotEmpty() && surname.isNotEmpty() && email.isNotEmpty() &&
             dateOfBirth.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty() &&

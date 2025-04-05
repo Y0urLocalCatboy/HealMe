@@ -66,7 +66,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
 
-    // Optional - Add full set of material icons
     implementation(libs.androidx.material.icons.extended)
     // Optional - Add window size utils
     implementation(libs.androidx.adaptive)

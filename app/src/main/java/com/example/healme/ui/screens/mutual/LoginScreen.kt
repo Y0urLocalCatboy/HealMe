@@ -1,4 +1,4 @@
-package com.example.healme.ui.screens
+package com.example.healme.ui.screens.mutual
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
