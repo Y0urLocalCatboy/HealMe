@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
@@ -65,13 +66,13 @@ fun ConditionalDrawer(
                         icon = { Icon(Icons.Default.Person, contentDescription = "Profile") }
                     )
                     NavigationDrawerItem(
-                        label = { Text("Settings") },
+                        label = { Text("Chat") },
                         selected = false,
                         onClick = {
-                            navController.navigate("settings")
+                            navController.navigate("chat")
                             scope.launch { drawerState.close() }
                         },
-                        icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") }
+                        icon = { Icon(Icons.Default.Chat, contentDescription = "Chat") }
                     )
                 }
             }

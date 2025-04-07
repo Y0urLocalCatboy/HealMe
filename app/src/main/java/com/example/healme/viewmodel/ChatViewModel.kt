@@ -4,7 +4,9 @@ import androidx.compose.runtime.Composable
 import com.example.healme.R
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModel
-
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 class ChatViewModel : ViewModel() {
@@ -26,4 +28,18 @@ class ChatViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Formats a timestamp string into a human-readable date format.
+     *
+     * @param timestamp The timestamp string to be formatted.
+     * @return A formatted date string.
+     */
+    fun formatTimestamp(timestamp: String): String {
+        return try {
+            val date = Date(timestamp.toLong())
+            SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(date)
+        } catch (e: Exception) {
+            timestamp
+        }
+    }
 }

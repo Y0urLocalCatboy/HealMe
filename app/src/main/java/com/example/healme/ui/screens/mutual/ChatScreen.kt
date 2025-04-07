@@ -1,5 +1,6 @@
 package com.example.healme.ui.screens.mutual
 
+import android.annotation.SuppressLint
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,17 +43,19 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.example.healme.ui.components.popups.showToast
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.healme.R
+import com.google.firebase.firestore.ListenerRegistration
+
 
 @Composable
 fun ChatScreen(navController: NavController,
-               viewModel: ChatViewModel
+               viewModel: ChatViewModel = viewModel(),
 ) {
     val fs = FirestoreClass()
     val auth = FirebaseAuth.getInstance()
@@ -64,15 +67,59 @@ fun ChatScreen(navController: NavController,
     }
 
     var message by remember { mutableStateOf("") }
-    val errorMessage = viewModel.messageValidity(message)
-    var doctors by remember { mutableStateOf(listOf<Doctor?>()) }
+    var showError by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var contacts by remember { mutableStateOf(listOf<User?>()) }
     var user by remember { mutableStateOf<Map<String, Any?>?>(null) }
-    var chosenDoctor by remember { mutableStateOf<Doctor?>(null) }
+    var isDoctor by remember { mutableStateOf(user?.get("specialization") != null) }
+    var chosenContactIndex by remember { mutableStateOf(0) }
+    var messages by remember { mutableStateOf<List<Message>>(emptyList()) }
+    var messageListener by remember { mutableStateOf<Any?>(null) }
 
     LaunchedEffect(currentUser?.uid) {
         user = fs.loadUser(currentUser?.uid ?: "")
-        doctors = fs.doctorsFromPatient(user?.get("id") as? String ?: "")?: emptyList()
+        isDoctor = user?.get("specialization") != null
 
+
+        if (isDoctor) {
+            contacts = fs.patientsFromDoctor(user?.get("id") as? String ?: "") ?: emptyList()
+        } else {
+            contacts = fs.doctorsFromPatient(user?.get("id") as? String ?: "") ?: emptyList()
+        }
+    }
+
+
+    val chosenContact = if (contacts.isNotEmpty() && chosenContactIndex < contacts.size) {
+        contacts[chosenContactIndex]
+    } else null
+
+    LaunchedEffect(chosenContact) {
+        (messageListener as? ListenerRegistration)?.remove()
+
+        chosenContact?.let { contact ->
+            val userId = user?.get("id") as? String ?: ""
+
+            messageListener = fs.listenForMessages(userId, contact.id) { newMessages ->
+                messages = newMessages
+            }
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            (messageListener as? ListenerRegistration)?.remove()
+        }
+    }
+
+    LaunchedEffect(chosenContact) {
+        chosenContact?.let { contact ->
+            val userId = user?.get("id") as? String ?: ""
+            fs.getAllMessages(userId, contact.id) { success, retrievedMessages ->
+                if (success) {
+                    messages = retrievedMessages
+                }
+            }
+        }
     }
 
     ChatContent(
@@ -85,48 +132,59 @@ fun ChatScreen(navController: NavController,
         } else {
             Patient()
         },
-        errorMessage = errorMessage,
-        doctors = doctors.filterNotNull(),
+        errorMessage = if (showError) viewModel.messageValidity(message) else null,
+        contacts = contacts.filterNotNull(),
+        chosenContactIndex = chosenContactIndex,
+        onContactIndexChange = { chosenContactIndex = it },
+        messages = messages,
         message = message,
         onMessageChange = { message = it },
         onSendMessage = {
-            if (errorMessage == null && message.isNotEmpty() && chosenDoctor != null) {
+            if (errorMessage == null && message.isNotEmpty() && chosenContact != null) {
+                val userId = user?.get("id") as? String ?: ""
                 fs.saveMessage(
                     Message(
                         content = message,
-                        senderId = user?.get("id") as? String ?: "",
-                        receiverId = chosenDoctor?.id ?: "",
+                        senderId = userId,
+                        receiverId = chosenContact.id,
                         timestamp = System.currentTimeMillis().toString()
                     ),
-                    startDate = System.currentTimeMillis().toString(),
                     onResult = { success, msg ->
                         if (success) {
                             message = ""
-                        } else {}
+                            fs.getAllMessages(userId, chosenContact.id) { success, retrievedMessages ->
+                                if (success) {
+                                    messages = retrievedMessages
+                                }
+                            }
+                        } else  {
+                            showError = true
+                            errorMessage = msg ?: "Couldn't send message"
+                        }
                     }
                 )
             }
         },
-        onNextDoctorClick = {},
-        onBackDoctorClick = {},
-        onBackClick = {}
-
+        onBackClick = { navController.popBackStack() }
     )
 }
 
+@SuppressLint("ViewModelConstructorInComposable")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatContent(
     user: User,
     errorMessage: String?,
-    doctors: List<Doctor>,
+    contacts: List<User>,
+    chosenContactIndex: Int,
+    onContactIndexChange: (Int) -> Unit,
+    messages: List<Message>,
     message: String,
     onMessageChange: (String) -> Unit,
     onSendMessage: () -> Unit,
-    onNextDoctorClick: () -> Unit,
-    onBackDoctorClick: () -> Unit,
     onBackClick: () -> Unit,
 ){
+    var showError by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     if (errorMessage != null) {
@@ -135,23 +193,9 @@ fun ChatContent(
         }
     }
 
-    val chosenDoctorIndex = remember { mutableStateOf(0) }
-    val chosenDoctor = if (doctors.isNotEmpty() && chosenDoctorIndex.value < doctors.size) {
-        doctors[chosenDoctorIndex.value]
+    val chosenContact = if (contacts.isNotEmpty() && chosenContactIndex < contacts.size) {
+        contacts[chosenContactIndex]
     } else null
-
-    var messages by remember { mutableStateOf<List<Message>>(emptyList()) }
-    val fs = FirestoreClass()
-
-    LaunchedEffect(chosenDoctor) {
-        chosenDoctor?.let { doctor ->
-            fs.getAllMessages(user.id, doctor.id) { success, retrievedMessages ->
-                if (success) {
-                    messages = retrievedMessages
-                }
-            }
-        }
-    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -165,37 +209,39 @@ fun ChatContent(
                     ) {
                         IconButton(
                             onClick = {
-                                if (doctors.isNotEmpty() && chosenDoctorIndex.value > 0) {
-                                    chosenDoctorIndex.value--
-                                    onBackDoctorClick()
+                                if (contacts.isNotEmpty() && chosenContactIndex > 0) {
+                                    onContactIndexChange(chosenContactIndex - 1)
                                 }
                             },
-                            enabled = chosenDoctorIndex.value > 0
+                            enabled = chosenContactIndex > 0
                         ) {
                             Icon(
                                 imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Previous doctor"
+                                contentDescription = stringResource(
+                                    if (user is Doctor) R.string.pat_previous else R.string.dr_previous
+                                )
                             )
                         }
 
                         Text(
-                            text = chosenDoctor?.let { "${it.name} ${it.surname}" } ?: "No doctor selected",
+                            text = chosenContact?.let { "${it.name} ${it.surname}" } ?: stringResource(R.string.no_contacts),
                             style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.padding(horizontal = 16.dp)
                         )
 
                         IconButton(
                             onClick = {
-                                if (doctors.isNotEmpty() && chosenDoctorIndex.value < doctors.size - 1) {
-                                    chosenDoctorIndex.value++
-                                    onNextDoctorClick()
+                                if (contacts.isNotEmpty() && chosenContactIndex < contacts.size - 1) {
+                                    onContactIndexChange(chosenContactIndex + 1)
                                 }
                             },
-                            enabled = chosenDoctorIndex.value < doctors.size - 1
+                            enabled = chosenContactIndex < contacts.size - 1
                         ) {
                             Icon(
                                 imageVector = Icons.Default.ArrowForward,
-                                contentDescription = "Next doctor"
+                                contentDescription = stringResource(
+                                    if (user is Doctor) R.string.pat_next else R.string.dr_next
+                                )
                             )
                         }
                     }
@@ -225,7 +271,12 @@ fun ChatContent(
                 ) {
                     OutlinedTextField(
                         value = message,
-                        onValueChange = onMessageChange,
+                        onValueChange = {
+                            onMessageChange(it)
+                            if (showError) {
+                                showError = false
+                            }
+                        },
                         modifier = Modifier
                             .weight(1f)
                             .padding(end = 8.dp),
@@ -235,7 +286,7 @@ fun ChatContent(
 
                     Button(
                         onClick = onSendMessage,
-                        enabled = message.isNotEmpty() && errorMessage == null && chosenDoctor != null
+                        enabled = chosenContact != null
                     ) {
                         Icon(
                             imageVector = Icons.Default.Send,
@@ -277,7 +328,7 @@ fun ChatContent(
                                 style = MaterialTheme.typography.bodyMedium
                             )
                             Text(
-                                text = formatTimestamp(message.timestamp),
+                                text = ChatViewModel().formatTimestamp(message.timestamp),
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.align(Alignment.End)
                             )
@@ -289,14 +340,7 @@ fun ChatContent(
     }
 }
 
-private fun formatTimestamp(timestamp: String): String {
-    return try {
-        val date = Date(timestamp.toLong())
-        SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(date)
-    } catch (e: Exception) {
-        timestamp
-    }
-}
+
 
 
 @Preview
@@ -317,8 +361,8 @@ fun ChatScreenPreview() {
         surname = "Gonitwa"
     )
 
-    val patient = Patient(id = "user_1",
-        email = "patient@example.com",
+    val patient = Patient(id = "321312",
+        email = "patient@wp.pl",
         name = "Jan",
         surname = "Kowalski"
     )
@@ -326,12 +370,26 @@ fun ChatScreenPreview() {
     ChatContent(
         user = patient,
         errorMessage = null,
-        doctors = listOf(doctor1, doctor2),
+        contacts = listOf(doctor1, doctor2),
+        chosenContactIndex = 0,
+        onContactIndexChange = { },
+        messages = listOf(
+            Message(
+                content = "To wassyp",
+                senderId = "654321",
+                receiverId = "321312",
+                timestamp = System.currentTimeMillis().toString()
+            ),
+            Message(
+                content = "Good lmao",
+                senderId = "321312",
+                receiverId = "654321",
+                timestamp = (System.currentTimeMillis() - 3600000).toString()
+            )
+        ),
         message = "",
         onMessageChange = { },
         onSendMessage = {},
-        onNextDoctorClick = {},
-        onBackDoctorClick = {},
         onBackClick = {}
     )
 }

@@ -7,17 +7,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.healme.ui.components.menu.ConditionalDrawer
+import com.example.healme.ui.screens.mutual.ChatScreen
 import com.example.healme.ui.screens.mutual.LoginScreen
 import com.example.healme.ui.screens.mutual.RegisterScreen
 import com.example.healme.ui.screens.patient.PatientHomeScreen
+import com.example.healme.viewmodel.ChatViewModel
 
 @Composable
 fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
-    // Keep track of current destination
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
 
-    // Screens where drawer should be visible
-    val drawerEnabledRoutes = listOf("home", "patient")
+    val drawerEnabledRoutes = listOf("patient")
     val showDrawer = currentDestination in drawerEnabledRoutes
 
     ConditionalDrawer(
@@ -41,8 +41,8 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
                 PatientHomeScreen(navController)
             }
 
-            composable("profile") {
-                PatientHomeScreen(navController)
+            composable("chat") {
+                ChatScreen(navController)
             }
         }
     }

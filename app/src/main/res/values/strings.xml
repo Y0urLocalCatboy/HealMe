@@ -49,12 +49,15 @@
     <string name="password_digit">Password must contain at least one digit</string>
     <string name="password_special_char">Password must contain at least one special character</string>
 
-    <!-- Strings used for message validation -->
+    <!-- Strings used for chat and message validation -->
     <string name="message_short">Message can\'t be empty</string>
     <string name="message_long">Message must be shorter than 200 characters</string>
+    <string name="dr_next">Next Doctor</string>
+    <string name="dr_previous">Previous Doctor</string>
+    <string name="pat_next">Next Patient</string>
+    <string name="pat_previous">Previous Patient</string>
+    <string name="no_contacts">No contacts</string>
 
-    <string name="menu_home">Home</string>
-    <string name="menu_gallery">Gallery</string>
-    <string name="menu_slideshow">Slideshow</string>
+
 
 </resources>

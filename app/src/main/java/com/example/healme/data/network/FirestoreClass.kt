@@ -2,13 +2,17 @@ package com.example.healme.data.network
 
 import com.example.healme.data.models.Message
 import com.example.healme.data.models.user.Doctor
+import com.example.healme.data.models.user.Patient
 import com.example.healme.data.models.user.User
 import com.example.healme.data.network.FirestoreInterface
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
+import java.util.Calendar
+import java.util.Date
 
 class FirestoreClass: FirestoreInterface {
 
@@ -92,7 +96,7 @@ class FirestoreClass: FirestoreInterface {
                 "name" to user.name,
                 "surname" to user.surname,
                 "dateOfBirth" to user.dateOfBirth,
-                "speciality" to "placeholder",    //ZAPAMIETAC ZE TO BAZOWO PLACEHOLDER
+                "specialization" to "placeholder",    //ZAPAMIETAC ZE TO BAZOWO PLACEHOLDER
                 "patients" to mutableListOf<String?>()
             )
             db.runTransaction { transaction ->
@@ -108,13 +112,23 @@ class FirestoreClass: FirestoreInterface {
 
     override fun saveMessage(
         message: Message,
-        startDate: String,
         onResult: (Boolean, String) -> Unit
     ) {
         val messageData = hashMapOf(
             "content" to message.content,
             "timestamp" to message.timestamp,
         )
+
+        val messageDate = Date(message.timestamp.toLong())
+        val calendar = Calendar.getInstance().apply {
+            time = messageDate
+            set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val startDate = calendar.time.time.toString()
 
         db.collection("messages")
             .whereEqualTo("senderId", message.senderId)
@@ -143,6 +157,10 @@ class FirestoreClass: FirestoreInterface {
                         com.google.firebase.firestore.FieldValue.arrayUnion(messageData)
                     )
                         .addOnSuccessListener {
+                            onResult(true, "Message sent successfully!")
+                        }
+                        .addOnFailureListener { e ->
+                            onResult(false, e.message ?: "Unknown error updating message")
                         }
                 }
             }
@@ -154,8 +172,8 @@ class FirestoreClass: FirestoreInterface {
         onResult: (Boolean, List<Message>) -> Unit
     ) {
         db.collection("messages")
-            .whereEqualTo("senderId", senderId)
-            .whereEqualTo("receiverId", receiverId)
+            .whereIn("senderId", listOf(senderId, receiverId))
+            .whereIn("receiverId", listOf(senderId, receiverId))
             .get()
             .addOnSuccessListener { querySnapshot ->
                 if (querySnapshot.isEmpty) {
@@ -167,8 +185,8 @@ class FirestoreClass: FirestoreInterface {
                             val message = Message(
                                 content = messageData["content"] as String,
                                 timestamp = messageData["timestamp"] as String,
-                                senderId = senderId,
-                                receiverId = receiverId
+                                senderId = document.get("senderId") as String,
+                                receiverId = document.get("receiverId") as String
                             )
                             messages.add(message)
                         }
@@ -190,5 +208,53 @@ class FirestoreClass: FirestoreInterface {
         } catch (e: Exception) {
             null
         }
+    }
+
+    override suspend fun patientsFromDoctor(id: String): MutableList<Patient>? {
+        return try {
+            val doctorSnapshot = db.collection("doctors").document(id).get().await()
+            val patientIds = doctorSnapshot.get("patients") as? List<String> ?: return null
+            val patients = mutableListOf<Patient>()
+            for (patientId in patientIds) {
+                val patientSnapshot = db.collection("patients").document(patientId).get().await()
+                patientSnapshot.toObject(Patient::class.java)?.let { patients.add(it) }
+            }
+            patients
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    override fun listenForMessages(
+        senderId: String,
+        receiverId: String,
+        onUpdate: (List<Message>) -> Unit
+    ): ListenerRegistration {
+        return db.collection("messages")
+            .whereIn("senderId", listOf(senderId, receiverId))
+            .whereIn("receiverId", listOf(senderId, receiverId))
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    onUpdate(emptyList())
+                    return@addSnapshotListener
+                }
+                if (snapshot != null && !snapshot.isEmpty) {
+                    val messages = mutableListOf<Message>()
+                    for (document in snapshot.documents) {
+                        for (messageData in document.get("weeklymessages") as? List<Map<String, Any>> ?: emptyList()) {
+                            val message = Message(
+                                content = messageData["content"] as String,
+                                timestamp = messageData["timestamp"] as String,
+                                senderId = document.get("senderId") as String,
+                                receiverId = document.get("receiverId") as String
+                            )
+                            messages.add(message)
+                        }
+                    }
+                    onUpdate(messages)
+                } else {
+                    onUpdate(emptyList())
+                }
+            }
     }
 }

@@ -2,6 +2,7 @@ package com.example.healme.data.network
 
 import com.example.healme.data.models.Message
 import com.example.healme.data.models.user.*
+import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.tasks.await
 
 interface FirestoreInterface {
@@ -58,7 +59,6 @@ interface FirestoreInterface {
      */
     fun saveMessage(
         message: Message,
-        startDate: String,
         onResult: (Boolean, String) -> Unit
     )
 
@@ -83,4 +83,26 @@ interface FirestoreInterface {
      * @return The doctors associated with the patient, or null if no doctors are found.
      */
     suspend fun doctorsFromPatient(id: String): MutableList<Doctor>?
+
+    /**
+     * Gets all the patients associated with a doctor.
+     *
+     * @param id The id of the doctor.
+     * @return The patients associated with the doctor, or null if no patients are found.
+     */
+    suspend fun patientsFromDoctor(id: String): MutableList<Patient>?
+
+    /**
+     * Listens for messages between two users.
+     *
+     * @param senderId The ID of the sender.
+     * @param receiverId The ID of the receiver.
+     * @param onUpdate Callback function with updated list of messages.
+     * @return ListenerRegistration object to manage the listener.
+     */
+    fun listenForMessages(
+        senderId: String,
+        receiverId: String,
+        onUpdate: (List<Message>) -> Unit
+    ): ListenerRegistration
 }
