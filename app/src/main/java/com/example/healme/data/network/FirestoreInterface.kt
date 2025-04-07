@@ -83,4 +83,11 @@ interface FirestoreInterface {
      * @return The doctors associated with the patient, or null if no doctors are found.
      */
     suspend fun doctorsFromPatient(id: String): MutableList<Doctor>?
+
+    /**
+     * Updates availability data for a doctor.
+     * @param doctorId ID of the doctor.
+     * @param availabilityMap Availability data to update.
+     */
+    suspend fun updateDoctorAvailability(doctorId: String, availabilityMap: Map<String, Any?>)
 }
