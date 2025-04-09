@@ -124,14 +124,11 @@ fun ChatScreen(navController: NavController,
 
     ChatContent(
         user = if (user != null) {
-            if (user!!["specialization"] != null) {
-                Doctor.fromMap(user!!)
-            } else {
-                Patient.fromMap(user!!)
-            }
+            User.fromMap(user!! as Map<String, Any>)
+
         } else {
-            Patient()
-        },
+            null
+        } ?: return@ChatScreen,
         errorMessage = if (showError) viewModel.messageValidity(message) else null,
         contacts = contacts.filterNotNull(),
         chosenContactIndex = chosenContactIndex,
