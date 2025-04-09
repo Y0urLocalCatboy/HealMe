@@ -1,6 +1,7 @@
 package com.example.healme.ui.components.menu
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -17,11 +18,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import com.example.healme.data.network.FirestoreClass
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -90,16 +93,35 @@ fun WeekSelectionDialog(onDismiss: () -> Unit, onWeekSelected: (Date) -> Unit) {
 @Composable
 fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass) {
     val doctorId = "dNFkQwa9wqSrj0ZVDQEvrJ9si8T2"
-    val calendar = Calendar.getInstance()
-    calendar.time = startDate
+    val context = LocalContext.current
 
-    // Ensure we start from Monday
-    calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+    val calendar = Calendar.getInstance().apply {
+        time = startDate
+        set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+    }
+
     val days = List(5) { index ->
         Calendar.getInstance().apply {
             time = calendar.time
             add(Calendar.DAY_OF_MONTH, index)
         }.time
+    }
+
+    val hours = (8..18).toList()
+
+    val availabilityMap = remember { mutableStateMapOf<Long, Boolean>() }
+
+    LaunchedEffect(Unit) {
+        val userMap = firestore.loadUser(doctorId)
+        val weeklyAvailability = userMap?.get("weeklyAvailability") as? Map<*, *>
+        weeklyAvailability?.forEach { (key, value) ->
+            val slot = value as? Map<*, *>
+            val timestamp = (slot?.get("timestamp") as? Number)?.toLong()
+            val status = slot?.get("status") as? String
+            if (timestamp != null && status != null) {
+                availabilityMap[timestamp] = status == "available"
+            }
+        }
     }
 
     val horizontalScrollState = rememberScrollState()
@@ -110,104 +132,98 @@ fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Text(
-                "Hour",
-                modifier = Modifier
-                    .width(60.dp)
-                    .padding(4.dp),
-                fontSize = 12.sp
-            )
-
-            // Loop through the days and create a label for each day
+            Text("Hour", modifier = Modifier.width(60.dp), fontSize = 12.sp)
             days.forEach { day ->
                 val dayOfWeek = Calendar.getInstance().apply { time = day }.get(Calendar.DAY_OF_WEEK)
                 val shortDay = when (dayOfWeek) {
                     Calendar.MONDAY -> "Mo"
                     Calendar.TUESDAY -> "Tu"
-                    Calendar.WEDNESDAY -> "W"
+                    Calendar.WEDNESDAY -> "We"
                     Calendar.THURSDAY -> "Th"
                     Calendar.FRIDAY -> "Fr"
                     else -> ""
                 }
-
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .padding(4.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = shortDay,
-                        fontSize = 12.sp
-                    )
+                    Text(text = shortDay, fontSize = 12.sp)
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Hourly rows
-        Column(modifier = Modifier.fillMaxSize()) {
-            for (hourIndex in 0 until 11) {
-                val hour = 8 + hourIndex
+        hours.forEach { hour ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            ) {
+                Text(
+                    "$hour:00",
+                    modifier = Modifier.width(60.dp),
+                    fontSize = 12.sp
+                )
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                ) {
-                    Text(
-                        "$hour:00",
-                        modifier = Modifier
-                            .width(60.dp)
-                            .padding(4.dp),
-                        fontSize = 12.sp
-                    )
+                Row(modifier = Modifier.horizontalScroll(horizontalScrollState)) {
+                    days.forEach { day ->
+                        val timestamp = Calendar.getInstance().apply {
+                            time = day
+                            set(Calendar.HOUR_OF_DAY, hour)
+                            set(Calendar.MINUTE, 0)
+                            set(Calendar.SECOND, 0)
+                            set(Calendar.MILLISECOND, 0)
+                        }.timeInMillis / 1000
 
-                    // Create time slot boxes for each day
-                    Row(modifier = Modifier.horizontalScroll(horizontalScrollState)) {
-                        days.forEach { day ->
-                            val timeSlot = Calendar.getInstance().apply {
-                                time = day
-                                set(Calendar.HOUR_OF_DAY, hour)
-                                set(Calendar.MINUTE, 0)
-                            }.time
+                        val isAvailable = availabilityMap[timestamp] ?: false
 
-                            val timestamp = timeSlot.time / 1000
-                            var isAvailable by remember { mutableStateOf(false) }
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .padding(4.dp)
+                                .background(
+                                    color = if (isAvailable) Color(0xFF4CAF50) else Color.Gray,
+                                    shape = RoundedCornerShape(4.dp)
+                                )
+                                .clickable {
+                                    val newStatus = !isAvailable
+                                    availabilityMap[timestamp] = newStatus
 
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .padding(4.dp)
-                                    .background(
-                                        if (isAvailable) Color.Green else Color.Gray,
-                                        shape = RoundedCornerShape(4.dp)
+                                    val updateMap = mapOf(
+                                        "weeklyAvailability.$timestamp.status" to if (newStatus) "available" else "unavailable",
+                                        "weeklyAvailability.$timestamp.timestamp" to timestamp
                                     )
-                                    .clickable {
-                                        isAvailable = !isAvailable
-                                        CoroutineScope(Dispatchers.IO).launch {
-                                            val updateMap = mapOf(
-                                                "weeklyAvailability.$timestamp.status" to if (isAvailable) "available" else "unavailable",
-                                                "weeklyAvailability.$timestamp.timestamp" to timestamp
-                                            )
+
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        try {
                                             firestore.updateDoctorAvailability(doctorId, updateMap)
+                                        } catch (e: Exception) {
+                                            withContext(Dispatchers.Main) {
+                                                Toast
+                                                    .makeText(context, "Failed to update availability", Toast.LENGTH_SHORT)
+                                                    .show()
+                                            }
                                         }
                                     }
-                            )
-                        }
+                                }
+                        )
                     }
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        // Legend
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
                     .size(20.dp)
-                    .background(Color.Green)
+                    .background(Color(0xFF4CAF50))
             )
             Text(" Available", style = MaterialTheme.typography.bodySmall)
             Spacer(modifier = Modifier.width(16.dp))

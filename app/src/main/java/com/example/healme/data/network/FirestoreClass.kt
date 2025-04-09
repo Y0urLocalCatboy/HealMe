@@ -199,4 +199,24 @@ class FirestoreClass: FirestoreInterface {
             throw Exception("updateDoctorAvailability: ${e.message}")
         }
     }
+
+    override suspend fun getDoctorAvailability(doctorId: String): Map<Long, String> {
+        return try {
+            val snapshot = fs.collection("doctors").document(doctorId).get().await()
+            val availabilityMap = mutableMapOf<Long, String>()
+
+            val weeklyAvailability = snapshot.get("weeklyAvailability") as? Map<String, Map<String, Any>>
+            weeklyAvailability?.forEach { (key, value) ->
+                val status = value["status"] as? String
+                val timestampKey = key.toLongOrNull()
+                if (timestampKey != null && status != null) {
+                    availabilityMap[timestampKey] = status
+                }
+            }
+            availabilityMap
+        } catch (e: Exception) {
+            emptyMap()
+        }
+    }
+
 }

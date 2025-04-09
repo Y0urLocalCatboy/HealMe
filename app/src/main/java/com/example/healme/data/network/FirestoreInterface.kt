@@ -52,8 +52,7 @@ interface FirestoreInterface {
      * Saves a message to Firestore.
      *
      * @param message The message content.
-     * @param senderId The ID of the sender.
-     * @param receiverId The ID of the receiver.
+     * @param startDate The date the message was sent.
      * @param onResult Callback function with result (success, message).
      */
     fun saveMessage(
@@ -90,4 +89,11 @@ interface FirestoreInterface {
      * @param availabilityMap Availability data to update.
      */
     suspend fun updateDoctorAvailability(doctorId: String, availabilityMap: Map<String, Any?>)
+
+    /**
+     * Retrieves availability data for a doctor.
+     * @param doctorId ID of the doctor.
+     * @return Map of timestamps to availability status ("available"/"unavailable").
+     */
+    suspend fun getDoctorAvailability(doctorId: String): Map<Long, String>
 }
