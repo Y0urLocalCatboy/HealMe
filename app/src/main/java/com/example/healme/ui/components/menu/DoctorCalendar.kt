@@ -183,7 +183,7 @@ fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass) {
 
                         Box(
                             modifier = Modifier
-                                .size(40.dp)
+                                .size(35.dp)
                                 .padding(4.dp)
                                 .background(
                                     color = if (isAvailable) Color(0xFF4CAF50) else Color.Gray,
