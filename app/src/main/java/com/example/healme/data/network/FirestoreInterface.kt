@@ -105,4 +105,13 @@ interface FirestoreInterface {
         receiverId: String,
         onUpdate: (List<Message>) -> Unit
     ): ListenerRegistration
+
+    /**
+     * Checks if a user is an admin.
+     *
+     * @param id The ID of the user to check.
+     */
+    suspend fun isAdmin(id: String): Boolean
+
+    suspend fun changeToAdmin(id: String, onResult: (Boolean, String) -> Unit)
 }

@@ -241,7 +241,8 @@ class FirestoreClass: FirestoreInterface {
                 if (snapshot != null && !snapshot.isEmpty) {
                     val messages = mutableListOf<Message>()
                     for (document in snapshot.documents) {
-                        for (messageData in document.get("weeklymessages") as? List<Map<String, Any>> ?: emptyList()) {
+                        for (messageData in document.get("weeklymessages") as? List<Map<String, Any>>
+                            ?: emptyList()) {
                             val message = Message(
                                 content = messageData["content"] as String,
                                 timestamp = messageData["timestamp"] as String,
@@ -256,5 +257,70 @@ class FirestoreClass: FirestoreInterface {
                     onUpdate(emptyList())
                 }
             }
+    }
+
+
+    override suspend fun isAdmin(email: String): Boolean {
+        return try {
+            val snapshot = db.collection("admins").get().await()
+            snapshot.documents.any { it.getString("email") == email }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun changeUser(
+        user: User,
+        data: Map<String, Any?>
+    ) {
+        try {
+            val filtered = data.filterValues { value ->
+                value != null && !(value is String && value.isBlank())
+            }
+            if (filtered.isEmpty()) return
+
+            fs.collection(user.getCollectionName())
+                .document(user.id)
+                .update(filtered)
+                .await()
+        } catch (e: Exception) {
+            throw Exception("updateUser: ${e.message}")
+        }
+    }
+
+    override suspend fun changeToAdmin(id: String, onResult: (Boolean, String) -> Unit) {
+        try {
+
+            val userData = loadUser(id) ?: throw IllegalStateException("User data not found")
+            val email = userData["email"] as? String ?: throw IllegalStateException("Email not found for user")
+
+            val existingAdmin = db.collection("admins")
+                .whereEqualTo("email", email)
+                .get()
+                .await()
+
+            if (!existingAdmin.isEmpty) {
+                onResult(false, "User is already an admin")
+                return
+            }
+
+            val adminData = hashMapOf<String, Any>("email" to email)
+            db.runTransaction { transaction ->
+                TODO()
+                val userDocRef = db.collection("patient").document(userData["id"] as String)?:
+                    db.collection("doctors").document(userData["id"] as String)
+                transaction.delete(userDocRef)
+                val adminDocRef = db.collection("admins").document(userData["id"] as String)
+                transaction.set(adminDocRef, adminData)
+            }.await()
+            db.collection("admins")
+                .document()
+                .set(adminData)
+                .await()
+
+            onResult(true, "Successfully changed user to admin")
+        } catch (e: Exception) {
+            onResult(false, "Error changing user to admin: ${e.message}")
+        }
     }
 }
