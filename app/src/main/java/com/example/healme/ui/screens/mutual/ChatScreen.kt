@@ -60,11 +60,6 @@ fun ChatScreen(navController: NavController,
     val fs = FirestoreClass()
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
-    if (currentUser == null) {
-        SnackBarEffect(remember { SnackbarHostState() },
-            "A critical error has occured - the user is not logged in",
-            true)
-    }
 
     var message by remember { mutableStateOf("") }
     var showError by remember { mutableStateOf(false) }
