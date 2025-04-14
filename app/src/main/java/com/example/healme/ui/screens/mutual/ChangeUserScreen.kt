@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -152,6 +153,13 @@ fun ChangeUserContent(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        Text(
+            text = stringResource(R.string.edit_profile),
+            style = MaterialTheme.typography.displayLarge,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
         TextField(
             value = name,
             onValueChange = onNameChange,
@@ -163,7 +171,7 @@ fun ChangeUserContent(
             Text(nameError, color = Color.Red, fontSize = 12.sp)
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         TextField(
             value = surname,
@@ -176,7 +184,7 @@ fun ChangeUserContent(
             Text(surnameError, color = Color.Red, fontSize = 12.sp)
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         TextField(
             value = email,
@@ -189,7 +197,7 @@ fun ChangeUserContent(
             Text(stringResource(id = R.string.invalid_email), color = Color.Red, fontSize = 12.sp)
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         TextField(
             value = dateOfBirth,
@@ -202,7 +210,7 @@ fun ChangeUserContent(
             Text(dobError, color = Color.Red, fontSize = 12.sp)
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         if(isDoctor) {
             TextField(
@@ -217,7 +225,7 @@ fun ChangeUserContent(
 
         if (showError) {
             Text(errorMessage, color = Color.Red, fontSize = 14.sp)
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
         Button(
