@@ -270,25 +270,6 @@ class FirestoreClass: FirestoreInterface {
         }
     }
 
-    suspend fun changeUser(
-        user: User,
-        data: Map<String, Any?>
-    ) {
-        try {
-            val filtered = data.filterValues { value ->
-                value != null && !(value is String && value.isBlank())
-            }
-            if (filtered.isEmpty()) return
-
-            fs.collection(user.getCollectionName())
-                .document(user.id)
-                .update(filtered)
-                .await()
-        } catch (e: Exception) {
-            throw Exception("updateUser: ${e.message}")
-        }
-    }
-
     override suspend fun changeToAdmin(id: String, onResult: (Boolean, String) -> Unit) {
         try {
 
@@ -306,22 +287,22 @@ class FirestoreClass: FirestoreInterface {
             }
 
             val adminData = hashMapOf<String, Any>("email" to email)
+
             db.runTransaction { transaction ->
-                TODO()
-                val userDocRef = db.collection("patient").document(userData["id"] as String)?:
-                    db.collection("doctors").document(userData["id"] as String)
-                transaction.delete(userDocRef)
-                val adminDocRef = db.collection("admins").document(userData["id"] as String)
-                transaction.set(adminDocRef, adminData)
+                if(userData["specialization"] != null) {
+                    val doctorDocRef = db.collection("doctors").document(id)
+                    transaction.delete(doctorDocRef)
+                    transaction.set(db.collection("admins").document(id), adminData)
+                } else {
+                    val patientDocRef = db.collection("patients").document(id)
+                    transaction.delete(patientDocRef)
+                    transaction.set(db.collection("admins").document(id), adminData)
+                }
             }.await()
-            db.collection("admins")
-                .document()
-                .set(adminData)
-                .await()
 
             onResult(true, "Successfully changed user to admin")
         } catch (e: Exception) {
-            onResult(false, "Error changing user to admin: ${e.message}")
+            onResult(false, "user to admin: ${e.message}")
         }
     }
 }
