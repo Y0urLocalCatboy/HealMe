@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -26,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.healme.R
 import com.example.healme.data.models.user.User
@@ -37,7 +39,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ChangeUserScreen(navController: NavController,
-                     authViewModel: AuthViewModel
+                     authViewModel: AuthViewModel = viewModel()
 ){
     val fs = FirestoreClass()
     val auth = FirebaseAuth.getInstance()
@@ -54,6 +56,8 @@ fun ChangeUserScreen(navController: NavController,
     var showError by remember { mutableStateOf(" ") }
     var errorMessage by remember { mutableStateOf("") }
 
+    var specialization by remember { mutableStateOf("") }
+
     val nameError = if (name.isNotEmpty()) authViewModel.nameValidity(name) else null
     val surnameError = if (surname.isNotEmpty()) authViewModel.surnameValidity(surname) else null
     val dobError = if (dateOfBirth.isNotEmpty()) authViewModel.ageValidity(dateOfBirth) else null
@@ -62,14 +66,21 @@ fun ChangeUserScreen(navController: NavController,
             email.isNotEmpty() && dateOfBirth.isNotEmpty() &&
             nameError == null && surnameError == null && dobError == null
 
+    var dataLoaded by remember { mutableStateOf(false) }
     LaunchedEffect(currentUser?.uid) {
-        val userData = fs.loadUser(currentUser?.uid ?: "")
-        user = userData?.toMutableMap()
-        isDoctor = user?.get("specialization") != null
-        name = user?.get("name") as? String ?: ""
-        surname = user?.get("surname") as? String ?: ""
-        email = user?.get("email") as? String ?: ""
-        dateOfBirth = user?.get("dateOfBirth") as? String ?: ""
+        if (!dataLoaded) {
+            val userData = fs.loadUser(currentUser?.uid ?: "")
+            user = userData?.toMutableMap()
+            isDoctor = user?.get("specialization") != null
+            if(isDoctor) {
+                specialization = user?.get("specialization") as String? ?: ""
+            }
+            name = user?.get("name") as? String ?: ""
+            surname = user?.get("surname") as? String ?: ""
+            email = user?.get("email") as? String ?: ""
+            dateOfBirth = user?.get("dateOfBirth") as? String ?: ""
+            dataLoaded = true
+        }
     }
 
     ChangeUserContent(
@@ -81,7 +92,7 @@ fun ChangeUserScreen(navController: NavController,
         email = email,
         dateOfBirth = dateOfBirth,
         dobError = dobError,
-        specialization = user?.get("specialization") as String? ?: "",
+        specialization = specialization,
         showError = showError.isNotEmpty(),
         errorMessage = errorMessage,
         isFormValid = isFormValid,
@@ -89,9 +100,7 @@ fun ChangeUserScreen(navController: NavController,
         onSurnameChange = { surname = it },
         onEmailChange = { email = it },
         onDateOfBirthChange = { dateOfBirth = it },
-        onSpecializationChange = { spec ->
-            user?.let { it["specialization"] = spec }
-        },
+        onSpecializationChange = { specialization = it },
         onSaveClick = {
             if (isFormValid) {
                 val updateData = mapOf(
@@ -102,20 +111,19 @@ fun ChangeUserScreen(navController: NavController,
                 ).toMutableMap()
 
                 if (isDoctor) {
-                    updateData["specialization"] = user?.get("specialization") as String? ?: ""
+                    updateData["specialization"] = specialization
                 }
 
                 try {
-                        coroutineScope.launch {
-                            try {
-                                fs.updateUser(User.fromMap(user as Map<String, Any>), updateData)
-                                showError = ""
-                            } catch (e: Exception) {
-                                showError = "error"
-                                errorMessage = e.message ?: "it shouldn't happen (onSaveClick changeuserScreen)"
-                            }
+                    coroutineScope.launch {
+                        try {
+                            fs.updateUser(User.fromMap(user as Map<String, Any>), updateData)
+                            showError = ""
+                        } catch (e: Exception) {
+                            showError = "error"
+                            errorMessage = e.message ?: "it shouldn't happen (onSaveClick changeuserScreen)"
                         }
-
+                    }
                 } catch (e: Exception) {
                     showError = "error"
                     errorMessage = e.message ?: "it shouldn't happen (DITTO changeuserScreen)"
@@ -160,7 +168,7 @@ fun ChangeUserContent(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        TextField(
+        OutlinedTextField(
             value = name,
             onValueChange = onNameChange,
             label = { Text(stringResource(id = R.string.name)) },
@@ -173,7 +181,7 @@ fun ChangeUserContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        TextField(
+        OutlinedTextField(
             value = surname,
             onValueChange = onSurnameChange,
             label = { Text(stringResource(id = R.string.surname)) },
@@ -186,7 +194,7 @@ fun ChangeUserContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        TextField(
+        OutlinedTextField(
             value = email,
             onValueChange = onEmailChange,
             label = { Text(stringResource(id = R.string.email)) },
@@ -199,7 +207,7 @@ fun ChangeUserContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        TextField(
+        OutlinedTextField(
             value = dateOfBirth,
             onValueChange = onDateOfBirthChange,
             label = { Text(stringResource(id = R.string.birthdate)) },
@@ -213,7 +221,7 @@ fun ChangeUserContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         if(isDoctor) {
-            TextField(
+            OutlinedTextField(
                 value = specialization,
                 onValueChange = onSpecializationChange,
                 label = { Text(stringResource(id = R.string.specialization)) },

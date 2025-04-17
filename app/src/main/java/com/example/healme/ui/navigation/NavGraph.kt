@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.healme.ui.components.menu.ConditionalDrawer
+import com.example.healme.ui.screens.mutual.ChangeUserScreen
 import com.example.healme.ui.screens.mutual.ChatScreen
 import com.example.healme.ui.screens.mutual.LoginScreen
 import com.example.healme.ui.screens.mutual.RegisterScreen
@@ -43,6 +44,9 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
 
             composable("chat") {
                 ChatScreen(navController)
+            }
+            composable("change_user") {
+                ChangeUserScreen(navController)
             }
         }
     }

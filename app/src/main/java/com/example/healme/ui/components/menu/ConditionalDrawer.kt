@@ -57,13 +57,13 @@ fun ConditionalDrawer(
                         icon = { Icon(Icons.Default.Home, contentDescription = "Home") }
                     )
                     NavigationDrawerItem(
-                        label = { Text("Profile") },
-                        selected = navController.currentDestination?.route == "profile",
+                        label = { Text("Change User Data") },
+                        selected = navController.currentDestination?.route == "change_user",
                         onClick = {
-                            navController.navigate("profile")
+                            navController.navigate("change_user")
                             scope.launch { drawerState.close() }
                         },
-                        icon = { Icon(Icons.Default.Person, contentDescription = "Profile") }
+                        icon = { Icon(Icons.Default.Person, contentDescription = "change_user") }
                     )
                     NavigationDrawerItem(
                         label = { Text("Chat") },
