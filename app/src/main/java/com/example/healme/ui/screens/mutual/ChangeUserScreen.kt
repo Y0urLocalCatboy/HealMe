@@ -32,7 +32,6 @@ import androidx.navigation.NavController
 import com.example.healme.R
 import com.example.healme.data.models.user.User
 import com.example.healme.data.network.FirestoreClass
-import com.example.healme.viewmodel.ChangeUserViewModel
 import com.example.healme.viewmodel.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch

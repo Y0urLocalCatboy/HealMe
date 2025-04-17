@@ -24,7 +24,7 @@ class AuthViewModel : ViewModel() {
      */
     @Composable
     fun nameValidity(name: String): String? {
-        val minLength = 2
+        val minLength = 3
         val numberCheck = name.any { it.isDigit() }
         val specialCharCheck = name.any { "!@#$%^&*()_+-=[]{}|;:',.<>?".contains(it) }
         val spaceCheck = name.any { it.isWhitespace() }

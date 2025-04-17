@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.healme.ui.components.menu.ConditionalDrawer
+import com.example.healme.ui.screens.admin.AdminHomeScreen
 import com.example.healme.ui.screens.mutual.ChangeUserScreen
 import com.example.healme.ui.screens.mutual.ChatScreen
 import com.example.healme.ui.screens.mutual.LoginScreen
@@ -38,7 +39,7 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
             }
 
             composable("patient") {
-                PatientHomeScreen(navController)
+                AdminHomeScreen(navController)
             }
 
             composable("chat") {

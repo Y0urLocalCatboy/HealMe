@@ -29,7 +29,7 @@
     <string name="name_special_char">Name cannot contain special characters</string>
     <string name="name_space">Name cannot contain spaces</string>
     <string name="name_uppercase">Only the name\'s first letter can be uppercase</string>
-    <string name="name_short">Name must be longer than 2 characters</string>
+    <string name="name_short">Name must be longer than 3 characters</string>
     <string name="name_long">Name must be shorter than 15 characters</string>
 
     <string name="surname_digit">Surname cannot contain numbers</string>
@@ -62,5 +62,18 @@
     <string name="edit_profile">Edit Profile</string>
     <string name="save_profile">Save Changes</string>
     <string name="specialization">Specialization</string>
+
+    <!-- Strings used for administrator panel -->
+    <string name="admin_panel_title">Administrator Panel</string>
+    <string name="admin_panel_admin">Administrator</string>
+    <string name="admin_panel_doctor">Doctor</string>
+    <string name="admin_panel_patient">Patient</string>
+    <string name="admin_panel_next">Next user</string>
+    <string name="admin_panel_previous">Previous user</string>
+    <string name="admin_panel_all_users">All users:</string>
+    <string name="admin_panel_loading">Loading</string>
+    <string name ="admin_panel_birthdate">Birthdate</string>
+
+
 
 </resources>

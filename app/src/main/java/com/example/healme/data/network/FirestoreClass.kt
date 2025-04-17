@@ -1,5 +1,6 @@
 package com.example.healme.data.network
 
+import androidx.compose.ui.res.stringResource
 import com.example.healme.data.models.Message
 import com.example.healme.data.models.user.Doctor
 import com.example.healme.data.models.user.Patient
@@ -14,6 +15,7 @@ import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
 import java.util.Calendar
 import java.util.Date
+import kotlin.text.get
 
 class FirestoreClass: FirestoreInterface {
 
@@ -303,6 +305,30 @@ class FirestoreClass: FirestoreInterface {
             onResult(true, "Successfully changed user to admin")
         } catch (e: Exception) {
             onResult(false, "user to admin: ${e.message}")
+        }
+    }
+
+    override suspend fun getAllPatients(): List<Patient>? {
+        return try {
+            val snapshot = db.collection("patients").get().await()
+            snapshot.documents.mapNotNull { doc ->
+                val data = doc.data
+                if (data != null) Patient.fromMap(data) else null
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    override suspend fun getAllDoctors(): List<Doctor>? {
+        return try {
+            val snapshot = db.collection("doctors").get().await()
+            snapshot.documents.mapNotNull { doc ->
+                val data = doc.data
+                if (data != null) Doctor.fromMap(data) else null
+            }
+        } catch (e: Exception) {
+            null
         }
     }
 }

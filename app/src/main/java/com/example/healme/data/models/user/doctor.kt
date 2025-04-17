@@ -34,7 +34,7 @@ class Doctor(
         fun fromMap(data: Map<String, Any?>): Doctor {
             return Doctor(
 
-                specialization = data["speciality"] as? String ?: "",
+                specialization = data["specialization"] as? String ?: "",
 
                 patients = data["patients"] as? MutableList<String?> ?: mutableListOf(),
 
