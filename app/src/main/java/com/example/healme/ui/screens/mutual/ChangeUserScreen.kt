@@ -53,7 +53,6 @@ fun ChangeUserScreen(navController: NavController,
     var dateOfBirth by remember { mutableStateOf("") }
     var isDoctor by remember { mutableStateOf(false) }
 
-    var showError by remember { mutableStateOf(" ") }
     var errorMessage by remember { mutableStateOf("") }
 
     var specialization by remember { mutableStateOf("") }
@@ -93,7 +92,6 @@ fun ChangeUserScreen(navController: NavController,
         dateOfBirth = dateOfBirth,
         dobError = dobError,
         specialization = specialization,
-        showError = showError.isNotEmpty(),
         errorMessage = errorMessage,
         isFormValid = isFormValid,
         onNameChange = { name = it },
@@ -118,14 +116,11 @@ fun ChangeUserScreen(navController: NavController,
                     coroutineScope.launch {
                         try {
                             fs.updateUser(User.fromMap(user as Map<String, Any>), updateData)
-                            showError = ""
                         } catch (e: Exception) {
-                            showError = "error"
                             errorMessage = e.message ?: "it shouldn't happen (onSaveClick changeuserScreen)"
                         }
                     }
                 } catch (e: Exception) {
-                    showError = "error"
                     errorMessage = e.message ?: "it shouldn't happen (DITTO changeuserScreen)"
                 }
             }
@@ -144,7 +139,6 @@ fun ChangeUserContent(
     dateOfBirth: String,
     dobError: String?,
     specialization: String,
-    showError: Boolean,
     errorMessage: String,
     isFormValid: Boolean,
     onNameChange: (String) -> Unit,
@@ -231,14 +225,14 @@ fun ChangeUserContent(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        if (showError) {
-            Text(errorMessage, color = Color.Red, fontSize = 14.sp)
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+        Text(errorMessage, color = Color.Red, fontSize = 14.sp)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
 
         Button(
             onClick = onSaveClick,
-            enabled = isFormValid,
+            enabled = isFormValid && Patterns.EMAIL_ADDRESS.matcher(email).matches(),
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(stringResource(id = R.string.save_profile))
@@ -260,7 +254,6 @@ fun ChangeUserContentPreview() {
         dateOfBirth = "1990-01-01",
         dobError = null,
         specialization = "pediatrist",
-        showError = false,
         errorMessage = "",
         isFormValid = true,
         onNameChange = {},

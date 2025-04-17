@@ -12,13 +12,12 @@ import com.example.healme.ui.screens.mutual.ChatScreen
 import com.example.healme.ui.screens.mutual.LoginScreen
 import com.example.healme.ui.screens.mutual.RegisterScreen
 import com.example.healme.ui.screens.patient.PatientHomeScreen
-import com.example.healme.viewmodel.ChatViewModel
 
 @Composable
 fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
 
-    val drawerEnabledRoutes = listOf("patient")
+    val drawerEnabledRoutes = listOf("patient", "chat", "change_user")
     val showDrawer = currentDestination in drawerEnabledRoutes
 
     ConditionalDrawer(
