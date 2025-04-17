@@ -157,7 +157,6 @@ fun ChatScreen(navController: NavController,
                 )
             }
         },
-        onBackClick = { navController.popBackStack() }
     )
 }
 
@@ -174,7 +173,6 @@ fun ChatContent(
     message: String,
     onMessageChange: (String) -> Unit,
     onSendMessage: () -> Unit,
-    onBackClick: () -> Unit,
 ){
     var showError by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -374,6 +372,5 @@ fun ChatScreenPreview() {
         message = "",
         onMessageChange = { },
         onSendMessage = {},
-        onBackClick = {}
     )
 }
