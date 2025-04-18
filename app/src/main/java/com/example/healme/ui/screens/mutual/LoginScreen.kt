@@ -15,6 +15,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.healme.data.network.FirestoreClass
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(navController: NavController) {
@@ -64,13 +67,21 @@ fun LoginScreen(navController: NavController) {
         Button(
             onClick = {
                 val firestore = FirestoreClass()
-                firestore.loginUser(email, password) { success, message ->
-                    if (success) {
-                        navController.navigate("patient") {
-                            popUpTo("login") { inclusive = true }
+                var isAdmin = false
+                CoroutineScope(Dispatchers.Main).launch {
+                    isAdmin = firestore.isAdmin(email)
+                    firestore.loginUser(email, password) { success, message ->
+                        if (success) {
+                            if (isAdmin) {
+                                navController.navigate("admin")
+                            } else {
+                                navController.navigate("patient") {
+                                    popUpTo("login") { inclusive = true }
+                                }
+                            }
+                        } else {
+                            errorMessage = message
                         }
-                    } else {
-                        errorMessage = message
                     }
                 }
             },

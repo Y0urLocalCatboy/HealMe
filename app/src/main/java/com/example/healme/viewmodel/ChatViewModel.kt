@@ -22,8 +22,8 @@ class ChatViewModel : ViewModel() {
         val minLength = 1
         val maxLength = 200
         return when{
-            message.length < minLength -> stringResource(R.string.message_short)
-            message.length > maxLength -> stringResource(R.string.message_long)
+            message.length < minLength -> stringResource(R.string.chat_message_short)
+            message.length > maxLength -> stringResource(R.string.chat_message_long)
             else -> return null
         }
     }

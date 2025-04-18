@@ -15,7 +15,6 @@ import com.example.healme.data.models.user.Doctor
 import com.example.healme.data.models.user.Patient
 import com.example.healme.data.models.user.User
 import com.example.healme.data.network.FirestoreClass
-import com.example.healme.ui.components.popups.SnackBarEffect
 import com.example.healme.viewmodel.ChatViewModel
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.layout.Arrangement
@@ -208,13 +207,13 @@ fun ChatContent(
                             Icon(
                                 imageVector = Icons.Default.ArrowBack,
                                 contentDescription = stringResource(
-                                    if (user is Doctor) R.string.pat_previous else R.string.dr_previous
+                                    if (user is Doctor) R.string.chat_pat_previous else R.string.chat_dr_previous
                                 )
                             )
                         }
 
                         Text(
-                            text = chosenContact?.let { "${it.name} ${it.surname}" } ?: stringResource(R.string.no_contacts),
+                            text = chosenContact?.let { "${it.name} ${it.surname}" } ?: stringResource(R.string.chat_no_contacts),
                             style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.padding(horizontal = 16.dp)
                         )
@@ -230,7 +229,7 @@ fun ChatContent(
                             Icon(
                                 imageVector = Icons.Default.ArrowForward,
                                 contentDescription = stringResource(
-                                    if (user is Doctor) R.string.pat_next else R.string.dr_next
+                                    if (user is Doctor) R.string.chat_pat_next else R.string.chat_dr_next
                                 )
                             )
                         }

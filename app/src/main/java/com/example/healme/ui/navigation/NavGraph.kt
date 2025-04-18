@@ -39,15 +39,26 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
             }
 
             composable("patient") {
-                AdminHomeScreen(navController)
+                PatientHomeScreen(navController)
             }
 
             composable("chat") {
                 ChatScreen(navController)
             }
+
             composable("change_user") {
                 ChangeUserScreen(navController)
             }
+
+            composable("admin") {
+                AdminHomeScreen(navController)
+            }
+
+            composable("admin_change_user?userId={userId}") { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId")
+                ChangeUserScreen(navController, userId = userId.toString())
+            }
+
         }
     }
 }

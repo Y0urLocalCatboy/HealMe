@@ -55,7 +55,7 @@ fun AdminHomeScreen(
     }
 
     val onEditUser: (String) -> Unit = { userId ->
-        navController.navigate("edit_user/$userId")
+        navController.navigate("admin_change_user?userId=$userId")
     }
 
     AdminHomeContent(

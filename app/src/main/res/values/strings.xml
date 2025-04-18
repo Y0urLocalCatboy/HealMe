@@ -25,43 +25,43 @@
     <string name="invalid_email">Please enter a valid email address</string>
 
     <!-- Strings used for name validation -->
-    <string name="name_digit">Name cannot contain numbers</string>
-    <string name="name_special_char">Name cannot contain special characters</string>
-    <string name="name_space">Name cannot contain spaces</string>
-    <string name="name_uppercase">Only the name\'s first letter can be uppercase</string>
-    <string name="name_short">Name must be longer than 3 characters</string>
-    <string name="name_long">Name must be shorter than 15 characters</string>
+    <string name="name_validation_digit">Name cannot contain numbers</string>
+    <string name="name_validation_special_char">Name cannot contain special characters</string>
+    <string name="name_validation_space">Name cannot contain spaces</string>
+    <string name="name_validation_uppercase">Only the name\'s first letter can be uppercase</string>
+    <string name="name_validation_short">Name must be longer than 3 characters</string>
+    <string name="name_validation_long">Name must be shorter than 15 characters</string>
 
-    <string name="surname_digit">Surname cannot contain numbers</string>
-    <string name="surname_special_char">Surname cannot contain special characters</string>
-    <string name="surname_hyphenated">Use \'-\' for hyphenated surnames</string>
-    <string name="surname_uppercase">Every surname must start with an uppercase letter</string>
-    <string name="surname_short">Surname must be longer than 2 characters</string>
-    <string name="surname_long">Surname must be shorter than 15 characters</string>
+    <string name="surname_validation_digit">Surname cannot contain numbers</string>
+    <string name="surname_validation_special_char">Surname cannot contain special characters</string>
+    <string name="surname_validation_hyphenated">Use \'-\' for hyphenated surnames</string>
+    <string name="surname_validation_uppercase">Every surname must start with an uppercase letter</string>
+    <string name="surname_validation_short">Surname must be longer than 2 characters</string>
+    <string name="surname_validation_long">Surname must be shorter than 15 characters</string>
 
     <!-- Strings used for birthdate validation -->
-    <string name="invalid_age">You must be at least 18 years old to use this application</string>
-    <string name="invalid_birthdate">Please enter a valid birthdate</string>
+    <string name="birthdate_validation_invalid_age">You must be at least 18 years old to use this application</string>
+    <string name="birthdate_validation_invalid_birthdate">Please enter a valid birthdate</string>
 
     <!-- Strings used for password validation -->
-    <string name="password_length">Password must be longer than 8 characters</string>
-    <string name="password_uppercase">Password must containt at least one uppercase letter</string>
-    <string name="password_digit">Password must contain at least one digit</string>
-    <string name="password_special_char">Password must contain at least one special character</string>
+    <string name="password_validation_length">Password must be longer than 8 characters</string>
+    <string name="password_validation_uppercase">Password must containt at least one uppercase letter</string>
+    <string name="password_validation_digit">Password must contain at least one digit</string>
+    <string name="password_validation_special_char">Password must contain at least one special character</string>
 
     <!-- Strings used for chat and message validation -->
-    <string name="message_short">Message can\'t be empty</string>
-    <string name="message_long">Message must be shorter than 200 characters</string>
-    <string name="dr_next">Next Doctor</string>
-    <string name="dr_previous">Previous Doctor</string>
-    <string name="pat_next">Next Patient</string>
-    <string name="pat_previous">Previous Patient</string>
-    <string name="no_contacts">No contacts</string>
+    <string name="chat_message_short">Message can\'t be empty</string>
+    <string name="chat_message_long">Message must be shorter than 200 characters</string>
+    <string name="chat_dr_next">Next Doctor</string>
+    <string name="chat_dr_previous">Previous Doctor</string>
+    <string name="chat_pat_next">Next Patient</string>
+    <string name="chat_pat_previous">Previous Patient</string>
+    <string name="chat_no_contacts">No contacts</string>
 
     <!-- Strings used for Edititng profile -->
-    <string name="edit_profile">Edit Profile</string>
-    <string name="save_profile">Save Changes</string>
-    <string name="specialization">Specialization</string>
+    <string name="edit_profile_title">Edit Profile</string>
+    <string name="edit_profile_save_changes">Save Changes</string>
+    <string name="edit_profile_specialization">Specialization</string>
 
     <!-- Strings used for administrator panel -->
     <string name="admin_panel_title">Administrator Panel</string>

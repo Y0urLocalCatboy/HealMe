@@ -12,7 +12,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,11 +37,13 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ChangeUserScreen(navController: NavController,
+                     userId: String = "null",
                      authViewModel: AuthViewModel = viewModel()
 ){
     val fs = FirestoreClass()
     val auth = FirebaseAuth.getInstance()
-    val currentUser = auth.currentUser
+
+    val currentUserId = if(userId != "null") userId else auth.currentUser?.uid
     val coroutineScope = rememberCoroutineScope()
 
     var user by remember { mutableStateOf<MutableMap<String, Any?>?>(null) }
@@ -65,9 +66,9 @@ fun ChangeUserScreen(navController: NavController,
             nameError == null && surnameError == null && dobError == null
 
     var dataLoaded by remember { mutableStateOf(false) }
-    LaunchedEffect(currentUser?.uid) {
+    LaunchedEffect(currentUserId) {
         if (!dataLoaded) {
-            val userData = fs.loadUser(currentUser?.uid ?: "")
+            val userData = fs.loadUser(currentUserId ?: "")
             user = userData?.toMutableMap()
             isDoctor = user?.get("specialization") != null
             if(isDoctor) {
@@ -119,6 +120,7 @@ fun ChangeUserScreen(navController: NavController,
                             errorMessage = e.message ?: "it shouldn't happen (onSaveClick changeuserScreen)"
                         }
                     }
+                    navController.popBackStack()
                 } catch (e: Exception) {
                     errorMessage = e.message ?: "it shouldn't happen (DITTO changeuserScreen)"
                 }
@@ -156,7 +158,7 @@ fun ChangeUserContent(
     ) {
 
         Text(
-            text = stringResource(R.string.edit_profile),
+            text = stringResource(R.string.edit_profile_title),
             style = MaterialTheme.typography.displayLarge,
             modifier = Modifier.padding(bottom = 16.dp)
         )
@@ -217,7 +219,7 @@ fun ChangeUserContent(
             OutlinedTextField(
                 value = specialization,
                 onValueChange = onSpecializationChange,
-                label = { Text(stringResource(id = R.string.specialization)) },
+                label = { Text(stringResource(id = R.string.edit_profile_specialization)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -234,7 +236,7 @@ fun ChangeUserContent(
             enabled = isFormValid && Patterns.EMAIL_ADDRESS.matcher(email).matches(),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(stringResource(id = R.string.save_profile))
+            Text(stringResource(id = R.string.edit_profile_save_changes))
         }
     }
 }

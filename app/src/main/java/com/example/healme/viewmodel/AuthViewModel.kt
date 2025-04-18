@@ -32,12 +32,12 @@ class AuthViewModel : ViewModel() {
         val isShort = name.length < minLength
         val isLong = name.length > 15
         return when {
-            numberCheck -> stringResource(R.string.name_digit)
-            specialCharCheck -> stringResource(R.string.name_special_char)
-            spaceCheck -> stringResource(R.string.name_space)
-            isShort -> stringResource(R.string.name_short)
-            isLong -> stringResource(R.string.name_long)
-            !firstUppercaseOnly -> stringResource(R.string.name_uppercase)
+            numberCheck -> stringResource(R.string.name_validation_digit)
+            specialCharCheck -> stringResource(R.string.name_validation_special_char)
+            spaceCheck -> stringResource(R.string.name_validation_space)
+            isShort -> stringResource(R.string.name_validation_short)
+            isLong -> stringResource(R.string.name_validation_long)
+            !firstUppercaseOnly -> stringResource(R.string.name_validation_uppercase)
             else -> null
         }
     }
@@ -57,7 +57,7 @@ class AuthViewModel : ViewModel() {
         val dob = try {
             dateFormat.parse(dateOfBirth)
         } catch (e: ParseException) {
-            return stringResource(R.string.invalid_birthdate)
+            return stringResource(R.string.birthdate_validation_invalid_birthdate)
         }
 
         val today = Calendar.getInstance()
@@ -70,8 +70,8 @@ class AuthViewModel : ViewModel() {
         }
 
         return when {
-            age < 18 -> stringResource(R.string.invalid_age)
-            age > 110 -> stringResource(R.string.invalid_birthdate)
+            age < 18 -> stringResource(R.string.birthdate_validation_invalid_age)
+            age > 110 -> stringResource(R.string.birthdate_validation_invalid_birthdate)
 
             else -> null
         }
@@ -100,12 +100,12 @@ class AuthViewModel : ViewModel() {
         val isShort = surname.length < minLength
         val isLong = surname.length > 15
         return when {
-            numberCheck -> stringResource(R.string.surname_digit)
-            specialCharCheck -> stringResource(R.string.surname_special_char)
-            spaceCheck -> stringResource(R.string.surname_hyphenated)
-            isShort -> stringResource(R.string.surname_short)
-            isLong -> stringResource(R.string.surname_long)
-            !firstUppercaseOnly -> stringResource(R.string.surname_uppercase)
+            numberCheck -> stringResource(R.string.surname_validation_digit)
+            specialCharCheck -> stringResource(R.string.surname_validation_special_char)
+            spaceCheck -> stringResource(R.string.surname_validation_hyphenated)
+            isShort -> stringResource(R.string.surname_validation_short)
+            isLong -> stringResource(R.string.surname_validation_long)
+            !firstUppercaseOnly -> stringResource(R.string.surname_validation_uppercase)
             else -> null
         }
     }
@@ -129,10 +129,10 @@ class AuthViewModel : ViewModel() {
         val hasSpecialChar = password.any { "!@#$%^&*()_+-=[]{}|;:',.<>?".contains(it) }
 
         return when {
-            password.length < minLength -> stringResource(R.string.password_length)
-            !hasUpperCase -> stringResource(R.string.password_uppercase)
-            !hasNumber -> stringResource(R.string.password_digit)
-            !hasSpecialChar -> stringResource(R.string.password_special_char)
+            password.length < minLength -> stringResource(R.string.password_validation_length)
+            !hasUpperCase -> stringResource(R.string.password_validation_uppercase)
+            !hasNumber -> stringResource(R.string.password_validation_digit)
+            !hasSpecialChar -> stringResource(R.string.password_validation_special_char)
             else -> null
         }
     }
