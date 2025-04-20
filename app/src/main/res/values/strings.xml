@@ -9,20 +9,20 @@
     <string name="login_button">Log in</string>
 
     <!-- Strings used for register and login screen -->
-    <string name="register_title">Create an account</string>
-    <string name="already_have_account">Already have an account? Log in</string>
-    <string name="login">Log in</string>
-    <string name="name">Name</string>
-    <string name="surname">Surname</string>
-    <string name="email">Email</string>
-    <string name="password">Password</string>
-    <string name="confirm_password">Confirm Password</string>
-    <string name="dont_have_an_account">Don\'t Have An Account?</string>
-    <string name="register">Register</string>
-    <string name="password_mismatch">Passwords do not match</string>
-    <string name="registration_successful">Registration successful</string>
-    <string name="birthdate">Birthdate (day - month - year)</string>
-    <string name="invalid_email">Please enter a valid email address</string>
+    <string name="register_create_an_account">Create an account</string>
+    <string name="register_already_have_account">Already have an account? Log in</string>
+    <string name="register_login">Log in</string>
+    <string name="register_name">Name</string>
+    <string name="register_surname">Surname</string>
+    <string name="register_email">Email</string>
+    <string name="register_password">Password</string>
+    <string name="register_confirm_password">Confirm Password</string>
+    <string name="register_dont_have_an_account">Don\'t Have An Account?</string>
+    <string name="register_register_word">Register</string>
+    <string name="register_password_mismatch">Passwords do not match</string>
+    <string name="register_registration_successful">Registration successful</string>
+    <string name="register_birthdate_long">Birthdate (day - month - year)</string>
+    <string name="register_invalid_email">Please enter a valid email address</string>
 
     <!-- Strings used for name validation -->
     <string name="name_validation_digit">Name cannot contain numbers</string>
@@ -62,6 +62,8 @@
     <string name="edit_profile_title">Edit Profile</string>
     <string name="edit_profile_save_changes">Save Changes</string>
     <string name="edit_profile_specialization">Specialization</string>
+    <string name="edit_profile_patient_to_doctor">Patient to Doctor</string>
+    <string name="edit_profile_doctor_to_patient">Doctor to Patient</string>
 
     <!-- Strings used for administrator panel -->
     <string name="admin_panel_title">Administrator Panel</string>
@@ -73,6 +75,7 @@
     <string name="admin_panel_all_users">All users:</string>
     <string name="admin_panel_loading">Loading</string>
     <string name ="admin_panel_birthdate">Birthdate</string>
+    <string name="admin_panel_specialization">Specialization</string>
 
 
 
