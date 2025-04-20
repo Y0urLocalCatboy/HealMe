@@ -47,10 +47,10 @@ fun ConditionalDrawer(
                     Text("HealMe App", modifier = Modifier.padding(16.dp))
                     NavigationDrawerItem(
                         label = { Text("Home") },
-                        selected = navController.currentDestination?.route == "home",
+                        selected = navController.currentDestination?.route == "patient",
                         onClick = {
-                            navController.navigate("home") {
-                                popUpTo("home") { inclusive = true }
+                            navController.navigate("patient") {
+                                popUpTo("patient") { inclusive = true }
                             }
                             scope.launch { drawerState.close() }
                         },

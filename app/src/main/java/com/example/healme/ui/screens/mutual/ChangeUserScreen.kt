@@ -142,6 +142,9 @@ fun ChangeUserScreen(navController: NavController,
         onToggleDoctorStatus = {
             isDoctor = !isDoctor
             changesMade = true
+        },
+        onCancelClick = {
+            navController.popBackStack()
         }
     )
 }
@@ -166,7 +169,8 @@ fun ChangeUserContent(
     onDateOfBirthChange: (String) -> Unit,
     onSpecializationChange: (String) -> Unit,
     onSaveClick: () -> Unit,
-    onToggleDoctorStatus: () -> Unit = {}
+    onToggleDoctorStatus: () -> Unit = {},
+    onCancelClick: () -> Unit = {}
     ) {
     Column(
         modifier = Modifier
@@ -182,22 +186,24 @@ fun ChangeUserContent(
                     onClick = onToggleDoctorStatus,
                     modifier = Modifier.align(Alignment.TopEnd)
                 ) {
-                    Text(if (isDoctor)
-                        stringResource(R.string.edit_profile_doctor_to_patient)
-                    else
-                        stringResource(R.string.edit_profile_patient_to_doctor)
+                    Text(
+                        if (isDoctor)
+                            stringResource(R.string.edit_profile_doctor_to_patient)
+                        else
+                            stringResource(R.string.edit_profile_patient_to_doctor)
                     )
                 }
             }
-                Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-                Text(
-                    text = stringResource(R.string.edit_profile_title),
-                    style = MaterialTheme.typography.displayLarge,
-                    modifier = Modifier
-                        .padding(bottom = 16.dp)
-                        .fillMaxWidth(),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center                )
+            Text(
+                text = stringResource(R.string.edit_profile_title),
+                style = MaterialTheme.typography.displayLarge,
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+                    .fillMaxWidth(),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
 
         } else {
             Text(
@@ -206,7 +212,8 @@ fun ChangeUserContent(
                 modifier = Modifier
                     .padding(bottom = 16.dp)
                     .fillMaxWidth(),
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center                )
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
         }
 
         OutlinedTextField(
@@ -243,7 +250,11 @@ fun ChangeUserContent(
             modifier = Modifier.fillMaxWidth()
         )
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            Text(stringResource(id = R.string.register_invalid_email), color = Color.Red, fontSize = 12.sp)
+            Text(
+                stringResource(id = R.string.register_invalid_email),
+                color = Color.Red,
+                fontSize = 12.sp
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -261,7 +272,7 @@ fun ChangeUserContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if(isDoctor) {
+        if (isDoctor) {
             OutlinedTextField(
                 value = specialization,
                 onValueChange = onSpecializationChange,
@@ -284,9 +295,19 @@ fun ChangeUserContent(
         ) {
             Text(stringResource(id = R.string.edit_profile_save_changes))
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onCancelClick ,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                stringResource(id = R.string.edit_profile_cancel)
+            )
+        }
     }
 }
-
 @Preview(showBackground = true)
 @Composable
 fun ChangeUserContentPreview() {

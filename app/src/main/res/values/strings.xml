@@ -64,6 +64,7 @@
     <string name="edit_profile_specialization">Specialization</string>
     <string name="edit_profile_patient_to_doctor">Patient to Doctor</string>
     <string name="edit_profile_doctor_to_patient">Doctor to Patient</string>
+    <string name="edit_profile_cancel">Cancel</string>
 
     <!-- Strings used for administrator panel -->
     <string name="admin_panel_title">Administrator Panel</string>
@@ -76,6 +77,7 @@
     <string name="admin_panel_loading">Loading</string>
     <string name ="admin_panel_birthdate">Birthdate</string>
     <string name="admin_panel_specialization">Specialization</string>
+    <string name="admin_panel_logout">Logout</string>
 
 
 

@@ -26,6 +26,7 @@ import com.example.healme.data.models.user.Doctor
 import com.example.healme.data.models.user.Patient
 import com.example.healme.data.models.user.User
 import com.example.healme.viewmodel.AdminViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun AdminHomeScreen(
@@ -68,6 +69,13 @@ fun AdminHomeScreen(
         }
     }
 
+    val onLogOut: () -> Unit = {
+        FirebaseAuth.getInstance().signOut()
+        navController.navigate("login") {
+            popUpTo("welcome") { inclusive = true }
+        }
+    }
+
     AdminHomeContent(
         users = users,
         roles = roles,
@@ -75,7 +83,8 @@ fun AdminHomeScreen(
         onSelectedIndexChange = { selectedIndex = it },
         specificRole = if (users.isNotEmpty() && selectedIndex < roles.size)
             roles[selectedIndex] else "",
-        onEditUser = onEditUser
+        onEditUser = onEditUser,
+        onLogOut = onLogOut
     )
 }
 
@@ -86,20 +95,33 @@ fun AdminHomeContent(
     selectedIndex: Int,
     onSelectedIndexChange: (Int) -> Unit,
     specificRole: String,
-    onEditUser: (String) -> Unit
+    onEditUser: (String) -> Unit,
+    onLogOut: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text(
-            text = stringResource(R.string.admin_panel_title),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-        )
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(
+                onClick = onLogOut,
+                modifier = Modifier.padding(end = 8.dp),
+            ) {
+                Text(stringResource(R.string.admin_panel_logout))
+            }
+
+            Text(
+                text = stringResource(R.string.admin_panel_title),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Right
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
