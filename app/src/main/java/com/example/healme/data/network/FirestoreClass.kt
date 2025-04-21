@@ -87,7 +87,7 @@ class FirestoreClass: FirestoreInterface {
     override suspend fun patientToDoctor(patientId: String) {
         try {
             val userData =
-                loadUser(auth.uid ?: "") ?: throw IllegalStateException("User data not found")
+                loadUser(patientId) ?: throw IllegalStateException("User data not found")
             val filtered = userData.filterValues { value ->
                 value != null && !(value is String && value.isBlank())
             } as Map<String, Any>
@@ -103,13 +103,40 @@ class FirestoreClass: FirestoreInterface {
                 "patients" to mutableListOf<String?>()
             )
             db.runTransaction { transaction ->
-                val patientDocRef = db.collection("patient").document(user.id)
+                val patientDocRef = db.collection("patients").document(user.id)
                 transaction.delete(patientDocRef)
-                val doctorDocRef = db.collection("doctor").document(user.id)
+                val doctorDocRef = db.collection("doctors").document(user.id)
                 transaction.set(doctorDocRef, doctorData)
             }.await()
         } catch (e: Exception) {
             throw Exception("patientToDoctor: ${e.message}")
+        }
+    }
+
+    override suspend fun doctorToPatient(doctorId: String) {
+        try {
+            val userData =
+                loadUser(doctorId) ?: throw IllegalStateException("User data not found")
+            val filtered = userData.filterValues { value ->
+                value != null && !(value is String && value.isBlank())
+            } as Map<String, Any>
+
+            val user = User.fromMap(filtered)
+            val patientData = hashMapOf(
+                "id" to user.id,
+                "email" to user.email,
+                "name" to user.name,
+                "surname" to user.surname,
+                "dateOfBirth" to user.dateOfBirth
+            )
+            db.runTransaction { transaction ->
+                val doctorDocRef = db.collection("doctors").document(user.id)
+                transaction.delete(doctorDocRef)
+                val patientDocRef = db.collection("patients").document(user.id)
+                transaction.set(patientDocRef, patientData)
+            }.await()
+        } catch (e: Exception) {
+            throw Exception("doctorToPatient: ${e.message}")
         }
     }
 
@@ -331,6 +358,51 @@ class FirestoreClass: FirestoreInterface {
             null
         }
     }
+
+    fun listenForPatients(onUpdate: (List<Patient>) -> Unit): ListenerRegistration {
+        return db.collection("patients")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    return@addSnapshotListener
+                }
+
+                val patients = snapshot?.documents?.mapNotNull { doc ->
+                    try {
+                        val userData = doc.data?.toMutableMap()
+                        if (userData != null) {
+                            userData["id"] = doc.id
+                            Patient.fromMap(userData)
+                        } else null
+                    } catch (e: Exception) {
+                        null
+                    }
+                } ?: emptyList()
+
+                onUpdate(patients)
+            }
+    }
+
+    fun listenForDoctors(onUpdate: (List<Doctor>) -> Unit): ListenerRegistration {
+        return db.collection("doctors")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    return@addSnapshotListener
+                }
+                val doctors = snapshot?.documents?.mapNotNull { doc ->
+                    try {
+                        val userData = doc.data?.toMutableMap()
+                        if (userData != null) {
+                            userData["id"] = doc.id
+                            Doctor.fromMap(userData)
+                        } else null
+                    } catch (e: Exception) {
+                        null
+                    }
+                } ?: emptyList()
+                onUpdate(doctors)
+            }
+    }
+
 
     override suspend fun updateDoctorAvailability(doctorId: String, updateMap: Map<String, Any?>) {
         try {
