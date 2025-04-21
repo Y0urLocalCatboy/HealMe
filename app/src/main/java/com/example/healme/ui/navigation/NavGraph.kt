@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.healme.ui.components.menu.ConditionalDrawer
 import com.example.healme.ui.screens.admin.AdminHomeScreen
+import com.example.healme.ui.screens.doctor.DoctorHomeScreen
 import com.example.healme.ui.screens.mutual.ChangeUserScreen
 import com.example.healme.ui.screens.mutual.ChatScreen
 import com.example.healme.ui.screens.mutual.LoginScreen
@@ -18,7 +19,7 @@ import com.example.healme.ui.screens.patient.PatientHomeScreen
 fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
 
-    val drawerEnabledRoutes = listOf("patient", "chat", "change_user")
+    val drawerEnabledRoutes = listOf("patient", "chat", "change_user", "doctor")
     val showDrawer = currentDestination in drawerEnabledRoutes
 
     ConditionalDrawer(
@@ -27,7 +28,7 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     ) {
         NavHost(
             navController = navController,
-            startDestination = "login",
+            startDestination = "doctor",
             modifier = modifier
         ) {
             composable("login") {
@@ -52,6 +53,10 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
 
             composable("admin") {
                 AdminHomeScreen(navController)
+            }
+
+            composable("doctor") {
+                DoctorHomeScreen(navController)
             }
 
             composable("admin_change_user?userId={userId}") { backStackEntry ->

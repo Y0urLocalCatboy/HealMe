@@ -113,6 +113,20 @@ interface FirestoreInterface {
      */
     suspend fun isAdmin(id: String): Boolean
 
+    /**
+     * Updates availability data for a doctor.
+     * @param doctorId ID of the doctor.
+     * @param availabilityMap Availability data to update.
+     */
+    suspend fun updateDoctorAvailability(doctorId: String, availabilityMap: Map<String, Any?>)
+
+    /**
+     * Retrieves availability data for a doctor.
+     * @param doctorId ID of the doctor.
+     * @return Map of timestamps to availability status ("available"/"unavailable").
+     */
+    suspend fun getDoctorAvailability(doctorId: String): Map<Long, String>
+
     suspend fun changeToAdmin(id: String, onResult: (Boolean, String) -> Unit)
 
     suspend fun getAllDoctors(): List<Doctor>?

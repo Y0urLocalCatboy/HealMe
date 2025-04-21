@@ -14,4 +14,6 @@ val LightGray = Color(0xFFD3D3D3)
 val Black = Color(0xFF000000)
 val White = Color(0xFFFFFFFF)
 val Crimson = Color(0xFF880000)
-
+val Success = Color(0xFF4CAF50)
+val UnavailableGray = Color.Gray
+val SurfaceVariant = LightGray

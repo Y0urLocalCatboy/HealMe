@@ -26,8 +26,12 @@ private val LightColorScheme = lightColorScheme(
     onTertiary = White,
     onBackground = Black,
     onSurface = Black,
-    error = Crimson
-)
+    error = Crimson,
+    surfaceVariant = SurfaceVariant,
+    primaryContainer = Success,
+    secondaryContainer = UnavailableGray,
+
+    )
 
 private val DarkColorScheme = darkColorScheme(
     primary = LightGreen,
@@ -40,9 +44,12 @@ private val DarkColorScheme = darkColorScheme(
     onTertiary = Black,
     onBackground = White,
     onSurface = White,
-    error = Crimson
-)
+    error = Crimson,
+    surfaceVariant = SurfaceVariant,
+    primaryContainer = Success,
+    secondaryContainer = UnavailableGray,
 
+    )
 @Composable
 fun HealMeTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
