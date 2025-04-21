@@ -20,13 +20,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.healme.R
 import com.example.healme.data.models.user.Doctor
 import com.example.healme.data.models.user.Patient
 import com.example.healme.data.models.user.User
 import com.example.healme.viewmodel.AdminViewModel
-import kotlin.text.compareTo
-import kotlin.text.get
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun AdminHomeScreen(
@@ -36,18 +36,18 @@ fun AdminHomeScreen(
     val users by adminViewModel.users.collectAsState()
     var selectedIndex by remember { mutableStateOf(0) }
 
+    val adminRole by rememberUpdatedState(newValue = stringResource(R.string.admin_panel_admin))
+    val doctorRole by rememberUpdatedState(newValue = stringResource(R.string.admin_panel_doctor))
+    val patientRole by rememberUpdatedState(newValue = stringResource(R.string.admin_panel_patient))
+
     LaunchedEffect(Unit) {
         adminViewModel.loadAllUsers()
     }
 
-    val roles = users.map { user ->
-        when(user) {
-            is Doctor -> stringResource(R.string.admin_panel_doctor)
-            is Patient -> stringResource(R.string.admin_panel_patient)
-            else -> stringResource(R.string.admin_panel_admin)
-        }
+    LaunchedEffect(navController.currentBackStackEntryAsState()) {
+        adminViewModel.loadAllUsers()
     }
-
+    
     LaunchedEffect(users.size) {
         if (selectedIndex >= users.size && users.isNotEmpty()) {
             selectedIndex = 0
@@ -56,6 +56,24 @@ fun AdminHomeScreen(
 
     val onEditUser: (String) -> Unit = { userId ->
         navController.navigate("admin_change_user?userId=$userId")
+
+    }
+
+    val roles = remember(users) {
+        users.map { user ->
+            when(user) {
+                is Doctor -> doctorRole
+                is Patient -> patientRole
+                else -> adminRole
+            }
+        }
+    }
+
+    val onLogOut: () -> Unit = {
+        FirebaseAuth.getInstance().signOut()
+        navController.navigate("login") {
+            popUpTo("welcome") { inclusive = true }
+        }
     }
 
     AdminHomeContent(
@@ -65,7 +83,8 @@ fun AdminHomeScreen(
         onSelectedIndexChange = { selectedIndex = it },
         specificRole = if (users.isNotEmpty() && selectedIndex < roles.size)
             roles[selectedIndex] else "",
-        onEditUser = onEditUser
+        onEditUser = onEditUser,
+        onLogOut = onLogOut
     )
 }
 
@@ -76,20 +95,33 @@ fun AdminHomeContent(
     selectedIndex: Int,
     onSelectedIndexChange: (Int) -> Unit,
     specificRole: String,
-    onEditUser: (String) -> Unit
+    onEditUser: (String) -> Unit,
+    onLogOut: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text(
-            text = stringResource(R.string.admin_panel_title),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-        )
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(
+                onClick = onLogOut,
+                modifier = Modifier.padding(end = 8.dp),
+            ) {
+                Text(stringResource(R.string.admin_panel_logout))
+            }
+
+            Text(
+                text = stringResource(R.string.admin_panel_title),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Right
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -220,11 +252,11 @@ fun UserDetailsCard(
             Divider(modifier = Modifier.padding(vertical = 8.dp))
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(R.string.email) + ": ${user.email}")
+                Text(stringResource(R.string.register_email) + ": ${user.email}")
                 Text(stringResource(R.string.admin_panel_birthdate) + ": ${user.dateOfBirth}")
                 Text(specificRole)
                 if (user is Doctor) {
-                    Text("Specialization: ${user.specialization.takeIf { it != "placeholder" } ?: "Not specified"}")
+                    Text("${stringResource(R.string.admin_panel_specialization)} ${user.specialization.takeIf { it != "placeholder" } ?: "Not specified"}")
                 }
                 else {
                     Text("")

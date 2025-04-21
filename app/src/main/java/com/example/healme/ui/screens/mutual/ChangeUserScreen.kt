@@ -2,6 +2,7 @@ package com.example.healme.ui.screens.mutual
 
 import android.util.Patterns
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +32,7 @@ import androidx.navigation.NavController
 import com.example.healme.R
 import com.example.healme.data.models.user.User
 import com.example.healme.data.network.FirestoreClass
+import com.example.healme.viewmodel.AdminViewModel
 import com.example.healme.viewmodel.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
@@ -38,13 +40,15 @@ import kotlinx.coroutines.launch
 @Composable
 fun ChangeUserScreen(navController: NavController,
                      userId: String = "null",
-                     authViewModel: AuthViewModel = viewModel()
+                     authViewModel: AuthViewModel = viewModel(),
+                        adminViewModel: AdminViewModel = viewModel()
 ){
     val fs = FirestoreClass()
     val auth = FirebaseAuth.getInstance()
 
     val currentUserId = if(userId != "null") userId else auth.currentUser?.uid
     val coroutineScope = rememberCoroutineScope()
+    val adminMode = userId != "null"
 
     var user by remember { mutableStateOf<MutableMap<String, Any?>?>(null) }
     var name by remember { mutableStateOf("") }
@@ -52,6 +56,8 @@ fun ChangeUserScreen(navController: NavController,
     var email by remember { mutableStateOf("") }
     var dateOfBirth by remember { mutableStateOf("") }
     var isDoctor by remember { mutableStateOf(false) }
+    var changesMade by remember { mutableStateOf(false) }
+
 
     var errorMessage by remember { mutableStateOf("") }
 
@@ -83,6 +89,7 @@ fun ChangeUserScreen(navController: NavController,
     }
 
     ChangeUserContent(
+        adminMode = adminMode,
         isDoctor = isDoctor,
         name = name,
         nameError = nameError,
@@ -110,6 +117,8 @@ fun ChangeUserScreen(navController: NavController,
 
                 if (isDoctor) {
                     updateData["specialization"] = specialization
+                } else if (changesMade) {
+                    updateData.remove("specialization")
                 }
 
                 try {
@@ -119,18 +128,30 @@ fun ChangeUserScreen(navController: NavController,
                         } catch (e: Exception) {
                             errorMessage = e.message ?: "it shouldn't happen (onSaveClick changeuserScreen)"
                         }
+                        if (changesMade) {
+                            adminViewModel.changeUserType(User.fromMap(user as Map<String, Any>))
+                            changesMade = false
+                        }
                     }
                     navController.popBackStack()
                 } catch (e: Exception) {
                     errorMessage = e.message ?: "it shouldn't happen (DITTO changeuserScreen)"
                 }
             }
+        },
+        onToggleDoctorStatus = {
+            isDoctor = !isDoctor
+            changesMade = true
+        },
+        onCancelClick = {
+            navController.popBackStack()
         }
     )
 }
 
 @Composable
 fun ChangeUserContent(
+    adminMode: Boolean = false,
     isDoctor: Boolean,
     name: String,
     nameError: String?,
@@ -147,8 +168,10 @@ fun ChangeUserContent(
     onEmailChange: (String) -> Unit,
     onDateOfBirthChange: (String) -> Unit,
     onSpecializationChange: (String) -> Unit,
-    onSaveClick: () -> Unit
-) {
+    onSaveClick: () -> Unit,
+    onToggleDoctorStatus: () -> Unit = {},
+    onCancelClick: () -> Unit = {}
+    ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -157,16 +180,46 @@ fun ChangeUserContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Text(
-            text = stringResource(R.string.edit_profile_title),
-            style = MaterialTheme.typography.displayLarge,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        if (adminMode) {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    onClick = onToggleDoctorStatus,
+                    modifier = Modifier.align(Alignment.TopEnd)
+                ) {
+                    Text(
+                        if (isDoctor)
+                            stringResource(R.string.edit_profile_doctor_to_patient)
+                        else
+                            stringResource(R.string.edit_profile_patient_to_doctor)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text(
+                text = stringResource(R.string.edit_profile_title),
+                style = MaterialTheme.typography.displayLarge,
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+                    .fillMaxWidth(),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+
+        } else {
+            Text(
+                text = stringResource(R.string.edit_profile_title),
+                style = MaterialTheme.typography.displayLarge,
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+                    .fillMaxWidth(),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+        }
 
         OutlinedTextField(
             value = name,
             onValueChange = onNameChange,
-            label = { Text(stringResource(id = R.string.name)) },
+            label = { Text(stringResource(id = R.string.register_name)) },
             isError = nameError != null,
             modifier = Modifier.fillMaxWidth()
         )
@@ -179,7 +232,7 @@ fun ChangeUserContent(
         OutlinedTextField(
             value = surname,
             onValueChange = onSurnameChange,
-            label = { Text(stringResource(id = R.string.surname)) },
+            label = { Text(stringResource(id = R.string.register_surname)) },
             isError = surnameError != null,
             modifier = Modifier.fillMaxWidth()
         )
@@ -192,12 +245,16 @@ fun ChangeUserContent(
         OutlinedTextField(
             value = email,
             onValueChange = onEmailChange,
-            label = { Text(stringResource(id = R.string.email)) },
+            label = { Text(stringResource(id = R.string.register_email)) },
             isError = !Patterns.EMAIL_ADDRESS.matcher(email).matches(),
             modifier = Modifier.fillMaxWidth()
         )
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            Text(stringResource(id = R.string.invalid_email), color = Color.Red, fontSize = 12.sp)
+            Text(
+                stringResource(id = R.string.register_invalid_email),
+                color = Color.Red,
+                fontSize = 12.sp
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -205,7 +262,7 @@ fun ChangeUserContent(
         OutlinedTextField(
             value = dateOfBirth,
             onValueChange = onDateOfBirthChange,
-            label = { Text(stringResource(id = R.string.birthdate)) },
+            label = { Text(stringResource(id = R.string.register_birthdate_long)) },
             isError = dobError != null,
             modifier = Modifier.fillMaxWidth()
         )
@@ -215,7 +272,7 @@ fun ChangeUserContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if(isDoctor) {
+        if (isDoctor) {
             OutlinedTextField(
                 value = specialization,
                 onValueChange = onSpecializationChange,
@@ -238,14 +295,25 @@ fun ChangeUserContent(
         ) {
             Text(stringResource(id = R.string.edit_profile_save_changes))
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onCancelClick ,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                stringResource(id = R.string.edit_profile_cancel)
+            )
+        }
     }
 }
-
 @Preview(showBackground = true)
 @Composable
 fun ChangeUserContentPreview() {
 
     ChangeUserContent(
+        adminMode = true,
         isDoctor = true,
         name = "Gregory",
         nameError = null,
@@ -262,6 +330,7 @@ fun ChangeUserContentPreview() {
         onEmailChange = {},
         onDateOfBirthChange = {},
         onSpecializationChange = {},
-        onSaveClick = {}
+        onSaveClick = {},
+        onToggleDoctorStatus = {}
     )
 }

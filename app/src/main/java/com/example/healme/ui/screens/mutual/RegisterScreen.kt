@@ -44,8 +44,8 @@ fun RegisterScreen(
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    val passwordMismatchError = stringResource(R.string.password_mismatch)
-    val registrationSuccess = stringResource(R.string.registration_successful)
+    val passwordMismatchError = stringResource(R.string.register_password_mismatch)
+    val registrationSuccess = stringResource(R.string.register_registration_successful)
 
     val nameError = if (name.isNotEmpty()) authViewModel.nameValidity(name) else null
     val surnameError = if (surname.isNotEmpty()) authViewModel.surnameValidity(surname) else null
@@ -167,7 +167,7 @@ private fun RegisterContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(R.string.register),
+            text = stringResource(R.string.register_register_word),
             style = MaterialTheme.typography.displayLarge,
             modifier = Modifier.padding(bottom = 16.dp)
         )
@@ -175,7 +175,7 @@ private fun RegisterContent(
         OutlinedTextField(
             value = name,
             onValueChange = onNameChange,
-            label = { Text(stringResource(R.string.name)) },
+            label = { Text(stringResource(R.string.register_name)) },
             isError = nameError != null,
             supportingText = { nameError?.let { Text(it) } },
             modifier = Modifier
@@ -186,7 +186,7 @@ private fun RegisterContent(
         OutlinedTextField(
             value = surname,
             onValueChange = onSurnameChange,
-            label = { Text(stringResource(R.string.surname)) },
+            label = { Text(stringResource(R.string.register_surname)) },
             isError = surnameError != null,
             supportingText = { surnameError?.let { Text(it) } },
             modifier = Modifier
@@ -197,9 +197,9 @@ private fun RegisterContent(
         OutlinedTextField(
             value = email,
             onValueChange = onEmailChange,
-            label = { Text(stringResource(R.string.email)) },
+            label = { Text(stringResource(R.string.register_email)) },
             isError = emailError && email.isNotEmpty(),
-            supportingText = { if(emailError && email.isNotEmpty()) Text(stringResource(R.string.invalid_email)) else null },
+            supportingText = { if(emailError && email.isNotEmpty()) Text(stringResource(R.string.register_invalid_email)) else null },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp)
@@ -211,7 +211,7 @@ private fun RegisterContent(
                 val validChars = it.filter { char -> char.isDigit() || char == '-' }
                 onDateOfBirthChange(validChars)
             },
-            label = { Text(stringResource(R.string.birthdate)) },
+            label = { Text(stringResource(R.string.register_birthdate_long)) },
             isError = dobError != null,
             supportingText = { dobError?.let { Text(it) } },
             modifier = Modifier
@@ -222,7 +222,7 @@ private fun RegisterContent(
         OutlinedTextField(
             value = password,
             onValueChange = onPasswordChange,
-            label = { Text(stringResource(R.string.password)) },
+            label = { Text(stringResource(R.string.register_password)) },
             isError = passwordError != null,
             supportingText = { passwordError?.let { Text(it) } },
             visualTransformation = PasswordVisualTransformation(),
@@ -234,12 +234,12 @@ private fun RegisterContent(
         OutlinedTextField(
             value = confirmPassword,
             onValueChange = onConfirmPasswordChange,
-            label = { Text(stringResource(R.string.confirm_password)) },
+            label = { Text(stringResource(R.string.register_confirm_password)) },
             visualTransformation = PasswordVisualTransformation(),
             isError = password != confirmPassword && confirmPassword.isNotEmpty(),
             supportingText = {
                 if (password != confirmPassword && confirmPassword.isNotEmpty()) {
-                    Text(stringResource(R.string.password_mismatch))
+                    Text(stringResource(R.string.register_password_mismatch))
                 }
             },
             modifier = Modifier
@@ -265,14 +265,14 @@ private fun RegisterContent(
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
         ) {
-            Text(stringResource(R.string.register))
+            Text(stringResource(R.string.register_register_word))
         }
 
         TextButton(
             onClick = onLoginClick,
             shape = MaterialTheme.shapes.large
         ) {
-            Text(stringResource(R.string.already_have_account))
+            Text(stringResource(R.string.register_already_have_account))
         }
     }
 }

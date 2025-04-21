@@ -49,6 +49,8 @@ interface FirestoreInterface {
      */
     suspend fun patientToDoctor(patientId: String)
 
+    suspend fun doctorToPatient(doctorId: String)
+
     /**
      * Saves a message to Firestore.
      *
