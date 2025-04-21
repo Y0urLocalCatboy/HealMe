@@ -94,7 +94,6 @@ fun WeekSelectionDialog(onDismiss: () -> Unit, onWeekSelected: (Date) -> Unit) {
 fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass) {
     val doctorId = "dNFkQwa9wqSrj0ZVDQEvrJ9si8T2"
     val context = LocalContext.current
-
     val calendar = Calendar.getInstance().apply {
         time = startDate
         set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
@@ -108,13 +107,12 @@ fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass) {
     }
 
     val hours = (8..18).toList()
-
     val availabilityMap = remember { mutableStateMapOf<Long, Boolean>() }
 
     LaunchedEffect(Unit) {
         val userMap = firestore.loadUser(doctorId)
         val weeklyAvailability = userMap?.get("weeklyAvailability") as? Map<*, *>
-        weeklyAvailability?.forEach { (key, value) ->
+        weeklyAvailability?.forEach { (_, value) ->
             val slot = value as? Map<*, *>
             val timestamp = (slot?.get("timestamp") as? Number)?.toLong()
             val status = slot?.get("status") as? String
@@ -127,22 +125,14 @@ fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass) {
     val horizontalScrollState = rememberScrollState()
 
     Column(modifier = Modifier.padding(16.dp)) {
-        // Day headers
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             Text("Hour", modifier = Modifier.width(60.dp), fontSize = 12.sp)
             days.forEach { day ->
-                val dayOfWeek = Calendar.getInstance().apply { time = day }.get(Calendar.DAY_OF_WEEK)
-                val shortDay = when (dayOfWeek) {
-                    Calendar.MONDAY -> "Mo"
-                    Calendar.TUESDAY -> "Tu"
-                    Calendar.WEDNESDAY -> "We"
-                    Calendar.THURSDAY -> "Th"
-                    Calendar.FRIDAY -> "Fr"
-                    else -> ""
-                }
+                val shortDay = SimpleDateFormat("EE", Locale.getDefault()).format(day).take(2)
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -186,8 +176,11 @@ fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass) {
                                 .size(35.dp)
                                 .padding(4.dp)
                                 .background(
-                                    color = if (isAvailable) Color(0xFF4CAF50) else Color.Gray,
-                                    shape = RoundedCornerShape(4.dp)
+                                    color = if (isAvailable)
+                                        MaterialTheme.colorScheme.primaryContainer
+                                    else
+                                        MaterialTheme.colorScheme.secondaryContainer,
+                                    shape = MaterialTheme.shapes.small
                                 )
                                 .clickable {
                                     val newStatus = !isAvailable
@@ -223,14 +216,14 @@ fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass) {
             Box(
                 modifier = Modifier
                     .size(20.dp)
-                    .background(Color(0xFF4CAF50))
+                    .background(MaterialTheme.colorScheme.primaryContainer)
             )
             Text(" Available", style = MaterialTheme.typography.bodySmall)
             Spacer(modifier = Modifier.width(16.dp))
             Box(
                 modifier = Modifier
                     .size(20.dp)
-                    .background(Color.Gray)
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
             )
             Text(" Unavailable", style = MaterialTheme.typography.bodySmall)
         }
