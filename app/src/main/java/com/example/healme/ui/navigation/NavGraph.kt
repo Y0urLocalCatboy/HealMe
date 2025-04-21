@@ -25,7 +25,7 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     ) {
         NavHost(
             navController = navController,
-            startDestination = "doctor", //do zmiany
+            startDestination = "patient", //do zmiany
             modifier = modifier
         ) {
             composable("login") {
