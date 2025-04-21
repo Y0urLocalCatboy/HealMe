@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -25,6 +26,7 @@ import com.example.healme.R
 import com.example.healme.data.models.user.Doctor
 import com.example.healme.data.models.user.Patient
 import com.example.healme.data.models.user.User
+import com.example.healme.ui.components.menu.CalendarPicker
 import com.example.healme.viewmodel.AdminViewModel
 import com.google.firebase.auth.FirebaseAuth
 
@@ -214,19 +216,16 @@ fun UserDetailsCard(
     user: User,
     onEditClick: () -> Unit
 ) {
+    var showAvailabilityDialog by remember { mutableStateOf(false) }
+
     Card(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = colorResource(id = R.color.light_blue).copy(alpha = 0.2f)
         ),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -237,10 +236,7 @@ fun UserDetailsCard(
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
-
-                IconButton(
-                    onClick = onEditClick
-                ) {
+                IconButton(onClick = onEditClick) {
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "",
@@ -255,16 +251,36 @@ fun UserDetailsCard(
                 Text(stringResource(R.string.register_email) + ": ${user.email}")
                 Text(stringResource(R.string.admin_panel_birthdate) + ": ${user.dateOfBirth}")
                 Text(specificRole)
+
                 if (user is Doctor) {
                     Text("${stringResource(R.string.admin_panel_specialization)} ${user.specialization.takeIf { it != "placeholder" } ?: "Not specified"}")
-                }
-                else {
-                    Text("")
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Button(
+                        onClick = { showAvailabilityDialog = true },
+                        colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.green))
+                    ) {
+                        Text("Change Availability")
+                    }
+
+                    if (showAvailabilityDialog) {
+                        Dialog(onDismissRequest = { showAvailabilityDialog = false }) {
+                            Surface(
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                tonalElevation = 6.dp
+                            ) {
+                                CalendarPicker(doctorId = user.id)
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun UserListItem(

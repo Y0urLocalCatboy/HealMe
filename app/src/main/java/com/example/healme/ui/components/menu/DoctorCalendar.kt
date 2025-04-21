@@ -8,13 +8,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.foundation.rememberScrollState
@@ -28,17 +26,17 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
-class MainActivity : ComponentActivity() {
+/*class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             CalendarPicker()
         }
     }
-}
+}*/
 
 @Composable
-fun CalendarPicker() {
+fun CalendarPicker(doctorId: String) {
     var showDialog by remember { mutableStateOf(false) }
     var selectedWeek by remember { mutableStateOf<Date?>(null) }
 
@@ -49,7 +47,7 @@ fun CalendarPicker() {
 
         selectedWeek?.let {
             Text("Selected Week: ${SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(it)}")
-            AvailabilityPicker(startDate = it, firestore = FirestoreClass())
+            AvailabilityPicker(startDate = it, firestore = FirestoreClass(), doctorId = doctorId)
         }
     }
 
@@ -57,7 +55,6 @@ fun CalendarPicker() {
         WeekSelectionDialog(onDismiss = { showDialog = false }, onWeekSelected = { selectedWeek = it })
     }
 }
-
 @Composable
 fun WeekSelectionDialog(onDismiss: () -> Unit, onWeekSelected: (Date) -> Unit) {
     Dialog(onDismissRequest = onDismiss) {
@@ -91,8 +88,8 @@ fun WeekSelectionDialog(onDismiss: () -> Unit, onWeekSelected: (Date) -> Unit) {
 }
 
 @Composable
-fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass) {
-    val doctorId = "dNFkQwa9wqSrj0ZVDQEvrJ9si8T2"
+fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, doctorId: String) {
+    //val doctorId = "dNFkQwa9wqSrj0ZVDQEvrJ9si8T2"
     val context = LocalContext.current
     val calendar = Calendar.getInstance().apply {
         time = startDate
