@@ -30,7 +30,10 @@ fun DoctorHomeScreen(navController: NavHostController) {
                     },
                     title = { Text("Doctor Calendar") },
                     text = {
-                        CalendarPicker("dNFkQwa9wqSrj0ZVDQEvrJ9si8T2")
+                        CalendarPicker(
+                            "dNFkQwa9wqSrj0ZVDQEvrJ9si8T2",
+                            onExit = {showCalendar = false}
+                        )
                     }
                 )
             }

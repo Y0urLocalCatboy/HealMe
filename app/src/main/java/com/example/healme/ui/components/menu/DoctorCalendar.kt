@@ -26,17 +26,8 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
-/*class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            CalendarPicker()
-        }
-    }
-}*/
-
 @Composable
-fun CalendarPicker(doctorId: String) {
+fun CalendarPicker(doctorId: String, onExit: () -> Unit ) {
     var showDialog by remember { mutableStateOf(false) }
     var selectedWeek by remember { mutableStateOf<Date?>(null) }
 
@@ -48,6 +39,23 @@ fun CalendarPicker(doctorId: String) {
         selectedWeek?.let {
             Text("Selected Week: ${SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(it)}")
             AvailabilityPicker(startDate = it, firestore = FirestoreClass(), doctorId = doctorId)
+        }
+
+        Button(
+            onClick = onExit,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text("Exit")
+        }
+
+        if (showDialog) {
+            WeekSelectionDialog(
+                onDismiss = { showDialog = false },
+                onWeekSelected = {
+                    selectedWeek = it
+                    showDialog = false
+                }
+            )
         }
     }
 
@@ -81,6 +89,15 @@ fun WeekSelectionDialog(onDismiss: () -> Unit, onWeekSelected: (Date) -> Unit) {
                     ) {
                         Text(SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(week))
                     }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Cancel")
                 }
             }
         }
@@ -208,7 +225,7 @@ fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, doctorId: Str
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Legend
+
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier

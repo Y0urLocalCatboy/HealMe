@@ -49,7 +49,7 @@ fun AdminHomeScreen(
     LaunchedEffect(navController.currentBackStackEntryAsState()) {
         adminViewModel.loadAllUsers()
     }
-    
+
     LaunchedEffect(users.size) {
         if (selectedIndex >= users.size && users.isNotEmpty()) {
             selectedIndex = 0
@@ -271,7 +271,10 @@ fun UserDetailsCard(
                                 shape = RoundedCornerShape(12.dp),
                                 tonalElevation = 6.dp
                             ) {
-                                CalendarPicker(doctorId = user.id)
+                                CalendarPicker(
+                                    doctorId = user.id,
+                                    onExit = {showAvailabilityDialog = false}
+                                )
                             }
                         }
                     }
