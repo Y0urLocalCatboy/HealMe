@@ -406,7 +406,7 @@ class FirestoreClass: FirestoreInterface {
 
     override suspend fun updateDoctorAvailability(doctorId: String, updateMap: Map<String, Any?>) {
         try {
-            fs.collection("doctors").document(doctorId).update(updateMap).await()
+            fs.collection("availability").document(doctorId).update(updateMap).await()
         } catch (e: Exception) {
             throw Exception("updateDoctorAvailability: ${e.message}")
         }
@@ -414,7 +414,7 @@ class FirestoreClass: FirestoreInterface {
 
     override suspend fun getDoctorAvailability(doctorId: String): Map<Long, String> {
         return try {
-            val snapshot = fs.collection("doctors").document(doctorId).get().await()
+            val snapshot = fs.collection("availability").document(doctorId).get().await()
             val availabilityMap = mutableMapOf<Long, String>()
 
             val weeklyAvailability = snapshot.get("weeklyAvailability") as? Map<String, Map<String, Any>>

@@ -106,8 +106,9 @@ fun WeekSelectionDialog(onDismiss: () -> Unit, onWeekSelected: (Date) -> Unit) {
 
 @Composable
 fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, doctorId: String) {
-    //val doctorId = "dNFkQwa9wqSrj0ZVDQEvrJ9si8T2"
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
     val calendar = Calendar.getInstance().apply {
         time = startDate
         set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
@@ -123,16 +124,14 @@ fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, doctorId: Str
     val hours = (8..18).toList()
     val availabilityMap = remember { mutableStateMapOf<Long, Boolean>() }
 
-    LaunchedEffect(Unit) {
-        val userMap = firestore.loadUser(doctorId)
-        val weeklyAvailability = userMap?.get("weeklyAvailability") as? Map<*, *>
-        weeklyAvailability?.forEach { (_, value) ->
-            val slot = value as? Map<*, *>
-            val timestamp = (slot?.get("timestamp") as? Number)?.toLong()
-            val status = slot?.get("status") as? String
-            if (timestamp != null && status != null) {
+    LaunchedEffect(doctorId) {
+        try {
+            val doctorAvailability = firestore.getDoctorAvailability(doctorId)
+            doctorAvailability.forEach { (timestamp, status) ->
                 availabilityMap[timestamp] = status == "available"
             }
+        } catch (e: Exception) {
+            Toast.makeText(context, "Failed to load availability", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -140,6 +139,7 @@ fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, doctorId: Str
 
     Column(modifier = Modifier.padding(16.dp)) {
 
+        // Header row: hours
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -160,6 +160,7 @@ fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, doctorId: Str
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Rows for each hour
         hours.forEach { hour ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -205,14 +206,16 @@ fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, doctorId: Str
                                         "weeklyAvailability.$timestamp.timestamp" to timestamp
                                     )
 
-                                    CoroutineScope(Dispatchers.IO).launch {
+                                    coroutineScope.launch {
                                         try {
                                             firestore.updateDoctorAvailability(doctorId, updateMap)
                                         } catch (e: Exception) {
                                             withContext(Dispatchers.Main) {
-                                                Toast
-                                                    .makeText(context, "Failed to update availability", Toast.LENGTH_SHORT)
-                                                    .show()
+                                                Toast.makeText(
+                                                    context,
+                                                    "Failed to update availability",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
                                             }
                                         }
                                     }
@@ -225,7 +228,7 @@ fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, doctorId: Str
 
         Spacer(modifier = Modifier.height(16.dp))
 
-
+        // Legend
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
