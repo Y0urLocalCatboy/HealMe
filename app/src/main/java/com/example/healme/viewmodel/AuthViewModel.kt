@@ -9,6 +9,14 @@ import com.example.healme.R
 import java.text.ParseException
 import java.util.Locale
 
+/**
+ * ViewModel for handling authentication-related logic.
+ *
+ * @function nameValidity Validates a name according to specific rules.
+ * @function ageValidity Validates if the user is at least 18 years old based on the provided date of birth.
+ * @function surnameValidity Validates a surname according to specific rules.
+ * @function passwordValidity Validates the password entered by the user.
+ */
 class AuthViewModel : ViewModel() {
 
     /**

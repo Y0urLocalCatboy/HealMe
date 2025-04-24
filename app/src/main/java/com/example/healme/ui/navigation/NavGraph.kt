@@ -28,7 +28,7 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     ) {
         NavHost(
             navController = navController,
-            startDestination = "doctor",
+            startDestination = "login",
             modifier = modifier
         ) {
             composable("login") {
@@ -44,7 +44,7 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
             }
 
             composable("chat") {
-                ChatScreen(navController)
+                ChatScreen()
             }
 
             composable("change_user") {

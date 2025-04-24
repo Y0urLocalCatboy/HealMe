@@ -37,6 +37,14 @@ import com.example.healme.viewmodel.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
+/**
+ * ChangeUserScreen is a Composable function that displays a screen for changing user information.
+ *
+ * @param navController The NavController used for navigation.
+ * @param userId The ID of the user to be changed. Default is "null".
+ * @param authViewModel The AuthViewModel instance used for authentication-related operations.
+ * @param adminViewModel The AdminViewModel instance used for admin-related operations.
+ */
 @Composable
 fun ChangeUserScreen(navController: NavController,
                      userId: String = "null",
@@ -149,6 +157,30 @@ fun ChangeUserScreen(navController: NavController,
     )
 }
 
+/**
+ * ChangeUserContent is a Composable function that displays the content of the ChangeUserScreen.
+ *
+ * @param adminMode Indicates if the screen is in admin mode.
+ * @param isDoctor Indicates if the user is a doctor.
+ * @param name The name of the user.
+ * @param nameError The error message for the name field.
+ * @param surname The surname of the user.
+ * @param surnameError The error message for the surname field.
+ * @param email The email of the user.
+ * @param dateOfBirth The date of birth of the user.
+ * @param dobError The error message for the date of birth field.
+ * @param specialization The specialization of the user (if applicable - if isDoctor == true).
+ * @param errorMessage The error message to be displayed.
+ * @param isFormValid Indicates if the form is valid.
+ * @param onNameChange Callback for name change.
+ * @param onSurnameChange Callback for surname change.
+ * @param onEmailChange Callback for email change.
+ * @param onDateOfBirthChange Callback for date of birth change.
+ * @param onSpecializationChange Callback for specialization change.
+ * @param onSaveClick Callback for save button click.
+ * @param onToggleDoctorStatus Callback for toggling doctor status.
+ * @param onCancelClick Callback for cancel button click.
+ */
 @Composable
 fun ChangeUserContent(
     adminMode: Boolean = false,
@@ -308,10 +340,13 @@ fun ChangeUserContent(
         }
     }
 }
+
+/**
+ * Preview for ChangeUserContent.
+ */
 @Preview(showBackground = true)
 @Composable
 fun ChangeUserContentPreview() {
-
     ChangeUserContent(
         adminMode = true,
         isDoctor = true,

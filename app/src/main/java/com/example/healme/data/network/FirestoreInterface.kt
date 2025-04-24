@@ -129,10 +129,44 @@ interface FirestoreInterface {
      */
     suspend fun getDoctorAvailability(doctorId: String): Map<Long, String>
 
+    /**
+     * Changes a user to an admin role.
+     *
+     * @param id The ID of the user to promote to admin.
+     * @param onResult Callback function with the result (success, message).
+     */
     suspend fun changeToAdmin(id: String, onResult: (Boolean, String) -> Unit)
 
+    /**
+     * Listens for updates to the list of doctors and their data.
+     *
+     * @param onUpdate Callback function with updated list of doctors.
+     *
+     * @return ListenerRegistration object to manage the listener.
+     */
+    fun listenForDoctors(onUpdate: (List<Doctor>) -> Unit): ListenerRegistration
+
+    /**
+     * Listens for updates to the list of patients and their data.
+     *
+     * @param onUpdate Callback function with updated list of patients.
+     *
+     * @return ListenerRegistration object to manage the listener.
+     */
+    fun listenForPatients(onUpdate: (List<Patient>) -> Unit): ListenerRegistration
+
+    /**
+     * Retrieves all doctors from Firestore.
+     *
+     * @return List of Doctor objects, or null if no doctors are found.
+     */
     suspend fun getAllDoctors(): List<Doctor>?
 
+    /**
+     * Retrieves all patients from Firestore.
+     *
+     * @return List of Patient objects, or null if no patients are found.
+     */
     suspend fun getAllPatients(): List<Patient>?
 
 }

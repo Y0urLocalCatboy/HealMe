@@ -359,7 +359,7 @@ class FirestoreClass: FirestoreInterface {
         }
     }
 
-    fun listenForPatients(onUpdate: (List<Patient>) -> Unit): ListenerRegistration {
+    override fun listenForPatients(onUpdate: (List<Patient>) -> Unit): ListenerRegistration {
         return db.collection("patients")
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
@@ -382,7 +382,7 @@ class FirestoreClass: FirestoreInterface {
             }
     }
 
-    fun listenForDoctors(onUpdate: (List<Doctor>) -> Unit): ListenerRegistration {
+    override fun listenForDoctors(onUpdate: (List<Doctor>) -> Unit): ListenerRegistration {
         return db.collection("doctors")
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {

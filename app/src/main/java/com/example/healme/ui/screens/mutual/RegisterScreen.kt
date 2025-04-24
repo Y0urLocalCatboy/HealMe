@@ -279,7 +279,6 @@ private fun RegisterContent(
 
 /**
  * Preview function for the Register screen.
- * This function is used to display a preview of the RegisterScreen composable in the Android Studio preview.
  */
 @Preview(showBackground = true)
 @Composable

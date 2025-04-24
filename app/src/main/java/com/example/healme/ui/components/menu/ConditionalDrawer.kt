@@ -29,6 +29,15 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.launch
 
+/**
+ * ConditionalDrawer is a composable function that conditionally displays a navigation drawer
+ * based on the current route. It uses Jetpack Compose's Material3 library to create a responsive
+ * UI with a top app bar and a navigation drawer.
+ *
+ * @param showDrawer A boolean indicating whether to show the drawer or not.
+ * @param navController The NavHostController used for navigation.
+ * @param content The main content of the screen.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConditionalDrawer(
