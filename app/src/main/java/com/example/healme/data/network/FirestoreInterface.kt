@@ -119,15 +119,41 @@ interface FirestoreInterface {
      * Updates availability data for a doctor.
      * @param doctorId ID of the doctor.
      * @param availabilityMap Availability data to update.
-     */
+     *//*
     suspend fun updateDoctorAvailability(doctorId: String, availabilityMap: Map<String, Any?>)
 
-    /**
+    *//**
      * Retrieves availability data for a doctor.
      * @param doctorId ID of the doctor.
      * @return Map of timestamps to availability status ("available"/"unavailable").
-     */
+     *//*
     suspend fun getDoctorAvailability(doctorId: String): Map<Long, String>
+*/
+ /*   *//**
+     * Retrieves all available timestamps for a given doctor.
+     *
+     * @param doctorId The ID of the doctor.
+     * @return List of timestamps marked as "available".
+     *//*
+    suspend fun getAvailableTimestampsForDoctor(doctorId: String): List<Long>
+*/
+  /*  *//**
+     * Books a visit for a patient with a doctor at a specific timestamp.
+     *
+     * @param doctorId The doctor's ID.
+     * @param patientId The patient's ID.
+     * @param timestamp The timestamp for the visit (Unix seconds).
+     *//*
+    suspend fun bookVisit(doctorId: String, patientId: String, timestamp: Long)
+*/
+    /**
+     * Retrieves all booked visits for a patient with doctor names.
+     *
+     * @param patientId The ID of the patient.
+     * @return A list of pairs (timestamp, doctor full name).
+     */
+    suspend fun getPatientVisits(patientId: String): List<Pair<Long, String>>
+
 
     suspend fun changeToAdmin(id: String, onResult: (Boolean, String) -> Unit)
 

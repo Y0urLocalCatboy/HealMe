@@ -6,7 +6,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.healme.ui.screens.patient.BookingConfirmationScreen
 import com.example.healme.ui.components.menu.ConditionalDrawer
+import com.example.healme.ui.screens.patient.PatientCalendarScreen
 import com.example.healme.ui.screens.admin.AdminHomeScreen
 import com.example.healme.ui.screens.doctor.DoctorHomeScreen
 import com.example.healme.ui.screens.mutual.ChangeUserScreen
@@ -28,7 +30,7 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     ) {
         NavHost(
             navController = navController,
-            startDestination = "admin",
+            startDestination = "admin", // or "login" depending on your auth logic
             modifier = modifier
         ) {
             composable("login") {
@@ -64,6 +66,22 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
                 ChangeUserScreen(navController, userId = userId.toString())
             }
 
+            composable("calendar") {
+                PatientCalendarScreen(navController)
+            }
+
+            composable("confirmation/{doctorName}/{doctorSurname}/{timestamp}") { backStackEntry ->
+                val doctorName = backStackEntry.arguments?.getString("doctorName") ?: ""
+                val doctorSurname = backStackEntry.arguments?.getString("doctorSurname") ?: ""
+                val timestamp = backStackEntry.arguments?.getString("timestamp")?.toLongOrNull() ?: 0L
+
+                BookingConfirmationScreen(
+                    doctorName = doctorName,
+                    doctorSurname = doctorSurname,
+                    timestamp = timestamp,
+                    navController = navController
+                )
+            }
         }
     }
 }

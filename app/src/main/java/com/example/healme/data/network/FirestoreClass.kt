@@ -404,7 +404,7 @@ class FirestoreClass: FirestoreInterface {
     }
 
 
-    override suspend fun updateDoctorAvailability(doctorId: String, updateMap: Map<String, Any?>) {
+    /*override suspend fun updateDoctorAvailability(doctorId: String, updateMap: Map<String, Any?>) {
         try {
             fs.collection("availability").document(doctorId).update(updateMap).await()
         } catch (e: Exception) {
@@ -430,4 +430,27 @@ class FirestoreClass: FirestoreInterface {
             emptyMap()
         }
     }
+*/
+    override suspend fun getPatientVisits(patientId: String): List<Pair<Long, String>> {
+        return try {
+            val snapshot = fs.collection("visits")
+                .whereEqualTo("patientId", patientId)
+                .whereEqualTo("status", "booked")
+                .get()
+                .await()
+
+            snapshot.documents.mapNotNull { doc ->
+                val timestamp = doc.getLong("timestamp")
+                val doctorId = doc.getString("doctorId") ?: return@mapNotNull null
+                val doctor = fs.collection("doctors").document(doctorId).get().await()
+                val doctorName = "${doctor.getString("name") ?: ""} ${doctor.getString("surname") ?: ""}"
+                if (timestamp != null) Pair(timestamp, doctorName) else null
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+
+
 }
