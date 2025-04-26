@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -33,8 +34,14 @@ fun BookingConfirmationScreen(doctorName: String, doctorSurname: String, timesta
         Text("Date: $formattedDate", style = MaterialTheme.typography.bodyLarge)
         Spacer(modifier = Modifier.height(32.dp))
 
-        Button(onClick = { navController.popBackStack("patient_home", false) }) {
+        Button(onClick = {
+            navController.navigate("patient") {
+                popUpTo("patient") { inclusive = true }
+                launchSingleTop = true
+            }
+        }) {
             Text("Back to Home")
         }
+
     }
 }

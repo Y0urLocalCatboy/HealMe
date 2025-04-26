@@ -17,37 +17,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.healme.data.models.user.Doctor
 import com.example.healme.data.network.FirestoreClass
 import com.google.firebase.auth.FirebaseAuth
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlinx.coroutines.launch
+import java.util.Date
+import android.widget.Toast
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+
 
 @Composable
 fun PatientHomeScreen(navController: NavController) {
     val context = LocalContext.current
     val firestore = remember { FirestoreClass() }
-    val scope = rememberCoroutineScope()
     val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-
-    var doctorAvailability by remember { mutableStateOf<Map<String, Map<Long, String>>>(emptyMap()) }
-    var doctors by remember { mutableStateOf<List<Doctor>>(emptyList()) }
-
-    // Fetch doctors and their slots
-    LaunchedEffect(Unit) {
-        doctors = firestore.getAllDoctors()
-        val availabilityMap = mutableMapOf<String, Map<Long, String>>()
-
-        for (doctor in doctors) {
-            val availability = firestore.getDoctorAvailability(doctor.id)
-            val booked = firestore.getBookedTimestampsForDoctor(doctor.id)
-            val freeSlots = availability.filter { (ts, status) ->
-                status == "available" && ts !in booked
-            }
-            availabilityMap[doctor.id] = freeSlots
-        }
-
-        doctorAvailability = availabilityMap
-    }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text("Welcome!", style = MaterialTheme.typography.headlineMedium)
@@ -62,42 +48,11 @@ fun PatientHomeScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        doctors.forEach { doctor ->
-            val availability = doctorAvailability[doctor.id] ?: emptyMap()
-
-            Card(modifier = Modifier.padding(8.dp)) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Text("Dr. ${doctor.name} ${doctor.surname}", style = MaterialTheme.typography.titleMedium)
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    if (availability.isEmpty()) {
-                        Text("No available slots", style = MaterialTheme.typography.bodySmall)
-                    } else {
-                        availability.keys.sorted().forEach { timestamp ->
-                            val date = Date(timestamp * 1000)
-                            val formatted = SimpleDateFormat("EEE, dd MMM yyyy HH:mm", Locale.getDefault()).format(date)
-
-                            Button(
-                                onClick = {
-                                    scope.launch {
-                                        try {
-                                            firestore.bookVisit(doctor.id, userId, timestamp)
-                                            navController.navigate("confirmation/${doctor.name}/${doctor.surname}/$timestamp")
-                                        } catch (e: Exception) {
-                                            Toast.makeText(context, "Booking failed", Toast.LENGTH_SHORT).show()
-                                        }
-                                    }
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 2.dp)
-                            ) {
-                                Text("Book: $formatted")
-                            }
-                        }
-                    }
-                }
-            }
+        Button(
+            onClick = { navController.navigate("available_dates") },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text("Book an Appointment")
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -106,7 +61,7 @@ fun PatientHomeScreen(navController: NavController) {
             onClick = {
                 FirebaseAuth.getInstance().signOut()
                 navController.navigate("login") {
-                    popUpTo("welcome") { inclusive = true }
+                    popUpTo("patient") { inclusive = true }
                 }
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)

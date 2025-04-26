@@ -25,6 +25,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.ui.res.colorResource
+import com.example.healme.R
+
 
 @Composable
 fun CalendarPicker(doctorId: String, onExit: () -> Unit ) {
@@ -109,6 +112,10 @@ fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, doctorId: Str
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
+    val green = colorResource(id = R.color.green)
+    val gray = colorResource(id = R.color.gray)
+    val darkerRed = colorResource(id = R.color.darker_red)
+
     val calendar = Calendar.getInstance().apply {
         time = startDate
         set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
@@ -122,16 +129,25 @@ fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, doctorId: Str
     }
 
     val hours = (8..18).toList()
-    val availabilityMap = remember { mutableStateMapOf<Long, Boolean>() }
+    val availabilityMap = remember { mutableStateMapOf<Long, String>() }
+    val bookedTimestamps = remember { mutableStateListOf<Long>() }
 
     LaunchedEffect(doctorId) {
         try {
             val doctorAvailability = firestore.getDoctorAvailability(doctorId)
             doctorAvailability.forEach { (timestamp, status) ->
-                availabilityMap[timestamp] = status == "available"
+                availabilityMap[timestamp] = status
+            }
+
+            val booked = firestore.getBookedTimestampsForDoctor(doctorId)
+            bookedTimestamps.clear()
+            bookedTimestamps.addAll(booked)
+
+            booked.forEach { timestamp ->
+                availabilityMap[timestamp] = "booked"
             }
         } catch (e: Exception) {
-            Toast.makeText(context, "Failed to load availability", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Failed to load availability or bookings", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -139,7 +155,6 @@ fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, doctorId: Str
 
     Column(modifier = Modifier.padding(16.dp)) {
 
-        // Header row: hours
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -160,7 +175,6 @@ fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, doctorId: Str
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Rows for each hour
         hours.forEach { hour ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -184,42 +198,48 @@ fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, doctorId: Str
                             set(Calendar.MILLISECOND, 0)
                         }.timeInMillis / 1000
 
-                        val isAvailable = availabilityMap[timestamp] ?: false
+                        val status = availabilityMap[timestamp] ?: "unavailable"
+                        val isBooked = status == "booked"
+
+                        val backgroundColor = when {
+                            isBooked -> darkerRed
+                            status == "available" -> green
+                            else -> gray
+                        }
 
                         Box(
                             modifier = Modifier
                                 .size(35.dp)
                                 .padding(4.dp)
                                 .background(
-                                    color = if (isAvailable)
-                                        MaterialTheme.colorScheme.primaryContainer
-                                    else
-                                        MaterialTheme.colorScheme.secondaryContainer,
+                                    color = backgroundColor,
                                     shape = MaterialTheme.shapes.small
                                 )
-                                .clickable {
-                                    val newStatus = !isAvailable
-                                    availabilityMap[timestamp] = newStatus
+                                .then(
+                                    if (!isBooked) Modifier.clickable {
+                                        val newStatus = if (status == "available") "unavailable" else "available"
+                                        availabilityMap[timestamp] = newStatus
 
-                                    val updateMap = mapOf(
-                                        "weeklyAvailability.$timestamp.status" to if (newStatus) "available" else "unavailable",
-                                        "weeklyAvailability.$timestamp.timestamp" to timestamp
-                                    )
+                                        val updateMap = mapOf(
+                                            "weeklyAvailability.$timestamp.status" to newStatus,
+                                            "weeklyAvailability.$timestamp.timestamp" to timestamp
+                                        )
 
-                                    coroutineScope.launch {
-                                        try {
-                                            firestore.updateDoctorAvailability(doctorId, updateMap)
-                                        } catch (e: Exception) {
-                                            withContext(Dispatchers.Main) {
-                                                Toast.makeText(
-                                                    context,
-                                                    "Failed to update availability",
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
+                                        coroutineScope.launch {
+                                            try {
+                                                firestore.updateDoctorAvailability(doctorId, updateMap)
+                                            } catch (e: Exception) {
+                                                withContext(Dispatchers.Main) {
+                                                    Toast.makeText(
+                                                        context,
+                                                        "Failed to update availability",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                }
                                             }
                                         }
-                                    }
-                                }
+                                    } else Modifier
+                                )
                         )
                     }
                 }
@@ -228,21 +248,27 @@ fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, doctorId: Str
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Legend
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
                     .size(20.dp)
-                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .background(green)
             )
             Text(" Available", style = MaterialTheme.typography.bodySmall)
             Spacer(modifier = Modifier.width(16.dp))
             Box(
                 modifier = Modifier
                     .size(20.dp)
-                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                    .background(gray)
             )
             Text(" Unavailable", style = MaterialTheme.typography.bodySmall)
+            Spacer(modifier = Modifier.width(16.dp))
+            Box(
+                modifier = Modifier
+                    .size(20.dp)
+                    .background(darkerRed)
+            )
+            Text(" Booked", style = MaterialTheme.typography.bodySmall)
         }
     }
 }

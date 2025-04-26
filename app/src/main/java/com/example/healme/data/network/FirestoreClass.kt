@@ -1,7 +1,9 @@
 package com.example.healme.data.network
 
+import android.util.Log
 import androidx.compose.ui.res.stringResource
 import com.example.healme.data.models.Message
+import com.example.healme.data.models.Visit
 import com.example.healme.data.models.user.Doctor
 import com.example.healme.data.models.user.Patient
 import com.example.healme.data.models.user.User
@@ -16,6 +18,7 @@ import kotlinx.coroutines.tasks.await
 import java.util.Calendar
 import java.util.Date
 import kotlin.text.get
+
 
 class FirestoreClass: FirestoreInterface {
 
@@ -39,6 +42,8 @@ class FirestoreClass: FirestoreInterface {
     }
 
     override suspend fun loadUser(id: String): Map<String, Any?>? {
+        if (id.isBlank()) throw Exception("loadUser: Invalid ID")
+
         try {
             val documentSnapshot = fs.collection("patients")
                 .document(id)
@@ -54,6 +59,7 @@ class FirestoreClass: FirestoreInterface {
             throw Exception("loadUser: ${e.message}")
         }
     }
+
 
     override suspend fun updateUser(user: User, data: Map<String, Any?>) {
         try {
@@ -404,7 +410,7 @@ class FirestoreClass: FirestoreInterface {
     }
 
 
-    /*override suspend fun updateDoctorAvailability(doctorId: String, updateMap: Map<String, Any?>) {
+    override suspend fun updateDoctorAvailability(doctorId: String, updateMap: Map<String, Any?>) {
         try {
             fs.collection("availability").document(doctorId).update(updateMap).await()
         } catch (e: Exception) {
@@ -430,27 +436,78 @@ class FirestoreClass: FirestoreInterface {
             emptyMap()
         }
     }
-*/
+
     override suspend fun getPatientVisits(patientId: String): List<Pair<Long, String>> {
         return try {
-            val snapshot = fs.collection("visits")
-                .whereEqualTo("patientId", patientId)
-                .whereEqualTo("status", "booked")
+            val documentSnapshot = fs.collection("visits")
+                .document(patientId)
                 .get()
                 .await()
 
-            snapshot.documents.mapNotNull { doc ->
-                val timestamp = doc.getLong("timestamp")
-                val doctorId = doc.getString("doctorId") ?: return@mapNotNull null
-                val doctor = fs.collection("doctors").document(doctorId).get().await()
-                val doctorName = "${doctor.getString("name") ?: ""} ${doctor.getString("surname") ?: ""}"
-                if (timestamp != null) Pair(timestamp, doctorName) else null
+            if (!documentSnapshot.exists()) return emptyList()
+
+            val visitsMap = documentSnapshot.get("visits") as? Map<String, Map<String, Any>> ?: return emptyList()
+
+            val visitList = mutableListOf<Pair<Long, String>>()
+
+            for ((_, visitData) in visitsMap) {
+                val timestamp = (visitData["timestamp"] as? Long) ?: continue
+                val doctorId = visitData["doctorId"] as? String ?: continue
+
+                val doctorSnapshot = fs.collection("doctors").document(doctorId).get().await()
+                val doctorName = "${doctorSnapshot.getString("name") ?: ""} ${doctorSnapshot.getString("surname") ?: ""}".trim()
+
+                visitList.add(Pair(timestamp, doctorName))
             }
+
+            visitList
         } catch (e: Exception) {
+            Log.e("FirestoreClass", "Error fetching patient visits", e)
             emptyList()
         }
     }
 
 
+    override suspend fun bookVisit(doctorId: String, patientId: String, timestamp: Long) {
+        try {
+            val visit = Visit(
+                doctorId = doctorId,
+                patientId = patientId,
+                timestamp = timestamp
+            )
+
+            db.collection("visits")
+                .add(visit)
+                .await()
+
+            val updateMap = mapOf(
+                "weeklyAvailability.$timestamp.status" to "booked",
+                "weeklyAvailability.$timestamp.timestamp" to timestamp
+            )
+
+            fs.collection("availability")
+                .document(doctorId)
+                .update(updateMap)
+                .await()
+
+        } catch (e: Exception) {
+            Log.e("FirestoreClass", "Error booking visit or updating availability", e)
+        }
+    }
+
+
+    override suspend fun getBookedTimestampsForDoctor(doctorId: String): List<Long> {
+        return try {
+            val snapshot = db.collection("visits")
+                .whereEqualTo("doctorId", doctorId)
+                .get()
+                .await()
+
+            snapshot.documents.mapNotNull { it.getLong("timestamp") }
+        } catch (e: Exception) {
+            Log.e("FirestoreClass", "Error fetching booked timestamps", e)
+            emptyList()
+        }
+    }
 
 }

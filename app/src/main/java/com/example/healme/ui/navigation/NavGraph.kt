@@ -15,6 +15,7 @@ import com.example.healme.ui.screens.mutual.ChangeUserScreen
 import com.example.healme.ui.screens.mutual.ChatScreen
 import com.example.healme.ui.screens.mutual.LoginScreen
 import com.example.healme.ui.screens.mutual.RegisterScreen
+import com.example.healme.ui.screens.patient.AppointmentScreen
 import com.example.healme.ui.screens.patient.PatientHomeScreen
 
 @Composable
@@ -30,7 +31,7 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     ) {
         NavHost(
             navController = navController,
-            startDestination = "admin", // or "login" depending on your auth logic
+            startDestination = "login",
             modifier = modifier
         ) {
             composable("login") {
@@ -69,6 +70,11 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
             composable("calendar") {
                 PatientCalendarScreen(navController)
             }
+
+            composable("available_dates") {
+                AppointmentScreen(navController)
+            }
+
 
             composable("confirmation/{doctorName}/{doctorSurname}/{timestamp}") { backStackEntry ->
                 val doctorName = backStackEntry.arguments?.getString("doctorName") ?: ""
