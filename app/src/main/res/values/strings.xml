@@ -58,7 +58,7 @@
     <string name="chat_pat_previous">Previous Patient</string>
     <string name="chat_no_contacts">No contacts</string>
 
-    <!-- Strings used for Edititng profile -->
+    <!-- Strings used for editing profile -->
     <string name="edit_profile_title">Edit Profile</string>
     <string name="edit_profile_save_changes">Save Changes</string>
     <string name="edit_profile_specialization">Specialization</string>
@@ -79,6 +79,25 @@
     <string name="admin_panel_specialization">Specialization</string>
     <string name="admin_panel_logout">Logout</string>
 
+    <!-- Strings used for doctor panel -->
+    <string name="doctor_panel_title">Doctor Panel</string>
+    <string name="doctor_panel_chat">Chat</string>
+    <string name="doctor_panel_profile">Profile</string>
+    <string name="doctor_panel_welcome_morning">Good morning, Dr</string>
+    <string name="doctor_panel_welcome_afternoon">Good afternoon, Dr</string>
+    <string name="doctor_panel_welcome_evening">Good evening, Dr</string>
+    <string name="doctor_panel_welcome_night">Good night, Dr</string>
+    <string name="doctor_panel_welcome_default">Welcome, Dr</string>
+    <string name="doctor_panel_unspecified_specialization">Specialization not specified!</string>
+    <string name="doctor_panel_today">Today:</string>
+    <string name="doctor_panel_appointments">Today\'s appointments</string>
+    <string name="doctor_panel_see_more">See More</string>
+    <string name="doctor_panel_apointment_details">Details</string>
+    <string name="doctor_panel_patients">Patients</string>
+    <string name="doctor_panel_receipts">Receipts</string>
+    <string name="doctor_panel_schedule">Schedule</string>
+    <string name="doctor_panel_latest_patients">Latest patients</string>
+    <string name="doctor_panel_last_visit">Last visit</string>
 
 
 </resources>
