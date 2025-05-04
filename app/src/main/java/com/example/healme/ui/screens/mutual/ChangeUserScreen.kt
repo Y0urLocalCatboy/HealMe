@@ -49,7 +49,7 @@ import kotlinx.coroutines.launch
 fun ChangeUserScreen(navController: NavController,
                      userId: String = "null",
                      authViewModel: AuthViewModel = viewModel(),
-                        adminViewModel: AdminViewModel = viewModel()
+                     adminViewModel: AdminViewModel = viewModel()
 ){
     val fs = FirestoreClass()
     val auth = FirebaseAuth.getInstance()

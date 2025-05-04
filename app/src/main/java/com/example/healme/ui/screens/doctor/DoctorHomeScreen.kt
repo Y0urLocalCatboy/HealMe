@@ -10,6 +10,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -17,7 +22,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -26,15 +30,30 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import com.example.healme.R
 import com.example.healme.data.models.user.Patient
-import com.example.healme.viewmodel.AdminViewModel
+import com.example.healme.data.models.user.User
 import com.example.healme.viewmodel.DoctorViewModel
+import com.google.firebase.auth.FirebaseAuth
 import java.time.LocalTime
 
 
 @Composable
 fun DoctorHomeScreen(navController: NavHostController,
                      doctorViewModel: DoctorViewModel = viewModel()){
+    val auth = FirebaseAuth.getInstance()
 
+    val currentUserId = auth.currentUser?.uid
+
+    val coroutineScope = rememberCoroutineScope()
+    var doctor by remember { mutableStateOf<MutableMap<String, Any?>?>(null) }
+
+    DoctorHomeContent(
+        doctor = User.fromMap(doctor as Map<String, Any>) as Doctor,
+        onScheduleClick = { navController.navigate("TODO()") },
+        onPatientsClick = { navController.navigate("TODO()") },
+        onPrescriptionsClick = { navController.navigate("TODO()") },
+        onMessagesClick = { navController.navigate("chat") },
+        onProfileClick = { navController.navigate("change_user") }
+    )
 
 }
 
