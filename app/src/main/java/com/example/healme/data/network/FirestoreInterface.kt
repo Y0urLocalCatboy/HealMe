@@ -115,6 +115,8 @@ interface FirestoreInterface {
      */
     suspend fun isAdmin(id: String): Boolean
 
+    suspend fun isDoctor(id: String): Boolean
+
     suspend fun changeToAdmin(id: String, onResult: (Boolean, String) -> Unit)
 
     suspend fun getAllDoctors(): List<Doctor>?

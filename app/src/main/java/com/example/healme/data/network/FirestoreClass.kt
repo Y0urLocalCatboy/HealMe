@@ -298,7 +298,14 @@ class FirestoreClass: FirestoreInterface {
             false
         }
     }
-
+    override suspend fun isDoctor(email: String): Boolean {
+        return try {
+            val snapshot = db.collection("doctors").get().await()
+            snapshot.documents.any { it.getString("email") == email }
+        } catch (e: Exception) {
+            false
+        }
+    }
     override suspend fun changeToAdmin(id: String, onResult: (Boolean, String) -> Unit) {
         try {
 
