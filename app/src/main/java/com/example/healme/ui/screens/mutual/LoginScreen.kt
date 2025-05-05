@@ -73,15 +73,23 @@ fun LoginScreen(navController: NavController) {
             onClick = {
                 val firestore = FirestoreClass()
                 var isAdmin = false
+                var isDoctor = false
                 CoroutineScope(Dispatchers.Main).launch {
                     isAdmin = firestore.isAdmin(email)
+                    isDoctor = firestore.isDoctor(email)
                     firestore.loginUser(email, password) { success, message ->
                         if (success) {
                             if (isAdmin) {
                                 navController.navigate("admin")
                             } else {
-                                navController.navigate("patient") {
-                                    popUpTo("login") { inclusive = true }
+                                if(isDoctor){
+                                    navController.navigate("doctor") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
+                                } else {
+                                    navController.navigate("patient") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
                                 }
                             }
                         } else {

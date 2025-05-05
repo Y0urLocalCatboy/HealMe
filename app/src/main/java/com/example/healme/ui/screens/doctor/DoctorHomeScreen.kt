@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,12 +26,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.healme.data.models.user.Doctor
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import com.example.healme.R
 import com.example.healme.data.models.user.Patient
-import com.example.healme.data.models.user.User
 import com.example.healme.viewmodel.DoctorViewModel
 import com.google.firebase.auth.FirebaseAuth
 import java.time.LocalTime
@@ -38,16 +37,23 @@ import java.time.LocalTime
 
 @Composable
 fun DoctorHomeScreen(navController: NavHostController,
-                     doctorViewModel: DoctorViewModel = viewModel()){
+                     doctorViewModel: DoctorViewModel = viewModel()
+){
     val auth = FirebaseAuth.getInstance()
 
-    val currentUserId = auth.currentUser?.uid
+    val currentUser = auth.currentUser
 
     val coroutineScope = rememberCoroutineScope()
     var doctor by remember { mutableStateOf<MutableMap<String, Any?>?>(null) }
+    var patients by remember { mutableStateOf<List<Patient>>(emptyList()) }
 
+    LaunchedEffect(currentUser?.uid) {
+        doctor = doctorViewModel.getDoctorById(currentUser?.uid.toString()) as MutableMap<String, Any?>?
+        patients = doctorViewModel.getDoctorsPatients(currentUser?.uid.toString()) ?: emptyList()
+    }
     DoctorHomeContent(
-        doctor = User.fromMap(doctor as Map<String, Any>) as Doctor,
+        doctor = doctor,
+        patientList = patients,
         onScheduleClick = { navController.navigate("TODO()") },
         onPatientsClick = { navController.navigate("TODO()") },
         onPrescriptionsClick = { navController.navigate("TODO()") },
@@ -60,7 +66,8 @@ fun DoctorHomeScreen(navController: NavHostController,
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DoctorHomeContent(
-    doctor: Doctor,
+    doctor: MutableMap<String, Any?>?,
+    patientList: List<Patient> = emptyList(),
     onScheduleClick: () -> Unit = {},
     onPatientsClick: () -> Unit = {},
     onPrescriptionsClick: () -> Unit = {},
@@ -91,7 +98,7 @@ fun DoctorHomeContent(
         ) {
 
             item {
-                WelcomeSection(doctor.name, doctor.specialization)
+                WelcomeSection(doctor?.get("name") as? String?: "", doctor?.get("specialization") as? String?: "placeholder")
             }
 
             item {
@@ -107,7 +114,7 @@ fun DoctorHomeContent(
             }
 
             item {
-                RecentPatientsSection(TODO())
+                RecentPatientsSection(patientList)
             }
         }
     }
@@ -213,7 +220,7 @@ fun DoctorFunctionsSection(
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = "Szybki dostęp",
+            text = stringResource(R.string.doctor_panel_fast_menu),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 8.dp)
@@ -286,7 +293,7 @@ fun RecentPatientsSection(patients: List<Patient>){
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(patients) { patient ->
-                PatientCard(name = patient.name, lastVisit = TODO())
+                PatientCard(name = patient.name, lastVisit = patient.surname)
             }
         }
     }

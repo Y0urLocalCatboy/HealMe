@@ -43,6 +43,10 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
                 PatientHomeScreen(navController)
             }
 
+            composable("doctor") {
+                DoctorHomeScreen(navController)
+            }
+
             composable("chat") {
                 ChatScreen()
             }

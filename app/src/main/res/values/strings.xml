@@ -98,6 +98,7 @@
     <string name="doctor_panel_schedule">Schedule</string>
     <string name="doctor_panel_latest_patients">Latest patients</string>
     <string name="doctor_panel_last_visit">Last visit</string>
+    <string name="doctor_panel_fast_menu">Fast menu:</string>
 
 
 </resources>

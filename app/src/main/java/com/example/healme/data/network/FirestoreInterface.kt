@@ -115,6 +115,8 @@ interface FirestoreInterface {
      */
     suspend fun isAdmin(id: String): Boolean
 
+    suspend fun isDoctor(id: String): Boolean
+
     /**
      * Updates availability data for a doctor.
      * @param doctorId ID of the doctor.
