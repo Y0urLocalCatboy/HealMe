@@ -57,8 +57,8 @@ fun DoctorHomeScreen(navController: NavHostController,
         onScheduleClick = { navController.navigate("TODO()") },
         onPatientsClick = { navController.navigate("TODO()") },
         onPrescriptionsClick = { navController.navigate("TODO()") },
-        onMessagesClick = { navController.navigate("chat") },
-        onProfileClick = { navController.navigate("change_user") }
+        onMessagesClick = { navController.navigate("doctor_chat") },
+        onProfileClick = { navController.navigate("doctor_change_user") }
     )
 
 }
