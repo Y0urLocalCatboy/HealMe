@@ -27,7 +27,6 @@ fun AppointmentScreen(navController: NavController) {
     var doctors by remember { mutableStateOf<List<Doctor>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
 
-    // Load doctors and their availability
     LaunchedEffect(Unit) {
         scope.launch {
             doctors = firestore.getAllDoctors() ?: emptyList()

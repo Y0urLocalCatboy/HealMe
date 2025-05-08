@@ -17,6 +17,7 @@ import com.example.healme.ui.screens.mutual.LoginScreen
 import com.example.healme.ui.screens.mutual.RegisterScreen
 import com.example.healme.ui.screens.patient.AppointmentScreen
 import com.example.healme.ui.screens.patient.PatientHomeScreen
+import com.example.healme.ui.screens.patient.PatientMedicalHistoryScreen
 
 @Composable
 fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
@@ -88,6 +89,11 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
                     navController = navController
                 )
             }
+
+            composable("medical_history") {
+                PatientMedicalHistoryScreen(navController)
+            }
+
         }
     }
 }

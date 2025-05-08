@@ -9,29 +9,28 @@ package com.example.healme.data.models
  * @property content The content of the medical history.
  * @property timestamp The timestamp of the medical history.
  */
-data class MedicalHistory (val id: String = "",
-                          val patientId: String = "",
-                          val doctorId: String = "",
-                          val content: String = "",
-                          val timestamp: String = ""
+data class MedicalHistory(
+    val id: String = "",
+    val patientId: String = "",
+    val doctorId: String = "",
+    val content: String = "",
+    val timestamp: Long = 0L,
 
-) {
-
+    //not stored in firestore
+    val doctorName: String = ""
+)
+ {
     companion object {
-        /**
-         * Creates a MedicalHistory object from firebase.
-         *
-         * @param data The data belonging to a MedicalHistory.
-         * @return A MedicalHistory object.
-         */
         fun fromMap(data: Map<String, Any?>): MedicalHistory {
             return MedicalHistory(
                 id = data["id"] as? String ?: "",
                 patientId = data["patientId"] as? String ?: "",
                 doctorId = data["doctorId"] as? String ?: "",
                 content = data["content"] as? String ?: "",
-                timestamp = data["timestamp"] as? String ?: ""
+                timestamp = (data["timestamp"] as? Long) ?: 0L,
+                doctorName = data["doctorName"] as? String ?: ""
             )
         }
+
     }
 }

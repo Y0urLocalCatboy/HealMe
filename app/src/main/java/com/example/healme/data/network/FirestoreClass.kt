@@ -2,6 +2,7 @@ package com.example.healme.data.network
 
 import android.util.Log
 import androidx.compose.ui.res.stringResource
+import com.example.healme.data.models.MedicalHistory
 import com.example.healme.data.models.Message
 import com.example.healme.data.models.Visit
 import com.example.healme.data.models.user.Doctor
@@ -13,10 +14,12 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
 import java.util.Calendar
 import java.util.Date
+import java.util.UUID
 import kotlin.text.get
 
 
@@ -470,30 +473,44 @@ class FirestoreClass: FirestoreInterface {
 
     override suspend fun bookVisit(doctorId: String, patientId: String, timestamp: Long) {
         try {
-            val visit = Visit(
-                doctorId = doctorId,
-                patientId = patientId,
-                timestamp = timestamp
+            val visitData = mapOf(
+                "doctorId" to doctorId,
+                "timestamp" to timestamp,
+                "status" to "booked"
             )
 
-            db.collection("visits")
-                .add(visit)
-                .await()
+            val visitsDocRef = db.collection("visits").document(patientId)
+
+            val snapshot = visitsDocRef.get().await()
+            val existingVisits = snapshot.get("visits") as? Map<*, *> ?: emptyMap<Any, Any>()
+            val visitIndex = existingVisits.size + 1
+            val visitKey = "visits.visit$visitIndex"
 
             val updateMap = mapOf(
+                visitKey to visitData,
+                "patientId" to patientId
+            )
+
+            visitsDocRef.update(updateMap).await()
+
+            val availabilityUpdateMap = mapOf(
                 "weeklyAvailability.$timestamp.status" to "booked",
                 "weeklyAvailability.$timestamp.timestamp" to timestamp
             )
 
             fs.collection("availability")
                 .document(doctorId)
-                .update(updateMap)
+                .update(availabilityUpdateMap)
                 .await()
+
+            addMedicalRecord(patientId = patientId, doctorId = doctorId, timestamp = timestamp)
 
         } catch (e: Exception) {
             Log.e("FirestoreClass", "Error booking visit or updating availability", e)
         }
     }
+
+
 
 
     override suspend fun getBookedTimestampsForDoctor(doctorId: String): List<Long> {
@@ -509,5 +526,78 @@ class FirestoreClass: FirestoreInterface {
             emptyList()
         }
     }
+
+    override suspend fun addMedicalRecord(patientId: String, doctorId: String, timestamp: Long) {
+        try {
+            val docRef = db.collection("medicalHistory").document(patientId)
+            val uniqueKey = UUID.randomUUID().toString()
+
+            val recordData = mapOf(
+                "doctorId" to doctorId,
+                "timestamp" to timestamp,
+                "content" to ""
+            )
+
+            val updateMap = mapOf(
+                "records.$uniqueKey" to recordData,
+                "patientId" to patientId
+            )
+
+            docRef.update(updateMap).await() // ✅ use update here
+
+        } catch (e: Exception) {
+            // If the doc doesn't exist, create it
+            val fallbackMap = mapOf(
+                "patientId" to patientId,
+                "records" to mapOf(
+                    UUID.randomUUID().toString() to mapOf(
+                        "doctorId" to doctorId,
+                        "timestamp" to timestamp,
+                        "content" to ""
+                    )
+                )
+            )
+            db.collection("medicalHistory").document(patientId)
+                .set(fallbackMap)
+                .await()
+
+            Log.e("FirestoreClass", "Doc didn't exist, created new medicalHistory", e)
+        }
+    }
+
+    override suspend fun getPatientMedicalHistory(patientId: String): List<MedicalHistory> {
+        return try {
+            val snapshot = fs.collection("medicalHistory").document(patientId).get().await()
+            if (!snapshot.exists()) return emptyList()
+
+            val records = snapshot.get("records") as? Map<String, Map<String, Any>> ?: return emptyList()
+            val result = mutableListOf<MedicalHistory>()
+
+            for ((recordId, data) in records) {
+                val doctorId = data["doctorId"] as? String
+                if (doctorId.isNullOrBlank()) {
+                    Log.w("FirestoreClass", "Skipping record $recordId due to missing doctorId")
+                    continue
+                }
+
+                val doctorSnapshot = fs.collection("doctors").document(doctorId).get().await()
+                val doctorName = "${doctorSnapshot.getString("name") ?: ""} ${doctorSnapshot.getString("surname") ?: ""}".trim()
+
+                val recordWithId = data.toMutableMap().apply {
+                    put("id", recordId)
+                    put("patientId", patientId)
+                    put("doctorName", doctorName)
+                }
+
+                result.add(MedicalHistory.fromMap(recordWithId))
+            }
+
+            result
+        } catch (e: Exception) {
+            Log.e("FirestoreClass", "Error fetching medical history", e)
+            emptyList()
+        }
+    }
+
 
 }

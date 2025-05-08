@@ -68,6 +68,14 @@ fun PatientHomeScreen(navController: NavController) {
         ) {
             Text("Log Out")
         }
+
+        Button(
+            onClick = { navController.navigate("medical_history") },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text("View Medical History")
+        }
+
     }
 }
 
