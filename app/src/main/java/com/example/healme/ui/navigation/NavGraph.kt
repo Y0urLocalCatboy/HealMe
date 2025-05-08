@@ -10,6 +10,7 @@ import com.example.healme.ui.components.menu.BackArrowTopBar
 import com.example.healme.ui.components.menu.ConditionalDrawer
 import com.example.healme.ui.screens.admin.AdminHomeScreen
 import com.example.healme.ui.screens.doctor.DoctorHomeScreen
+import com.example.healme.ui.screens.doctor.DoctorPatientsScreen
 import com.example.healme.ui.screens.mutual.ChangeUserScreen
 import com.example.healme.ui.screens.mutual.ChatScreen
 import com.example.healme.ui.screens.mutual.LoginScreen
@@ -72,6 +73,10 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
 
             composable("doctor_chat") {
                 ChatScreen(navController)
+            }
+
+            composable("doctor_patients") {
+                DoctorPatientsScreen(navController)
             }
 
             composable("admin") {
