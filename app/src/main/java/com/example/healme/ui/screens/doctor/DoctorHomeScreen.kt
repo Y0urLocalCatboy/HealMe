@@ -76,8 +76,15 @@ fun DoctorHomeContent(
 ) {
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text(stringResource(R.string.doctor_panel_title)) },
+            TopAppBar(
+                title = {
+                    Text(
+                        stringResource(R.string.doctor_panel_title),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                        },
+                modifier = Modifier.fillMaxWidth(),
+                windowInsets = WindowInsets(0, 0, 0, 0),
                 actions = {
                     IconButton(onClick = onMessagesClick) {
                         Icon(Icons.Default.Email, contentDescription = stringResource(R.string.doctor_panel_chat))
@@ -85,7 +92,11 @@ fun DoctorHomeContent(
                     IconButton(onClick = onProfileClick) {
                         Icon(Icons.Default.Person, contentDescription = stringResource(R.string.doctor_panel_profile))
                     }
-                }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             )
         }
     ) { paddingValues ->
@@ -98,7 +109,7 @@ fun DoctorHomeContent(
         ) {
 
             item {
-                WelcomeSection(doctor?.get("name") as? String?: "", doctor?.get("specialization") as? String?: "placeholder")
+                WelcomeSection(doctor?.get("surname") as? String?: "", doctor?.get("specialization") as? String?: "placeholder")
             }
 
             item {

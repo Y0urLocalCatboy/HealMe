@@ -6,7 +6,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.healme.ui.components.menu.BackArrowTopBar
 import com.example.healme.ui.components.menu.ConditionalDrawer
 import com.example.healme.ui.screens.admin.AdminHomeScreen
 import com.example.healme.ui.screens.doctor.DoctorHomeScreen
@@ -22,22 +21,11 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
 
     val drawerEnabledRoutes = listOf("patient", "chat", "change_user")
-    val backArrowEnabledRoutes = listOf("doctor", "admin", "doctor_change_user", "doctor_chat")
     val showDrawer = currentDestination in drawerEnabledRoutes
-    val showBackArrow = currentDestination in backArrowEnabledRoutes
     ConditionalDrawer(
         showDrawer = showDrawer,
         navController = navController
     ) {
-        BackArrowTopBar(
-            showBackArrow = showBackArrow,
-            navController = navController,
-            title = when (currentDestination) {
-                "doctor" -> "Doctor Panel"
-                "admin" -> "Admin Panel"
-                else -> "HealMe"
-            }
-        ) {
         NavHost(
             navController = navController,
             startDestination = "login",
@@ -89,6 +77,5 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
             }
 
         }
-    }
     }
 }
