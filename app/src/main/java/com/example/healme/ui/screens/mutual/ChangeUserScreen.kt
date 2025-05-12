@@ -9,7 +9,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -153,6 +158,9 @@ fun ChangeUserScreen(navController: NavController,
         },
         onCancelClick = {
             navController.popBackStack()
+        },
+        onNavigateBack = {
+            navController.popBackStack()
         }
     )
 }
@@ -202,7 +210,8 @@ fun ChangeUserContent(
     onSpecializationChange: (String) -> Unit,
     onSaveClick: () -> Unit,
     onToggleDoctorStatus: () -> Unit = {},
-    onCancelClick: () -> Unit = {}
+    onCancelClick: () -> Unit = {},
+    onNavigateBack: () -> Unit = {}
     ) {
     Column(
         modifier = Modifier
@@ -212,6 +221,24 @@ fun ChangeUserContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
+        if(isDoctor){
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 0.dp, top = 0.dp)
+            ) {
+                IconButton(
+                    onClick = onNavigateBack,
+                    modifier = Modifier.align(Alignment.TopStart)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.back_button)
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
         if (adminMode) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 Button(

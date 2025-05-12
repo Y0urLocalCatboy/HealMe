@@ -1,5 +1,6 @@
 package com.example.healme.ui.screens.mutual
 
+import android.R.attr.navigationIcon
 import android.annotation.SuppressLint
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -159,6 +160,9 @@ fun ChatScreen(viewModel: ChatViewModel = viewModel(),
                 )
             }
         },
+        onNavigateBack = {
+            navController.popBackStack()
+        }
     )
 }
 
@@ -188,6 +192,7 @@ fun ChatContent(
     message: String,
     onMessageChange: (String) -> Unit,
     onSendMessage: () -> Unit,
+    onNavigateBack: () -> Unit = {},
 ){
     var showError by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -211,7 +216,16 @@ fun ChatContent(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth()
-                    ) {
+                    )
+                    {
+                        if(user is Doctor){
+                            IconButton(onClick = onNavigateBack) {
+                                Icon(
+                                    imageVector = Icons.Filled.ArrowBack,
+                                    contentDescription = stringResource(R.string.back_button)
+                                )
+                            }
+                        }
                         IconButton(
                             onClick = {
                                 if (contacts.isNotEmpty() && chosenContactIndex > 0) {

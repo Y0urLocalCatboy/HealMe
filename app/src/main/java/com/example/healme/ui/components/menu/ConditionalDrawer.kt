@@ -107,17 +107,10 @@ fun ConditionalDrawer(
                 }
             }
         }
-    } else {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("HealMe", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
-                )
-            }
-        ) { paddingValues ->
+    } else
+        Scaffold { paddingValues ->
             Box(modifier = Modifier.padding(paddingValues)) {
                 content()
-            }
         }
     }
 }
