@@ -187,6 +187,7 @@ interface FirestoreInterface {
         onResult: (Boolean, String) -> Unit
     )
 
+
     /**
      * Retrieves all prescriptions for a specific patient.
      *

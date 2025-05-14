@@ -58,7 +58,9 @@ import com.google.firebase.firestore.ListenerRegistration
  * @param viewModel The ChatViewModel instance for managing chat-related data.
  */
 @Composable
-fun ChatScreen(viewModel: ChatViewModel = viewModel(),
+fun ChatScreen(
+    navController: NavController,
+    viewModel: ChatViewModel = viewModel(),
 ) {
     val fs = FirestoreClass()
     val auth = FirebaseAuth.getInstance()
