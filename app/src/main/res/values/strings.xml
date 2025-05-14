@@ -113,4 +113,23 @@
 
     <!-- String used for back arrow top bar -->
     <string name="back_arrow">Back</string>
+
+    <!-- Strings used for doctor prescriptions panel -->
+    <string name="doctor_prescriptions_title">Prescriptions</string>
+    <string name="doctor_prescriptions_new_prescriptions">New prescription</string>
+    <string name="doctor_prescriptions_select_patient">Select a patient</string>
+    <string name="doctor_prescriptions_medication">Mediation</string>
+    <string name="doctor_prescriptions_dosage">Dosage</string>
+    <string name="doctor_prescriptions_instructions">Additional instructions</string>
+    <string name="doctor_prescriptions_issue_prescription">Confirm Prescription</string>
+    <string name="doctor_prescriptions_recent_prescription">Recent Prescription</string>
+    <string name="doctor_prescriptions_dosage_value">Dosage:</string>
+    <string name="doctor_prescriptions_patient">Patient</string>
+
+
+
+
+
+
+
 </resources>
