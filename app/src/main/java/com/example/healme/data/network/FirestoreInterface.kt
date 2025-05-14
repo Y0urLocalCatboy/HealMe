@@ -116,6 +116,12 @@ interface FirestoreInterface {
      */
     suspend fun isAdmin(id: String): Boolean
 
+    /**
+     * Changes a user's role to admin.
+     *
+     * @param id The ID of the user to convert.
+     * @param onResult Callback function with result (success, message).
+     */
     suspend fun isDoctor(id: String): Boolean
 
     /**
@@ -141,45 +147,51 @@ interface FirestoreInterface {
     suspend fun changeToAdmin(id: String, onResult: (Boolean, String) -> Unit)
 
     /**
-     * Listens for updates to the list of doctors and their data.
+     * Retrieves all doctors from the database.
      *
-     * @param onUpdate Callback function with updated list of doctors.
-     *
-     * @return ListenerRegistration object to manage the listener.
-     */
-    fun listenForDoctors(onUpdate: (List<Doctor>) -> Unit): ListenerRegistration
-
-    /**
-     * Listens for updates to the list of patients and their data.
-     *
-     * @param onUpdate Callback function with updated list of patients.
-     *
-     * @return ListenerRegistration object to manage the listener.
-     */
-    fun listenForPatients(onUpdate: (List<Patient>) -> Unit): ListenerRegistration
-
-    /**
-     * Retrieves all doctors from Firestore.
-     *
-     * @return List of Doctor objects, or null if no doctors are found.
+     * @return List of all doctors or null if an error occurs.
      */
     suspend fun getAllDoctors(): List<Doctor>?
 
     /**
-     * Retrieves all patients from Firestore.
+     * Retrieves all patients from the database.
      *
-     * @return List of Patient objects, or null if no patients are found.
+     * @return List of all patients or null if an error occurs.
      */
     suspend fun getAllPatients(): List<Patient>?
 
+    /**
+     * Sets up a real-time listener for changes to patient data.
+     *
+     * @param onUpdate Callback function invoked when patient data changes.
+     * @return ListenerRegistration object to manage the listener.
+     */
     fun listenForPatients(onUpdate: (List<Patient>) -> Unit): ListenerRegistration
 
+    /**
+     * Sets up a real-time listener for changes to doctor data.
+     *
+     * @param onUpdate Callback function invoked when doctor data changes.
+     * @return ListenerRegistration object to manage the listener.
+     */
     fun listenForDoctors(onUpdate: (List<Doctor>) -> Unit): ListenerRegistration
 
+    /**
+     * Saves a prescription to the database.
+     *
+     * @param prescription The prescription object to save.
+     * @param onResult Callback function with result (success, message).
+     */
     fun savePrescription(
         prescription: Prescription,
         onResult: (Boolean, String) -> Unit
     )
 
+    /**
+     * Retrieves all prescriptions for a specific patient.
+     *
+     * @param patientId The ID of the patient.
+     * @return List of prescriptions for the specified patient.
+     */
     suspend fun getPrescriptionsForPatient(patientId: String): List<Prescription>
 }
