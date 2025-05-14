@@ -475,6 +475,62 @@ class FirestoreClass: FirestoreInterface {
             emptyList()
         }
     }
+
+    override fun savePrescription(
+        prescription: Prescription,
+        onResult: (Boolean, String) -> Unit
+    ) {
+        val prescriptionData = hashMapOf(
+            "patientId" to prescription.patientId,
+            "medicationName" to prescription.medicationName,
+            "dosage" to prescription.dosage,
+            "instructions" to prescription.instructions,
+            "dateIssued" to prescription.dateIssued,
+            "doctorName" to prescription.doctorName,
+            "status" to prescription.status
+        )
+
+        db.collection("prescriptions")
+            .add(prescriptionData)
+            .addOnSuccessListener {
+                onResult(true, "Prescription saved successfully!")
+            }
+            .addOnFailureListener { e ->
+                onResult(false, e.message ?: "savePrescription firestore")
+            }
+    }
+
+
+    override suspend fun getPrescriptionsForPatient(patientId: String): List<Prescription> {
+        return try {
+            val querySnapshot = db.collection("prescriptions")
+                .whereEqualTo("patientId", patientId)
+                .get()
+                .await()
+
+            querySnapshot.documents.mapNotNull { document ->
+                try {
+                    val data = document.data
+                    if (data != null) {
+                        Prescription(
+                            id = document.id,
+                            patientId = data["patientId"] as String,
+                            medicationName = data["medicationName"] as String,
+                            dosage = data["dosage"] as String,
+                            instructions = data["instructions"] as String,
+                            dateIssued = data["dateIssued"] as String,
+                            doctorName = data["doctorName"] as String,
+                            status = data["status"] as String
+                        )
+                    } else null
+                } catch (e: Exception) {
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
 }
 
     override suspend fun getDoctorAvailability(doctorId: String): Map<Long, String> {
