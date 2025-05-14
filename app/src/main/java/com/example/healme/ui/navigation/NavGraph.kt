@@ -1,5 +1,6 @@
 package com.example.healme.ui.navigation
 
+import DoctorPrescriptionsScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -65,6 +66,14 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
 
             composable("doctor_patients") {
                 DoctorPatientsScreen(navController)
+            }
+
+            composable("doctor_schedule") {
+                //DoctorScheduleScreen(navController)
+            }
+
+            composable("doctor_prescription") {
+                DoctorPrescriptionsScreen(navController)
             }
 
             composable("admin") {
