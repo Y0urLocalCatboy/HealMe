@@ -14,12 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.healme.R
 import com.example.healme.data.models.Prescription
 import com.example.healme.data.models.user.Patient
@@ -47,12 +45,16 @@ fun DoctorPrescriptionsScreen(
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
     var patients by remember { mutableStateOf<List<Patient>>(emptyList()) }
-    var prescriptions by remember { mutableStateOf<List<Prescription>>(emptyList()) }
+    var prescriptions by remember { mutableStateOf<List<Prescription>?>(emptyList()) }
 
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(key1 = selectedPatient) {
         coroutineScope.launch {
             patients = viewModel.getDoctorsPatients(currentUser?.uid.toString()) ?: emptyList()
-            //prescriptions = viewModel.loadPrescriptions()
+            if (selectedPatient != null) {
+                prescriptions = viewModel.loadPrescriptions(selectedPatient?.id?:"") ?: emptyList()
+            } else {
+                prescriptions = emptyList()
+            }
         }
     }
 
@@ -90,13 +92,21 @@ fun DoctorPrescriptionsScreen(
             )
             coroutineScope.launch {
                 try {
-                    //viewModel.savePrescription(prescription)
+                    viewModel.savePrescription(prescription) { success, message ->
+                        if (success) {
+                            coroutineScope.launch {
+                                prescriptions = viewModel.loadPrescriptions(selectedPatient?.id ?: "")
+                            }
+                        } else {
+                            errorMessage = message ?: "Couldn't save prescription"
+                        }
+                    }
                     medicationName = ""
                     dosage = ""
                     instructions = ""
                     selectedPatient = null
                 } catch (e: Exception) {
-                    errorMessage = e.message ?: "PRESCRIPTION ERROR"
+                    errorMessage = e.message ?: "PRESCRIPTION ERROR DR_PRES_SCREEN"
                 }
             }
         }
@@ -113,7 +123,7 @@ fun DoctorPrescriptionsContent(
     errorMessage: String,
     showPatientSelector: Boolean,
     patients: List<Patient>,
-    prescriptions: List<Prescription>,
+    prescriptions: List<Prescription>?,
     isFormValid: Boolean,
     onMedicationNameChange: (String) -> Unit,
     onDosageChange: (String) -> Unit,
@@ -244,7 +254,9 @@ fun DoctorPrescriptionsContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = stringResource(R.string.doctor_prescriptions_recent_prescription, ""),
+            text = selectedPatient?.let {
+                stringResource(R.string.doctor_prescriptions_recent_prescription, "")
+            } ?: stringResource(R.string.doctor_prescriptions_select_patient_first, ""),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(vertical = 8.dp)
         )
@@ -254,8 +266,26 @@ fun DoctorPrescriptionsContent(
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            items(prescriptions) { prescription ->
-                PrescriptionItem(prescription = prescription)
+            if (selectedPatient == null) {
+                item {
+                    Text(
+                        text = stringResource(R.string.doctor_prescriptions_select_patient_first),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            } else if (prescriptions.isNullOrEmpty()) {
+                item {
+                    Text(
+                        text = stringResource(R.string.doctor_prescriptions_no_prescriptions),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            } else {
+                items(prescriptions) { prescription ->
+                    PrescriptionItem(prescription = prescription)
+                }
             }
         }
     }

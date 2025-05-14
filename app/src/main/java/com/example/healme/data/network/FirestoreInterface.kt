@@ -1,6 +1,7 @@
 package com.example.healme.data.network
 
 import com.example.healme.data.models.Message
+import com.example.healme.data.models.Prescription
 import com.example.healme.data.models.user.*
 import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.tasks.await
@@ -123,4 +124,14 @@ interface FirestoreInterface {
 
     suspend fun getAllPatients(): List<Patient>?
 
+    fun listenForPatients(onUpdate: (List<Patient>) -> Unit): ListenerRegistration
+
+    fun listenForDoctors(onUpdate: (List<Doctor>) -> Unit): ListenerRegistration
+
+    fun savePrescription(
+        prescription: Prescription,
+        onResult: (Boolean, String) -> Unit
+    )
+
+    suspend fun getPrescriptionsForPatient(patientId: String): List<Prescription>
 }

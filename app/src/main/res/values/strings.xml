@@ -125,6 +125,8 @@
     <string name="doctor_prescriptions_recent_prescription">Recent Prescription</string>
     <string name="doctor_prescriptions_dosage_value">Dosage:</string>
     <string name="doctor_prescriptions_patient">Patient</string>
+    <string name="doctor_prescriptions_no_prescriptions">No prescriptions available</string>
+    <string name="doctor_prescriptions_select_patient_first">Please select a patient!</string>
 
 
 
