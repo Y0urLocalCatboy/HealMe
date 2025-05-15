@@ -20,7 +20,7 @@ class DoctorViewModel : ViewModel() {
         return fs.patientsFromDoctor(id)
     }
 
-    suspend fun savePrescription(prescription: Prescription, onResult: (Boolean, String) -> Unit) {
+    fun savePrescription(prescription: Prescription, onResult: (Boolean, String) -> Unit) {
         fs.savePrescription(prescription, onResult)
     }
 
