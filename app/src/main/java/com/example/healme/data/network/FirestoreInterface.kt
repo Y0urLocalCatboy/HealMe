@@ -155,4 +155,49 @@ interface FirestoreInterface {
      */
     suspend fun getAllPatients(): List<Patient>?
 
+    /**
+     * Sets up a real-time listener for changes to patient data.
+     *
+     * @param onUpdate Callback function invoked when patient data changes.
+     * @return ListenerRegistration object to manage the listener.
+     */
+    fun listenForPatients(onUpdate: (List<Patient>) -> Unit): ListenerRegistration
+
+    /**
+     * Sets up a real-time listener for changes to doctor data.
+     *
+     * @param onUpdate Callback function invoked when doctor data changes.
+     * @return ListenerRegistration object to manage the listener.
+     */
+    fun listenForDoctors(onUpdate: (List<Doctor>) -> Unit): ListenerRegistration
+
+    /**
+     * Saves a prescription to the database.
+     *
+     * @param prescription The prescription object to save.
+     * @param onResult Callback function with result (success, message).
+     */
+    fun savePrescription(
+        prescription: Prescription,
+        onResult: (Boolean, String) -> Unit
+    )
+
+    /**
+     * Retrieves all prescriptions for a specific patient.
+     *
+     * @param patientId The ID of the patient.
+     * @return List of prescriptions for the specified patient.
+     */
+    suspend fun getPrescriptionsForPatient(patientId: String): List<Prescription>
+
+    suspend fun getPatientVisits(patientId: String): List<Pair<Long, String>>
+
+    suspend fun bookVisit(doctorId: String, patientId: String, timestamp: Long)
+
+    suspend fun getBookedTimestampsForDoctor(doctorId: String): List<Long>
+
+    suspend fun addMedicalRecord(patientId: String, doctorId: String, timestamp: Long)
+
+    suspend fun getPatientMedicalHistory(patientId: String): List<MedicalHistory>
+
 }

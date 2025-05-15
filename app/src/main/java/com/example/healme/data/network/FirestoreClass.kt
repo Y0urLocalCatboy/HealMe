@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.ui.res.stringResource
 import com.example.healme.data.models.MedicalHistory
 import com.example.healme.data.models.Message
+import com.example.healme.data.models.Prescription
 import com.example.healme.data.models.Visit
 import com.example.healme.data.models.user.Doctor
 import com.example.healme.data.models.user.Patient
