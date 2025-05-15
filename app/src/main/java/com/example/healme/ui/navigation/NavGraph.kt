@@ -1,5 +1,6 @@
 package com.example.healme.ui.navigation
 
+import DoctorPrescriptionsScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -11,6 +12,7 @@ import com.example.healme.ui.components.menu.ConditionalDrawer
 import com.example.healme.ui.screens.patient.PatientCalendarScreen
 import com.example.healme.ui.screens.admin.AdminHomeScreen
 import com.example.healme.ui.screens.doctor.DoctorHomeScreen
+import com.example.healme.ui.screens.doctor.DoctorPatientsScreen
 import com.example.healme.ui.screens.mutual.ChangeUserScreen
 import com.example.healme.ui.screens.mutual.ChatScreen
 import com.example.healme.ui.screens.mutual.LoginScreen
@@ -23,9 +25,8 @@ import com.example.healme.ui.screens.patient.PatientMedicalHistoryScreen
 fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
 
-    val drawerEnabledRoutes = listOf("patient", "chat", "change_user", "doctor")
+    val drawerEnabledRoutes = listOf("patient", "chat", "change_user")
     val showDrawer = currentDestination in drawerEnabledRoutes
-
     ConditionalDrawer(
         showDrawer = showDrawer,
         navController = navController
@@ -47,6 +48,10 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
                 PatientHomeScreen(navController)
             }
 
+            composable("doctor") {
+                DoctorHomeScreen(navController)
+            }
+
             composable("chat") {
                 ChatScreen(navController)
             }
@@ -55,12 +60,28 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
                 ChangeUserScreen(navController)
             }
 
-            composable("admin") {
-                AdminHomeScreen(navController)
+            composable("doctor_change_user") {
+                ChangeUserScreen(navController)
             }
 
-            composable("doctor") {
-                DoctorHomeScreen(navController)
+            composable("doctor_chat") {
+                ChatScreen(navController)
+            }
+
+            composable("doctor_patients") {
+                DoctorPatientsScreen(navController)
+            }
+
+            composable("doctor_schedule") {
+                //DoctorScheduleScreen(navController)
+            }
+
+            composable("doctor_prescription") {
+                DoctorPrescriptionsScreen(navController)
+            }
+
+            composable("admin") {
+                AdminHomeScreen(navController)
             }
 
             composable("admin_change_user?userId={userId}") { backStackEntry ->

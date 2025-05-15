@@ -19,6 +19,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+/**
+ * LoginScreen is a Composable function that represents the login screen of the application.
+ *
+ * @param navController The NavController used for navigation between screens.
+ */
 @Composable
 fun LoginScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
@@ -68,15 +73,23 @@ fun LoginScreen(navController: NavController) {
             onClick = {
                 val firestore = FirestoreClass()
                 var isAdmin = false
+                var isDoctor = false
                 CoroutineScope(Dispatchers.Main).launch {
                     isAdmin = firestore.isAdmin(email)
+                    isDoctor = firestore.isDoctor(email)
                     firestore.loginUser(email, password) { success, message ->
                         if (success) {
                             if (isAdmin) {
                                 navController.navigate("admin")
                             } else {
-                                navController.navigate("patient") {
-                                    popUpTo("login") { inclusive = true }
+                                if(isDoctor){
+                                    navController.navigate("doctor") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
+                                } else {
+                                    navController.navigate("patient") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
                                 }
                             }
                         } else {
@@ -100,6 +113,9 @@ fun LoginScreen(navController: NavController) {
         )
     }
 }
+/**
+ * Preview of the LoginScreen.
+ */
 @Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {

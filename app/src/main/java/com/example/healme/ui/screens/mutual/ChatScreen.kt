@@ -1,5 +1,6 @@
 package com.example.healme.ui.screens.mutual
 
+import android.R.attr.navigationIcon
 import android.annotation.SuppressLint
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -51,10 +52,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.healme.R
 import com.google.firebase.firestore.ListenerRegistration
 
-
+/**
+ * ChatScreen is a Composable function that displays the chat interface.
+ *
+ * @param viewModel The ChatViewModel instance for managing chat-related data.
+ */
 @Composable
-fun ChatScreen(navController: NavController,
-               viewModel: ChatViewModel = viewModel(),
+fun ChatScreen(
+    navController: NavController,
+    viewModel: ChatViewModel = viewModel(),
 ) {
     val fs = FirestoreClass()
     val auth = FirebaseAuth.getInstance()
@@ -156,9 +162,25 @@ fun ChatScreen(navController: NavController,
                 )
             }
         },
+        onNavigateBack = {
+            navController.popBackStack()
+        }
     )
 }
 
+/**
+ * ChatContent is a Composable function that displays the chat interface.
+ *
+ * @param user The current user.
+ * @param errorMessage The error message to display.
+ * @param contacts The list of contacts.
+ * @param chosenContactIndex The index of the currently selected contact.
+ * @param onContactIndexChange Callback to change the selected contact index.
+ * @param messages The list of messages.
+ * @param message The current message being typed.
+ * @param onMessageChange Callback to change the message.
+ * @param onSendMessage Callback to send the message.
+ */
 @SuppressLint("ViewModelConstructorInComposable")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -172,6 +194,7 @@ fun ChatContent(
     message: String,
     onMessageChange: (String) -> Unit,
     onSendMessage: () -> Unit,
+    onNavigateBack: () -> Unit = {},
 ){
     var showError by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -195,7 +218,16 @@ fun ChatContent(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth()
-                    ) {
+                    )
+                    {
+                        if(user is Doctor){
+                            IconButton(onClick = onNavigateBack) {
+                                Icon(
+                                    imageVector = Icons.Filled.ArrowBack,
+                                    contentDescription = stringResource(R.string.back_button)
+                                )
+                            }
+                        }
                         IconButton(
                             onClick = {
                                 if (contacts.isNotEmpty() && chosenContactIndex > 0) {
@@ -322,8 +354,9 @@ fun ChatContent(
 }
 
 
-
-
+/**
+ * Preview of the ChatScreen.
+ */
 @Preview
 @Composable
 fun ChatScreenPreview() {

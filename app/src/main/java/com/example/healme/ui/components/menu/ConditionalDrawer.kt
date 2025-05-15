@@ -24,11 +24,22 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.healme.R
 import kotlinx.coroutines.launch
 
+/**
+ * ConditionalDrawer is a composable function that conditionally displays a navigation drawer
+ * based on the current route. It uses Jetpack Compose's Material3 library to create a responsive
+ * UI with a top app bar and a navigation drawer.
+ *
+ * @param showDrawer A boolean indicating whether to show the drawer or not.
+ * @param navController The NavHostController used for navigation.
+ * @param content The main content of the screen.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConditionalDrawer(
@@ -46,7 +57,7 @@ fun ConditionalDrawer(
                 ModalDrawerSheet {
                     Text("HealMe App", modifier = Modifier.padding(16.dp))
                     NavigationDrawerItem(
-                        label = { Text("Home") },
+                        label = { Text(stringResource(R.string.patient_panel_home)) },
                         selected = navController.currentDestination?.route == "patient",
                         onClick = {
                             navController.navigate("patient") {
@@ -54,25 +65,27 @@ fun ConditionalDrawer(
                             }
                             scope.launch { drawerState.close() }
                         },
-                        icon = { Icon(Icons.Default.Home, contentDescription = "Home") }
+                        icon = { Icon(Icons.Default.Home,
+                            contentDescription = stringResource(R.string.patient_panel_home)) }
                     )
                     NavigationDrawerItem(
-                        label = { Text("Change User Data") },
+                        label = { Text(stringResource(R.string.patient_panel_profile)) },
                         selected = navController.currentDestination?.route == "change_user",
                         onClick = {
                             navController.navigate("change_user")
                             scope.launch { drawerState.close() }
                         },
-                        icon = { Icon(Icons.Default.Person, contentDescription = "change_user") }
+                        icon = { Icon(Icons.Default.Person,
+                            contentDescription = stringResource(R.string.patient_panel_profile)) }
                     )
                     NavigationDrawerItem(
-                        label = { Text("Chat") },
+                        label = { Text(stringResource(R.string.patient_panel_chat)) },
                         selected = false,
                         onClick = {
                             navController.navigate("chat")
                             scope.launch { drawerState.close() }
                         },
-                        icon = { Icon(Icons.Default.Chat, contentDescription = "Chat") }
+                        icon = { Icon(Icons.Default.Chat, contentDescription = stringResource(R.string.patient_panel_chat)) }
                     )
                 }
             }
@@ -83,7 +96,7 @@ fun ConditionalDrawer(
                         title = { Text("HealMe") },
                         navigationIcon = {
                             IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                Icon(Icons.Default.Menu, contentDescription = "Menu")
+                                Icon(Icons.Default.Menu, contentDescription = stringResource(R.string.patient_panel_menu))
                             }
                         }
                     )
@@ -94,17 +107,10 @@ fun ConditionalDrawer(
                 }
             }
         }
-    } else {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("HealMe", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
-                )
-            }
-        ) { paddingValues ->
+    } else
+        Scaffold { paddingValues ->
             Box(modifier = Modifier.padding(paddingValues)) {
                 content()
-            }
         }
     }
 }

@@ -29,6 +29,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 
 
+/**
+ * PatientHomeScreen is the home screen for patients after they log in.
+ * It displays a TODO()
+ *
+ * @param navController The NavController used for navigation.
+ */
 @Composable
 fun PatientHomeScreen(navController: NavController) {
     val context = LocalContext.current
@@ -79,6 +85,9 @@ fun PatientHomeScreen(navController: NavController) {
     }
 }
 
+/**
+ * Preview of the PatientHomeScreen.
+ */
 @Preview(showBackground = true)
 @Composable
 fun PatientHomeScreenPreview() {

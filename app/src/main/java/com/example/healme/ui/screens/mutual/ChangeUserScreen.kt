@@ -9,7 +9,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -37,11 +42,19 @@ import com.example.healme.viewmodel.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
+/**
+ * ChangeUserScreen is a Composable function that displays a screen for changing user information.
+ *
+ * @param navController The NavController used for navigation.
+ * @param userId The ID of the user to be changed. Default is "null".
+ * @param authViewModel The AuthViewModel instance used for authentication-related operations.
+ * @param adminViewModel The AdminViewModel instance used for admin-related operations.
+ */
 @Composable
 fun ChangeUserScreen(navController: NavController,
                      userId: String = "null",
                      authViewModel: AuthViewModel = viewModel(),
-                        adminViewModel: AdminViewModel = viewModel()
+                     adminViewModel: AdminViewModel = viewModel()
 ){
     val fs = FirestoreClass()
     val auth = FirebaseAuth.getInstance()
@@ -145,10 +158,37 @@ fun ChangeUserScreen(navController: NavController,
         },
         onCancelClick = {
             navController.popBackStack()
+        },
+        onNavigateBack = {
+            navController.popBackStack()
         }
     )
 }
 
+/**
+ * ChangeUserContent is a Composable function that displays the content of the ChangeUserScreen.
+ *
+ * @param adminMode Indicates if the screen is in admin mode.
+ * @param isDoctor Indicates if the user is a doctor.
+ * @param name The name of the user.
+ * @param nameError The error message for the name field.
+ * @param surname The surname of the user.
+ * @param surnameError The error message for the surname field.
+ * @param email The email of the user.
+ * @param dateOfBirth The date of birth of the user.
+ * @param dobError The error message for the date of birth field.
+ * @param specialization The specialization of the user (if applicable - if isDoctor == true).
+ * @param errorMessage The error message to be displayed.
+ * @param isFormValid Indicates if the form is valid.
+ * @param onNameChange Callback for name change.
+ * @param onSurnameChange Callback for surname change.
+ * @param onEmailChange Callback for email change.
+ * @param onDateOfBirthChange Callback for date of birth change.
+ * @param onSpecializationChange Callback for specialization change.
+ * @param onSaveClick Callback for save button click.
+ * @param onToggleDoctorStatus Callback for toggling doctor status.
+ * @param onCancelClick Callback for cancel button click.
+ */
 @Composable
 fun ChangeUserContent(
     adminMode: Boolean = false,
@@ -170,7 +210,8 @@ fun ChangeUserContent(
     onSpecializationChange: (String) -> Unit,
     onSaveClick: () -> Unit,
     onToggleDoctorStatus: () -> Unit = {},
-    onCancelClick: () -> Unit = {}
+    onCancelClick: () -> Unit = {},
+    onNavigateBack: () -> Unit = {}
     ) {
     Column(
         modifier = Modifier
@@ -180,6 +221,24 @@ fun ChangeUserContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
+        if(isDoctor){
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 0.dp, top = 0.dp)
+            ) {
+                IconButton(
+                    onClick = onNavigateBack,
+                    modifier = Modifier.align(Alignment.TopStart)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.back_button)
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
         if (adminMode) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 Button(
@@ -308,10 +367,13 @@ fun ChangeUserContent(
         }
     }
 }
+
+/**
+ * Preview for ChangeUserContent.
+ */
 @Preview(showBackground = true)
 @Composable
 fun ChangeUserContentPreview() {
-
     ChangeUserContent(
         adminMode = true,
         isDoctor = true,

@@ -2,6 +2,7 @@ package com.example.healme.data.network
 
 import com.example.healme.data.models.MedicalHistory
 import com.example.healme.data.models.Message
+import com.example.healme.data.models.Prescription
 import com.example.healme.data.models.user.*
 import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.tasks.await
@@ -117,6 +118,14 @@ interface FirestoreInterface {
     suspend fun isAdmin(id: String): Boolean
 
     /**
+     * Changes a user's role to admin.
+     *
+     * @param id The ID of the user to convert.
+     * @param onResult Callback function with result (success, message).
+     */
+    suspend fun isDoctor(id: String): Boolean
+
+    /**
      * Updates availability data for a doctor.
      * @param doctorId ID of the doctor.
      * @param availabilityMap Availability data to update.
@@ -130,34 +139,20 @@ interface FirestoreInterface {
      */
     suspend fun getDoctorAvailability(doctorId: String): Map<Long, String>
 
-    /**
-     * Books a visit for a patient with a doctor at a specific timestamp.
-     *
-     * @param doctorId The doctor's ID.
-     * @param patientId The patient's ID.
-     * @param timestamp The timestamp for the visit (Unix seconds).
-     */
-    suspend fun bookVisit(doctorId: String, patientId: String, timestamp: Long)
-
-    /**
-     * Retrieves all booked visits for a patient with doctor names.
-     *
-     * @param patientId The ID of the patient.
-     * @return A list of pairs (timestamp, doctor full name).
-     */
-    suspend fun getPatientVisits(patientId: String): List<Pair<Long, String>>
-
-    suspend fun getBookedTimestampsForDoctor(doctorId: String): List<Long>
-
-
     suspend fun changeToAdmin(id: String, onResult: (Boolean, String) -> Unit)
 
+    /**
+     * Retrieves all doctors from the database.
+     *
+     * @return List of all doctors or null if an error occurs.
+     */
     suspend fun getAllDoctors(): List<Doctor>?
 
+    /**
+     * Retrieves all patients from the database.
+     *
+     * @return List of all patients or null if an error occurs.
+     */
     suspend fun getAllPatients(): List<Patient>?
-
-    suspend fun addMedicalRecord(patientId: String, doctorId: String, timestamp: Long)
-
-    suspend fun getPatientMedicalHistory(patientId: String): List<MedicalHistory>
 
 }

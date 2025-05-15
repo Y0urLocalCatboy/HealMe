@@ -8,7 +8,12 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-
+/**
+ * ViewModel for handling chat-related logic.
+ *
+ * @function messageValidity Validates the message input.
+ * @function formatTimestamp Formats a timestamp string into a human-readable date format.
+ */
 class ChatViewModel : ViewModel() {
 
     /**

@@ -30,6 +30,12 @@ import com.example.healme.ui.components.menu.CalendarPicker
 import com.example.healme.viewmodel.AdminViewModel
 import com.google.firebase.auth.FirebaseAuth
 
+/**
+ * AdminHomeScreen is the main screen for the admin panel.
+ *
+ * @param navController The NavHostController used for navigation.
+ * @param adminViewModel The ViewModel for managing admin-related data.
+ */
 @Composable
 fun AdminHomeScreen(
     navController: NavHostController,
@@ -90,6 +96,17 @@ fun AdminHomeScreen(
     )
 }
 
+/**
+ * AdminHomeContent is the main content of the AdminHomeScreen.
+ *
+ * @param users List of User objects to display.
+ * @param roles List of roles corresponding to the users.
+ * @param selectedIndex The currently selected index in the list of users.
+ * @param onSelectedIndexChange Callback function to handle index changes.
+ * @param specificRole The role of the currently selected user.
+ * @param onEditUser Callback function to handle user edit action.
+ * @param onLogOut Callback function to handle logout action.
+ */
 @Composable
 fun AdminHomeContent(
     users: List<User>,
@@ -210,6 +227,13 @@ fun AdminHomeContent(
     }
 }
 
+/**
+ * UserDetailsCard displays detailed information about a user.
+ *
+ * @param specificRole The specific role of the user (e.g., Doctor, Patient).
+ * @param user The User object containing user details.
+ * @param onEditClick Callback function to handle edit action.
+ */
 @Composable
 fun UserDetailsCard(
     specificRole: String,
@@ -285,6 +309,14 @@ fun UserDetailsCard(
 }
 
 
+/**
+ * UserListItem displays a single item in the user list.
+ *
+ * @param user The User object to display.
+ * @param role The role of the user (e.g., Doctor, Patient).
+ * @param isSelected Indicates if the item is selected.
+ * @param onClick Callback function to handle item click.
+ */
 @Composable
 fun UserListItem(
     user: User,
