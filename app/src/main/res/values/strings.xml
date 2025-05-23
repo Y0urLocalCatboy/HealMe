@@ -105,11 +105,47 @@
     <string name="doctor_patients_dob">Date of Birth</string>
     <string name="doctor_patient_details_icon_description">Details</string>
 
-    <!-- Strings used for patient panel -->
+    <!-- Strings used for conditional drawer -->
     <string name="patient_panel_home">Home</string>
     <string name="patient_panel_chat">Chat</string>
     <string name="patient_panel_profile">Change Profile</string>
     <string name="patient_panel_menu">Menu</string>
+
+    <!-- Strings used for patient panel -->
+    <string name="patient_panel_title">Patient Panel</string>
+    <string name="patient_panel_profile_settings">Profile Settings</string>
+    <string name="patient_panel_logout">Logout</string>
+    <string name="patient_panel_default_name">Patient</string>
+    <string name="patient_panel_welcome_back">Welcome back</string>
+    <string name="patient_panel_subtitle">Manage your health and appointments.</string>
+    <string name="patient_panel_user_avatar">User Avatar</string>
+    <string name="patient_panel_quick_actions">Quick Actions</string>
+    <string name="patient_panel_find_doctor">Find a Doctor</string>
+    <string name="patient_panel_my_appointments">My Appointments</string>
+    <string name="patient_panel_my_prescriptions">My Prescriptions</string>
+    <string name="patient_panel_messages">Messages</string>
+    <string name="patient_panel_upcoming_appointment">Upcoming Appointment</string>
+    <string name="patient_panel_appointment_icon">Appointment Icon</string>
+    <string name="patient_panel_details">Details</string>
+    <string name="patient_panel_health_tip_of_the_day">Health Tip of the Day</string>
+    <string name="patient_panel_health_tip_placeholder_first">Remember to drink plenty of water throughout the day!</string>
+    <string name="patient_panel_health_tip_placeholder_second">Make sure to get enough sleep for better health!</string>
+    <string name="patient_panel_health_tip_placeholder_third">Regular exercise is key to maintaining good health!</string>
+    <string name="patient_panel_health_tip_placeholder_fourth">Eating a balanced diet is essential for your well-being!</string>
+    <string name="patient_panel_health_tip_placeholder_fifth">Stay active and take breaks during long periods of sitting!</string>
+    <string name="patient_panel_health_tip_placeholder_sixth">Practice mindfulness and relaxation techniques for stress relief!</string>
+    <string name="patient_panel_health_tip_placeholder_seventh">Regular check-ups can help catch health issues early!</string>
+
+    <!-- Strings for PATIENT prescriptions -->
+    <string name="patient_prescriptions_screen_title">My Prescriptions</string>
+    <string name="patient_prescriptions_no_prescriptions">You have no prescriptions at the moment.</string>
+    <string name="patient_prescriptions_issued_by">Issued by: Dr. %1$s</string>
+    <string name="patient_prescriptions_date_issued">Date Issued: %1$s</string>
+    <string name="patient_prescriptions_dosage">Dosage: %1$s</string>
+    <string name="patient_prescriptions_instructions">Instructions: %1$s</string>
+    <string name="patient_prescriptions_status">Status: %1$s</string>
+    <string name="patient_prescriptions_loading">Loading prescriptions...</string>
+    <string name="patient_prescriptions_error">Could not load prescriptions. Please try again.</string>
 
     <!-- String used for back arrow top bar -->
     <string name="back_arrow">Back</string>
