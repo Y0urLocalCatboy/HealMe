@@ -124,6 +124,7 @@
     <string name="patient_panel_my_appointments">My Appointments</string>
     <string name="patient_panel_my_prescriptions">My Prescriptions</string>
     <string name="patient_panel_messages">Messages</string>
+    <string name="patient_panel_medical_history">Medical History </string>
     <string name="patient_panel_upcoming_appointment">Upcoming Appointment</string>
     <string name="patient_panel_appointment_icon">Appointment Icon</string>
     <string name="patient_panel_details">Details</string>
@@ -146,6 +147,8 @@
     <string name="patient_prescriptions_status">Status: %1$s</string>
     <string name="patient_prescriptions_loading">Loading prescriptions...</string>
     <string name="patient_prescriptions_error">Could not load prescriptions. Please try again.</string>
+    <string name="patient_prescriptions_no_data">Failed to load prescriptions.</string>
+    <string name="patient_prescriptions_error_message">User not logged in.</string>
 
     <!-- String used for back arrow top bar -->
     <string name="back_arrow">Back</string>

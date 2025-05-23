@@ -1,18 +1,13 @@
 package com.example.healme.ui.screens.patient
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,24 +17,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.healme.R
 import com.example.healme.data.models.user.Patient
 import com.example.healme.viewmodel.PatientViewModel
 import com.google.firebase.auth.FirebaseAuth
-import java.lang.Math.random
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -79,6 +66,7 @@ fun PatientHomeScreen(
         PatientHomeContent(
             patient = patient,
             onFindDoctorClick = { navController.navigate("TODO()") },
+            onMedicalHistoryClick = { navController.navigate("TODO()") },
             onPrescriptionsClick = { navController.navigate("patient_prescription") },
             onMessagesClick = { navController.navigate("chat") },
         )
@@ -92,6 +80,7 @@ fun PatientHomeContent(
     onFindDoctorClick: () -> Unit,
     onPrescriptionsClick: () -> Unit,
     onMessagesClick: () -> Unit,
+    onMedicalHistoryClick: () -> Unit,
 ) {
     Scaffold { paddingValues ->
         LazyColumn(
@@ -109,7 +98,8 @@ fun PatientHomeContent(
                 QuickActionsGrid(
                     onFindDoctorClick = onFindDoctorClick,
                     onPrescriptionsClick = onPrescriptionsClick,
-                    onMessagesClick = onMessagesClick
+                    onMessagesClick = onMessagesClick,
+                    onMedicalHistoryClick = onMedicalHistoryClick
                 )
             }
 
@@ -152,7 +142,8 @@ fun WelcomePatientSection(patientName: String) {
 fun QuickActionsGrid(
     onFindDoctorClick: () -> Unit,
     onPrescriptionsClick: () -> Unit,
-    onMessagesClick: () -> Unit
+    onMessagesClick: () -> Unit,
+    onMedicalHistoryClick: () -> Unit
 ) {
     Column {
         Text(
@@ -187,6 +178,13 @@ fun QuickActionsGrid(
                 text = stringResource(R.string.patient_panel_messages),
                 icon = Icons.Filled.Chat,
                 onClick = onMessagesClick,
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            ActionButton(
+                text = stringResource(R.string.patient_panel_medical_history),
+                icon = Icons.Filled.CalendarToday,
+                onClick = onMedicalHistoryClick,
                 modifier = Modifier.weight(1f)
             )
         }

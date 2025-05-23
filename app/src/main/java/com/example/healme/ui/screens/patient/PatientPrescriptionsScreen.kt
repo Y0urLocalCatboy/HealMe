@@ -37,6 +37,9 @@ fun PatientPrescriptionsScreen(
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
+    val noDataMessage = stringResource(R.string.patient_prescriptions_no_data)
+    val errorLoadingMessage = stringResource(R.string.patient_prescriptions_error_message)
+
     LaunchedEffect(currentUserId) {
         if (currentUserId != null) {
             isLoading = true
@@ -45,12 +48,12 @@ fun PatientPrescriptionsScreen(
                 prescriptions = result
                 isLoading = false
                 if (result == null) {
-                    errorMessage = "Failed to load prescriptions."
+                    errorMessage = noDataMessage
                 }
             }
         } else {
             isLoading = false
-            errorMessage = "User not logged in."
+            errorMessage = errorLoadingMessage
         }
     }
 
