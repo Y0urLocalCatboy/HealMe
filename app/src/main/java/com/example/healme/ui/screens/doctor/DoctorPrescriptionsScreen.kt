@@ -22,6 +22,9 @@ import com.example.healme.R
 import com.example.healme.data.models.Prescription
 import com.example.healme.data.models.user.Patient
 import com.example.healme.data.models.user.User
+import com.example.healme.ui.theme.Crimson
+import com.example.healme.ui.theme.DarkGreen
+import com.example.healme.ui.theme.DarkTurquoise
 import com.example.healme.viewmodel.DoctorViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
@@ -399,18 +402,18 @@ fun PrescriptionItem(prescription: Prescription) {
                         Text(
                             text = prescription.status,
                             color = when(prescription.status) {
-                                "Active" -> Color(0xFF1B5E20)
-                                "Filled" -> Color(0xFF0D47A1)
-                                "Expired" -> Color(0xFFB71C1C)
+                                "Active" -> DarkGreen
+                                "Filled" -> DarkTurquoise
+                                "Expired" -> Crimson
                                 else -> MaterialTheme.colorScheme.onSurfaceVariant
                             }
                         )
                     },
                     colors = AssistChipDefaults.assistChipColors(
                         containerColor = when(prescription.status) {
-                            "Active" -> Color(0xFF4CAF50).copy(alpha = 0.2f)
-                            "Filled" -> Color(0xFF2196F3).copy(alpha = 0.2f)
-                            "Expired" -> Color(0xFFF44336).copy(alpha = 0.2f)
+                            "Active" -> DarkGreen.copy(alpha = 0.2f)
+                            "Filled" -> DarkTurquoise.copy(alpha = 0.2f)
+                            "Expired" -> Crimson.copy(alpha = 0.2f)
                             else -> MaterialTheme.colorScheme.surfaceVariant
                         }
                     )
