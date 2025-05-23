@@ -65,8 +65,8 @@ fun PatientHomeScreen(
     } else {
         PatientHomeContent(
             patient = patient,
-            onFindDoctorClick = { navController.navigate("TODO()") },
-            onMedicalHistoryClick = { navController.navigate("TODO()") },
+            onFindDoctorClick = { navController.navigate("available_dates") },
+            onMedicalHistoryClick = { navController.navigate("medical_history") },
             onPrescriptionsClick = { navController.navigate("patient_prescription") },
             onMessagesClick = { navController.navigate("chat") },
         )
