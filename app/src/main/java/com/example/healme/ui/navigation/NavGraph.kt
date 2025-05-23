@@ -27,7 +27,7 @@ import com.example.healme.ui.screens.patient.PatientMedicalHistoryScreen
 fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
 
-    val drawerEnabledRoutes = listOf("patient", "chat", "change_user")
+    val drawerEnabledRoutes = listOf("patient", "chat", "change_user", "calendar", "available_dates", "medical_history")
     val showDrawer = currentDestination in drawerEnabledRoutes
     ConditionalDrawer(
         showDrawer = showDrawer,
