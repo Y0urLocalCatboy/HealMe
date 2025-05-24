@@ -167,6 +167,20 @@
     <string name="doctor_prescriptions_no_prescriptions">No prescriptions available</string>
     <string name="doctor_prescriptions_select_patient_first">Please select a patient!</string>
 
+    <!-- Strings for AppointmentScreen -->
+    <string name="appointment_screen_title">Available Appointments</string>
+    <string name="appointment_screen_search_doctor_label">Search for doctor</string>
+    <string name="appointment_screen_search_icon_description">Search</string>
+    <string name="appointment_screen_specialization_label">Specialization</string>
+    <string name="appointment_screen_all_specialties">All specialties</string>
+    <string name="appointment_screen_no_doctors_matching_criteria">No doctors matching search criteria</string>
+    <string name="appointment_screen_doctor_prefix">Dr. %1$s %2$s</string>
+    <string name="appointment_screen_back_to_doctors_list_button">Back to doctors list</string>
+    <string name="appointment_screen_no_available_slots">No available slots for this doctor</string>
+    <string name="appointment_screen_available_slots_title">Available slots:</string>
+    <string name="appointment_screen_book_slot_button">Book: %1$s</string>
+    <string name="appointment_screen_booking_failed_toast">Booking failed</string>
+    <string name="appointment_screen_back_button">Back</string>
 
 
 
