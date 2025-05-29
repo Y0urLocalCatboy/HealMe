@@ -372,10 +372,10 @@ fun VisitDetailDialog(
         },
         text = {
             Column {
-                Text("👨‍⚕️ Doctor: ${visitData.doctorName}")
-                Text("🩺 Specialty: ${visitData.specialization}")
-                Text("📅 Date: $formattedDate")
-                Text("⏰ Time: $formattedTime")
+                Text("Doctor: ${visitData.doctorName}")
+                Text("Specialty: ${visitData.specialization}")
+                Text("Date: $formattedDate")
+                Text("Time: $formattedTime")
             }
         }
     )
