@@ -53,6 +53,7 @@ fun PatientHomeScreen(
             patientViewModel.getPatientById(uid) { fetchedPatient ->
                 patient = fetchedPatient
                 scope.launch {
+                    firestore.cleanUpPastVisits(uid)
                     val upcomingPair = firestore.getUpcomingVisitForPatient(uid)
                     upcomingPair?.let { (visit, doctor) ->
                         upcomingVisit = VisitData(
@@ -63,6 +64,7 @@ fun PatientHomeScreen(
                     }
                     isLoading = false
                 }
+
             }
         } ?: run {
             isLoading = false

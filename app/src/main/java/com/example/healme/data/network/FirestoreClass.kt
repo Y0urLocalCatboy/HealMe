@@ -609,10 +609,9 @@ class FirestoreClass: FirestoreInterface {
                 "patientId" to patientId
             )
 
-            docRef.update(updateMap).await() // ✅ use update here
+            docRef.update(updateMap).await()
 
         } catch (e: Exception) {
-            // If the doc doesn't exist, create it
             val fallbackMap = mapOf(
                 "patientId" to patientId,
                 "records" to mapOf(
@@ -689,6 +688,31 @@ class FirestoreClass: FirestoreInterface {
             Pair(upcomingVisitEntry, doctor)
         } catch (e: Exception) {
             null
+        }
+    }
+
+    override suspend fun cleanUpPastVisits(patientId: String) {
+        try {
+            val now = System.currentTimeMillis() / 1000
+            val visitDoc = fs.collection("visits").document(patientId).get().await()
+            val visitsMap = visitDoc.get("visits") as? Map<String, Map<String, Any>> ?: return
+
+            val medicalDoc = fs.collection("medicalHistory").document(patientId).get().await()
+            val medicalRecords = (medicalDoc.get("records") as? Map<String, Map<String, Any>>) ?: emptyMap()
+
+            val completedTimestamps = medicalRecords.values.mapNotNull { it["timestamp"] as? Long }.toSet()
+
+            val toDelete = visitsMap.filter { (_, data) ->
+                val timestamp = data["timestamp"] as? Long ?: return@filter false
+                timestamp < now && timestamp in completedTimestamps
+            }
+
+            if (toDelete.isNotEmpty()) {
+                val updates = toDelete.keys.associate { "visits.$it" to com.google.firebase.firestore.FieldValue.delete() }
+                fs.collection("visits").document(patientId).update(updates).await()
+            }
+        } catch (e: Exception) {
+            println("⚠️ Error during visit cleanup: ${e.message}")
         }
     }
 
