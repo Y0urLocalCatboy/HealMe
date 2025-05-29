@@ -3,6 +3,7 @@ package com.example.healme.data.network
 import com.example.healme.data.models.MedicalHistory
 import com.example.healme.data.models.Message
 import com.example.healme.data.models.Prescription
+import com.example.healme.data.models.Visit
 import com.example.healme.data.models.user.*
 import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.tasks.await
@@ -199,5 +200,7 @@ interface FirestoreInterface {
     suspend fun addMedicalRecord(patientId: String, doctorId: String, timestamp: Long)
 
     suspend fun getPatientMedicalHistory(patientId: String): List<MedicalHistory>
+
+
 
 }

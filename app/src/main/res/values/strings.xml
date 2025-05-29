@@ -121,7 +121,7 @@
     <string name="patient_panel_user_avatar">User Avatar</string>
     <string name="patient_panel_quick_actions">Quick Actions</string>
     <string name="patient_panel_find_doctor">Find a Doctor</string>
-    <string name="patient_panel_my_appointments">My Appointments</string>
+    <string name="patient_panel_my_calendar">My Calendar</string>
     <string name="patient_panel_my_prescriptions">My Prescriptions</string>
     <string name="patient_panel_messages">Messages</string>
     <string name="patient_panel_medical_history">Medical History </string>
@@ -136,6 +136,9 @@
     <string name="patient_panel_health_tip_placeholder_fifth">Stay active and take breaks during long periods of sitting!</string>
     <string name="patient_panel_health_tip_placeholder_sixth">Practice mindfulness and relaxation techniques for stress relief!</string>
     <string name="patient_panel_health_tip_placeholder_seventh">Regular check-ups can help catch health issues early!</string>
+    <string name="patient_panel_appointment">For Appointments</string>
+
+
 
     <!-- Strings for PATIENT prescriptions -->
     <string name="patient_prescriptions_screen_title">My Prescriptions</string>
@@ -181,9 +184,9 @@
     <string name="appointment_screen_book_slot_button">Book: %1$s</string>
     <string name="appointment_screen_booking_failed_toast">Booking failed</string>
     <string name="appointment_screen_back_button">Back</string>
-
-
-
+    <string name="no_upcoming_appointments">no upcoming appointments</string>
+    <string name="appointment_details_title">Appointment Details</string>
+    <string name="close">Close</string>
 
 
 

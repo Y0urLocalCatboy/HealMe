@@ -14,6 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,9 +25,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.healme.R
+import com.example.healme.data.models.Visit
 import com.example.healme.data.models.user.Patient
+import com.example.healme.data.network.FirestoreClass
 import com.example.healme.viewmodel.PatientViewModel
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -69,6 +75,7 @@ fun PatientHomeScreen(
             onMedicalHistoryClick = { navController.navigate("medical_history") },
             onPrescriptionsClick = { navController.navigate("patient_prescription") },
             onMessagesClick = { navController.navigate("chat") },
+            onCalendarClick = { navController.navigate("calendar") }
         )
     }
 }
@@ -81,6 +88,7 @@ fun PatientHomeContent(
     onPrescriptionsClick: () -> Unit,
     onMessagesClick: () -> Unit,
     onMedicalHistoryClick: () -> Unit,
+    onCalendarClick: () -> Unit
 ) {
     Scaffold { paddingValues ->
         LazyColumn(
@@ -99,7 +107,8 @@ fun PatientHomeContent(
                     onFindDoctorClick = onFindDoctorClick,
                     onPrescriptionsClick = onPrescriptionsClick,
                     onMessagesClick = onMessagesClick,
-                    onMedicalHistoryClick = onMedicalHistoryClick
+                    onMedicalHistoryClick = onMedicalHistoryClick,
+                    onCalendarClick = onCalendarClick
                 )
             }
 
@@ -143,7 +152,8 @@ fun QuickActionsGrid(
     onFindDoctorClick: () -> Unit,
     onPrescriptionsClick: () -> Unit,
     onMessagesClick: () -> Unit,
-    onMedicalHistoryClick: () -> Unit
+    onMedicalHistoryClick: () -> Unit,
+    onCalendarClick: () -> Unit
 ) {
     Column {
         Text(
@@ -161,8 +171,15 @@ fun QuickActionsGrid(
                 onClick = onFindDoctorClick,
                 modifier = Modifier.weight(1f)
             )
+            Spacer(modifier = Modifier.width(12.dp))
+            ActionButton(
+                text = stringResource(R.string.patient_panel_my_calendar),
+                icon = Icons.Filled.CalendarToday,
+                onClick = onCalendarClick,
+                modifier = Modifier.weight(1f)
+            )
         }
-        Spacer(modifier = Modifier.height(12.dp))
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
@@ -229,54 +246,146 @@ fun ActionButton(
 fun UpcomingAppointmentCard() {
     // Placeholder!!!!!!!!!!!!!!!!!!!!!
     val appointmentDate = SimpleDateFormat("EEEE, dd MMMM yyyy 'at' HH:mm", Locale.getDefault()).format(Date(System.currentTimeMillis() + 86400000 * 2)) // Example: 2 days from now
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = stringResource(R.string.patient_panel_upcoming_appointment),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    Icons.Filled.CalendarToday,
-                    contentDescription = stringResource(R.string.patient_panel_appointment_icon),
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(40.dp)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(
-                        text = "Dr. Greogry House", // Placeholder
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Text(
-                        text = "PSYCHIATSITS", // Placeholder
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = appointmentDate,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Button(
-                onClick = { TODO("Appoitnmen details") },
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text(stringResource(R.string.patient_panel_details))
-            }
-        }
-    }
-}
 
+
+    Card(
+
+
+        modifier = Modifier.fillMaxWidth(),
+
+
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+
+
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+
+
+    ) {
+
+
+        Column(modifier = Modifier.padding(16.dp)) {
+
+
+            Text(
+
+
+                text = stringResource(R.string.patient_panel_upcoming_appointment),
+
+
+                style = MaterialTheme.typography.titleMedium,
+
+
+                fontWeight = FontWeight.Bold
+
+
+            )
+
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+
+
+                Icon(
+
+
+                    Icons.Filled.CalendarToday,
+
+
+                    contentDescription = stringResource(R.string.patient_panel_appointment_icon),
+
+
+                    tint = MaterialTheme.colorScheme.primary,
+
+
+                    modifier = Modifier.size(40.dp)
+
+
+                )
+
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+
+                Column {
+
+
+                    Text(
+
+
+                        text = "Dr. Greogry House", // Placeholder
+
+
+                        style = MaterialTheme.typography.bodyLarge,
+
+
+                        fontWeight = FontWeight.SemiBold
+
+
+                    )
+
+
+                    Text(
+
+
+                        text = "PSYCHIATSITS", // Placeholder
+
+
+                        style = MaterialTheme.typography.bodyMedium,
+
+
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+
+
+                    )
+
+
+                    Text(
+
+
+                        text = appointmentDate,
+
+
+                        style = MaterialTheme.typography.bodySmall
+
+
+                    )
+
+
+                }
+
+
+            }
+
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+
+            Button(
+
+
+                onClick = { TODO("Appoitnmen details") },
+
+
+                modifier = Modifier.align(Alignment.End)
+
+
+            ) {
+
+
+                Text(stringResource(R.string.patient_panel_details))
+
+
+            }
+
+
+        }
+
+
+    }
+
+}
 @Composable
 fun HealthTipCard() {
     Card(
