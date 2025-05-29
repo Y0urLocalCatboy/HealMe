@@ -665,5 +665,33 @@ class FirestoreClass: FirestoreInterface {
         }
     }
 
+    override suspend fun getUpcomingVisitForPatient(patientId: String): Pair<Visit, Doctor>? {
+        return try {
+            val docSnapshot = fs.collection("visits").document(patientId).get().await()
+            if (!docSnapshot.exists()) return null
+
+            val visitsMap = docSnapshot.get("visits") as? Map<String, Map<String, Any>> ?: return null
+
+            val now = System.currentTimeMillis() / 1000
+
+            val upcomingVisitEntry = visitsMap.mapNotNull { (_, data) ->
+                val timestamp = data["timestamp"] as? Long ?: return@mapNotNull null
+                val doctorId = data["doctorId"] as? String ?: return@mapNotNull null
+
+                if (timestamp > now) {
+                    Visit(doctorId = doctorId, patientId = patientId, timestamp = timestamp)
+                } else null
+            }.minByOrNull { it.timestamp } ?: return null
+
+            val doctorSnapshot = fs.collection("doctors").document(upcomingVisitEntry.doctorId).get().await()
+            val doctor = doctorSnapshot.toObject(Doctor::class.java) ?: return null
+
+            Pair(upcomingVisitEntry, doctor)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+
 
 }

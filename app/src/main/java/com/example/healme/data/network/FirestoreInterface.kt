@@ -201,6 +201,7 @@ interface FirestoreInterface {
 
     suspend fun getPatientMedicalHistory(patientId: String): List<MedicalHistory>
 
+    suspend fun getUpcomingVisitForPatient(patientId: String): Pair<Visit, Doctor>?
 
 
 }
