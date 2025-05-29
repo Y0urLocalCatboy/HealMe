@@ -43,39 +43,28 @@ fun PatientHomeScreen(
     var patient by remember { mutableStateOf<Patient?>(null) }
     var upcomingVisit by remember { mutableStateOf<VisitData?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    var showVisitDialog by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
     val firestore = remember { FirestoreClass() }
 
     LaunchedEffect(currentUser?.uid) {
         currentUser?.uid?.let { uid ->
-            println("📡 Fetching patient info for UID: $uid")
-
             patientViewModel.getPatientById(uid) { fetchedPatient ->
                 patient = fetchedPatient
-                println("✅ Patient fetched: ${fetchedPatient?.name}")
-
                 scope.launch {
                     val upcomingPair = firestore.getUpcomingVisitForPatient(uid)
-                    println("🔥 Raw upcoming visit + doctor: $upcomingPair")
-
                     upcomingPair?.let { (visit, doctor) ->
-                        println("🎯 Upcoming visit timestamp: ${visit.timestamp}")
-                        println("👨‍⚕️ Doctor name: ${doctor.name} ${doctor.surname}")
-                        println("🩺 Specialization: ${doctor.specialization}")
-
                         upcomingVisit = VisitData(
                             doctorName = "${doctor.name} ${doctor.surname}",
                             specialization = doctor.specialization ?: "General",
                             timestamp = visit.timestamp
                         )
-                    } ?: println("⚠️ No upcoming visits found.")
-
+                    }
                     isLoading = false
                 }
             }
         } ?: run {
-            println("❌ No current user UID found")
             isLoading = false
         }
     }
@@ -88,15 +77,23 @@ fun PatientHomeScreen(
         PatientHomeContent(
             patient = patient,
             upcomingVisit = upcomingVisit,
-            onVisitDetailsClick = {
-                navController.navigate("visit_detail/${upcomingVisit?.timestamp ?: 0}")
-            },
+            onVisitDetailsClick = { showVisitDialog = true },
             onFindDoctorClick = { navController.navigate("available_dates") },
             onMedicalHistoryClick = { navController.navigate("medical_history") },
             onPrescriptionsClick = { navController.navigate("patient_prescription") },
             onMessagesClick = { navController.navigate("chat") },
             onCalendarClick = { navController.navigate("calendar") }
         )
+
+        upcomingVisit?.let { visit ->
+            if (showVisitDialog) {
+                VisitDetailDialog(
+                    visitData = visit,
+                    onDismiss = { showVisitDialog = false }
+                )
+            }
+        }
+
     }
 }
 
@@ -161,8 +158,6 @@ fun PatientHomeContent(
                     }
                 }
             }
-
-
 
             item {
                 HealthTipCard()
@@ -315,7 +310,7 @@ fun UpcomingAppointmentCard(
             Spacer(modifier = Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    Icons.Filled.CalendarToday,
+                    imageVector = Icons.Filled.CalendarToday,
                     contentDescription = stringResource(R.string.patient_panel_appointment_icon),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(40.dp)
@@ -349,6 +344,41 @@ fun UpcomingAppointmentCard(
             }
         }
     }
+}
+
+@Composable
+fun VisitDetailDialog(
+    visitData: VisitData,
+    onDismiss: () -> Unit
+) {
+    val formattedDate = remember(visitData.timestamp) {
+        SimpleDateFormat("EEEE, dd MMMM yyyy", Locale.getDefault())
+            .format(Date(visitData.timestamp * 1000))
+    }
+    val formattedTime = remember(visitData.timestamp) {
+        SimpleDateFormat("HH:mm", Locale.getDefault())
+            .format(Date(visitData.timestamp * 1000))
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("OK")
+            }
+        },
+        title = {
+            Text("Appointment Details")
+        },
+        text = {
+            Column {
+                Text("👨‍⚕️ Doctor: ${visitData.doctorName}")
+                Text("🩺 Specialty: ${visitData.specialization}")
+                Text("📅 Date: $formattedDate")
+                Text("⏰ Time: $formattedTime")
+            }
+        }
+    )
 }
 
 @Composable
