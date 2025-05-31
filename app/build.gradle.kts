@@ -49,6 +49,7 @@ composeCompiler {
 
 dependencies {
 
+    implementation("com.google.firebase:firebase-messaging-ktx:24.1.1")
     implementation(libs.androidx.navigation.runtime.android)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.foundation.android)
@@ -87,6 +88,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth.ktx)
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

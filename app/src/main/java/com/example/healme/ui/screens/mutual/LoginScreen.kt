@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.healme.data.network.FirestoreClass
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -79,10 +81,28 @@ fun LoginScreen(navController: NavController) {
                     isDoctor = firestore.isDoctor(email)
                     firestore.loginUser(email, password) { success, message ->
                         if (success) {
+                            val userType = when {
+                                isAdmin -> "admin"
+                                isDoctor -> "doctor"
+                                else -> "patient"
+                            }
+
+                            val currentUser = FirebaseAuth.getInstance().currentUser
+                            currentUser?.uid?.let { uid ->
+                                FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        val token = task.result
+                                        CoroutineScope(Dispatchers.IO).launch {
+                                            firestore.updateUserFcmToken(uid, userType, token)
+                                        }
+                                    }
+                                }
+                            }
+
                             if (isAdmin) {
                                 navController.navigate("admin")
                             } else {
-                                if(isDoctor){
+                                if (isDoctor) {
                                     navController.navigate("doctor") {
                                         popUpTo("login") { inclusive = true }
                                     }
@@ -103,7 +123,6 @@ fun LoginScreen(navController: NavController) {
             Text("Log In")
         }
 
-
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
@@ -113,6 +132,7 @@ fun LoginScreen(navController: NavController) {
         )
     }
 }
+
 /**
  * Preview of the LoginScreen.
  */

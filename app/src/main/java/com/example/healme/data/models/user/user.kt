@@ -9,12 +9,15 @@ import com.example.healme.data.*
  * @property name The name of the User.
  * @property surname The surname of the User.
  * @property dateOfBirth The date of birth of the User.
+ * @property fcmToken The Firebase Cloud Messaging token for push notifications.
  */
-abstract class User (open val id: String="",
-                     open val email: String="",
-                     open val name: String="",
-                     open val surname: String="",
-                     open val dateOfBirth: String="",
+abstract class User (
+    open val id: String = "",
+    open val email: String = "",
+    open val name: String = "",
+    open val surname: String = "",
+    open val dateOfBirth: String = "",
+    open val fcmToken: String? = null
 ) {
 
     /**

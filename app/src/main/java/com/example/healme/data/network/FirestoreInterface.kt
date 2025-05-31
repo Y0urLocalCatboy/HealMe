@@ -205,5 +205,24 @@ interface FirestoreInterface {
 
     suspend fun cleanUpPastVisits(patientId: String)
 
+    /**
+     * Updates the FCM token for a given user.
+     *
+     * @param userId The ID of the user.
+     * @param userType The type of the user ("patient", "doctor", or "admin").
+     * @param token The new FCM token.
+     */
+    suspend fun updateUserFcmToken(userId: String, userType: String, token: String)
+
+    /**
+     * Retrieves the FCM token for a given user.
+     *
+     * @param userId The ID of the user.
+     * @param userType The type of the user ("patient", "doctor", or "admin").
+     * @return The FCM token, or null if not found.
+     */
+    suspend fun getUserFcmToken(userId: String, userType: String): String?
+
+
 
 }

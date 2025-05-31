@@ -16,8 +16,10 @@ class Patient(
     email: String = "",
     name: String = "",
     surname: String = "",
-    dateOfBirth: String = ""
-) : User(id, email, name, surname, dateOfBirth) {
+    dateOfBirth: String = "",
+    fcmToken: String? = null
+) : User(id, email, name, surname, dateOfBirth, fcmToken) {
+
     companion object {
 
         /**
@@ -28,17 +30,12 @@ class Patient(
          */
         fun fromMap(data: Map<String, Any?>): Patient {
             return Patient(
-
                 id = data["id"] as? String ?: "",
-
                 name = data["name"] as? String ?: "",
-
                 email = data["email"] as? String ?: "",
-
                 surname = data["surname"] as? String ?: "",
-
                 dateOfBirth = data["dateOfBirth"] as? String ?: "",
-
+                fcmToken = data["fcmToken"] as? String
             )
         }
     }

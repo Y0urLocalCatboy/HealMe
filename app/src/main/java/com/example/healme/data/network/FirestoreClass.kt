@@ -731,4 +731,45 @@ class FirestoreClass: FirestoreInterface {
             println("Error during visit cleanup for patient $patientId: ${e.message}")
         }
     }
+
+    override suspend fun updateUserFcmToken(userId: String, userType: String, token: String) {
+        try {
+            val collection = when (userType) {
+                "patient" -> "patients"
+                "doctor" -> "doctors"
+                "admin" -> "admins"
+                else -> throw IllegalArgumentException("Unknown user type: $userType")
+            }
+
+            fs.collection(collection)
+                .document(userId)
+                .update("fcmToken", token)
+                .addOnSuccessListener {
+                    println("✅ FCM token updated successfully for $userId")
+                }
+                .addOnFailureListener {
+                    println("❌ Failed to update FCM token: ${it.message}")
+                }
+        } catch (e: Exception) {
+            println("🔥 Exception in updateUserFcmToken: ${e.message}")
+        }
+    }
+
+    override suspend fun getUserFcmToken(userId: String, userType: String): String? {
+        return try {
+            val collection = when (userType) {
+                "patient" -> "patients"
+                "doctor" -> "doctors"
+                "admin" -> "admins"
+                else -> throw IllegalArgumentException("Unknown user type: $userType")
+            }
+
+            val snapshot = fs.collection(collection).document(userId).get().await()
+            snapshot.getString("fcmToken")
+        } catch (e: Exception) {
+            println("🔥 Failed to fetch FCM token: ${e.message}")
+            null
+        }
+    }
+
 }
