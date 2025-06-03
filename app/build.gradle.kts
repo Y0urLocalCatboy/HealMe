@@ -49,6 +49,7 @@ composeCompiler {
 
 dependencies {
 
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
     implementation("com.google.firebase:firebase-messaging-ktx:24.1.1")
     implementation(libs.androidx.navigation.runtime.android)
     implementation(libs.androidx.navigation.compose)

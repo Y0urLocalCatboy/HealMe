@@ -19,6 +19,11 @@ import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import org.json.JSONObject
 import java.util.Calendar
 import java.util.Date
 import java.util.UUID
@@ -771,5 +776,30 @@ class FirestoreClass: FirestoreInterface {
             null
         }
     }
+
+    override suspend fun sendNotificationToToken(token: String, title: String, message: String) {
+        val json = JSONObject()
+        val notification = JSONObject()
+
+        notification.put("title", title)
+        notification.put("body", message)
+        json.put("to", token)
+        json.put("notification", notification)
+
+        val requestBody = json.toString()
+        val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
+
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("https://fcm.googleapis.com/fcm/send")
+            .addHeader("Authorization", "key=YOUR_SERVER_KEY_HERE") // Replace this
+            .addHeader("Content-Type", "application/json")
+            .post(RequestBody.create(mediaType, requestBody))
+            .build()
+
+        val response = client.newCall(request).execute()
+        println("📨 Notification sent. Response: ${response.body?.string()}")
+    }
+
 
 }

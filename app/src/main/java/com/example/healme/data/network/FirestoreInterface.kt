@@ -223,6 +223,15 @@ interface FirestoreInterface {
      */
     suspend fun getUserFcmToken(userId: String, userType: String): String?
 
+    /**
+     * Sends a push notification using Firebase Cloud Messaging (FCM) to a specific device token.
+     *
+     * @param token The FCM token of the target device.
+     * @param title The title of the notification message.
+     * @param message The body content of the notification.
+     */
+    suspend fun sendNotificationToToken(token: String, title: String, message: String)
+
 
 
 }
