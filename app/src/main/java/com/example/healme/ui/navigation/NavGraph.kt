@@ -11,6 +11,7 @@ import com.example.healme.ui.screens.patient.BookingConfirmationScreen
 import com.example.healme.ui.components.menu.ConditionalDrawer
 import com.example.healme.ui.screens.patient.PatientCalendarScreen
 import com.example.healme.ui.screens.admin.AdminHomeScreen
+import com.example.healme.ui.screens.doctor.CalendarScreen
 import com.example.healme.ui.screens.doctor.DoctorHomeScreen
 import com.example.healme.ui.screens.doctor.DoctorPatientsScreen
 import com.example.healme.ui.screens.mutual.ChangeUserScreen
@@ -20,6 +21,7 @@ import com.example.healme.ui.screens.mutual.RegisterScreen
 import com.example.healme.ui.screens.patient.AppointmentScreen
 import com.example.healme.ui.screens.patient.PatientHomeScreen
 import com.example.healme.ui.screens.patient.PatientPrescriptionsScreen
+
 
 import com.example.healme.ui.screens.patient.PatientMedicalHistoryScreen
 
@@ -74,8 +76,12 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
                 DoctorPatientsScreen(navController)
             }
 
-            composable("doctor_schedule") {
-                //DoctorScheduleScreen(navController)
+            composable("doctor_schedule/{doctorId}") { backStackEntry ->
+                val doctorId = backStackEntry.arguments?.getString("doctorId") ?: ""
+                CalendarScreen(
+                    doctorId = doctorId,
+                    onExit = { navController.popBackStack() }
+                )
             }
 
             composable("doctor_prescription") {

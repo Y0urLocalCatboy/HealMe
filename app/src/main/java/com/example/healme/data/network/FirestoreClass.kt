@@ -13,6 +13,7 @@ import com.example.healme.data.network.FirestoreInterface
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
@@ -308,6 +309,7 @@ class FirestoreClass: FirestoreInterface {
             false
         }
     }
+
     override suspend fun isDoctor(email: String): Boolean {
         return try {
             val snapshot = db.collection("doctors").get().await()
@@ -316,11 +318,13 @@ class FirestoreClass: FirestoreInterface {
             false
         }
     }
+
     override suspend fun changeToAdmin(id: String, onResult: (Boolean, String) -> Unit) {
         try {
 
             val userData = loadUser(id) ?: throw IllegalStateException("User data not found")
-            val email = userData["email"] as? String ?: throw IllegalStateException("Email not found for user")
+            val email = userData["email"] as? String
+                ?: throw IllegalStateException("Email not found for user")
 
             val existingAdmin = db.collection("admins")
                 .whereEqualTo("email", email)
@@ -335,7 +339,7 @@ class FirestoreClass: FirestoreInterface {
             val adminData = hashMapOf<String, Any>("email" to email)
 
             db.runTransaction { transaction ->
-                if(userData["specialization"] != null) {
+                if (userData["specialization"] != null) {
                     val doctorDocRef = db.collection("doctors").document(id)
                     transaction.delete(doctorDocRef)
                     transaction.set(db.collection("admins").document(id), adminData)
@@ -492,7 +496,8 @@ class FirestoreClass: FirestoreInterface {
             val snapshot = fs.collection("availability").document(doctorId).get().await()
             val availabilityMap = mutableMapOf<Long, String>()
 
-            val weeklyAvailability = snapshot.get("weeklyAvailability") as? Map<String, Map<String, Any>>
+            val weeklyAvailability =
+                snapshot.get("weeklyAvailability") as? Map<String, Map<String, Any>>
             weeklyAvailability?.forEach { (key, value) ->
                 val status = value["status"] as? String
                 val timestampKey = key.toLongOrNull()
@@ -515,7 +520,8 @@ class FirestoreClass: FirestoreInterface {
 
             if (!documentSnapshot.exists()) return emptyList()
 
-            val visitsMap = documentSnapshot.get("visits") as? Map<String, Map<String, Any>> ?: return emptyList()
+            val visitsMap = documentSnapshot.get("visits") as? Map<String, Map<String, Any>>
+                ?: return emptyList()
 
             val visitList = mutableListOf<Pair<Long, String>>()
 
@@ -524,7 +530,8 @@ class FirestoreClass: FirestoreInterface {
                 val doctorId = visitData["doctorId"] as? String ?: continue
 
                 val doctorSnapshot = fs.collection("doctors").document(doctorId).get().await()
-                val doctorName = "${doctorSnapshot.getString("name") ?: ""} ${doctorSnapshot.getString("surname") ?: ""}".trim()
+                val doctorName =
+                    "${doctorSnapshot.getString("name") ?: ""} ${doctorSnapshot.getString("surname") ?: ""}".trim()
 
                 visitList.add(Pair(timestamp, doctorName))
             }
@@ -577,8 +584,6 @@ class FirestoreClass: FirestoreInterface {
     }
 
 
-
-
     override suspend fun getBookedTimestampsForDoctor(doctorId: String): List<Long> {
         return try {
             val snapshot = db.collection("visits")
@@ -609,10 +614,9 @@ class FirestoreClass: FirestoreInterface {
                 "patientId" to patientId
             )
 
-            docRef.update(updateMap).await() // ✅ use update here
+            docRef.update(updateMap).await()
 
         } catch (e: Exception) {
-            // If the doc doesn't exist, create it
             val fallbackMap = mapOf(
                 "patientId" to patientId,
                 "records" to mapOf(
@@ -636,7 +640,8 @@ class FirestoreClass: FirestoreInterface {
             val snapshot = fs.collection("medicalHistory").document(patientId).get().await()
             if (!snapshot.exists()) return emptyList()
 
-            val records = snapshot.get("records") as? Map<String, Map<String, Any>> ?: return emptyList()
+            val records =
+                snapshot.get("records") as? Map<String, Map<String, Any>> ?: return emptyList()
             val result = mutableListOf<MedicalHistory>()
 
             for ((recordId, data) in records) {
@@ -647,7 +652,8 @@ class FirestoreClass: FirestoreInterface {
                 }
 
                 val doctorSnapshot = fs.collection("doctors").document(doctorId).get().await()
-                val doctorName = "${doctorSnapshot.getString("name") ?: ""} ${doctorSnapshot.getString("surname") ?: ""}".trim()
+                val doctorName =
+                    "${doctorSnapshot.getString("name") ?: ""} ${doctorSnapshot.getString("surname") ?: ""}".trim()
 
                 val recordWithId = data.toMutableMap().apply {
                     put("id", recordId)
@@ -670,7 +676,8 @@ class FirestoreClass: FirestoreInterface {
             val docSnapshot = fs.collection("visits").document(patientId).get().await()
             if (!docSnapshot.exists()) return null
 
-            val visitsMap = docSnapshot.get("visits") as? Map<String, Map<String, Any>> ?: return null
+            val visitsMap =
+                docSnapshot.get("visits") as? Map<String, Map<String, Any>> ?: return null
 
             val now = System.currentTimeMillis() / 1000
 
@@ -683,7 +690,8 @@ class FirestoreClass: FirestoreInterface {
                 } else null
             }.minByOrNull { it.timestamp } ?: return null
 
-            val doctorSnapshot = fs.collection("doctors").document(upcomingVisitEntry.doctorId).get().await()
+            val doctorSnapshot =
+                fs.collection("doctors").document(upcomingVisitEntry.doctorId).get().await()
             val doctor = doctorSnapshot.toObject(Doctor::class.java) ?: return null
 
             Pair(upcomingVisitEntry, doctor)
@@ -692,6 +700,35 @@ class FirestoreClass: FirestoreInterface {
         }
     }
 
+    //TODO zmiana z czasu systemowego na firebasowy jak zrobisz to w czacie
+    override suspend fun cleanUpPastVisits(patientId: String) {
+        try {
+            val visitDoc = fs.collection("visits").document(patientId).get().await()
+            if (!visitDoc.exists()) return
 
+            val visitsMap = visitDoc.get("visits") as? Map<String, Map<String, Any>> ?: return
 
+            val currentTimestamp = System.currentTimeMillis() / 1000
+
+            val historyDoc = fs.collection("medicalHistory").document(patientId).get().await()
+            val medicalRecords = historyDoc.get("records") as? Map<String, Map<String, Any>> ?: emptyMap()
+
+            val medicalTimestamps = medicalRecords.values.mapNotNull {
+                it["timestamp"] as? Long
+            }.toSet()
+
+            val visitsToDelete = visitsMap.filter { (_, visitData) ->
+                val timestamp = visitData["timestamp"] as? Long ?: return@filter false
+                timestamp < currentTimestamp && timestamp in medicalTimestamps
+            }.keys
+
+            if (visitsToDelete.isNotEmpty()) {
+                val updates = visitsToDelete.associate { "visits.$it" to com.google.firebase.firestore.FieldValue.delete() }
+                fs.collection("visits").document(patientId).update(updates).await()
+            }
+
+        } catch (e: Exception) {
+            println("Error during visit cleanup for patient $patientId: ${e.message}")
+        }
+    }
 }

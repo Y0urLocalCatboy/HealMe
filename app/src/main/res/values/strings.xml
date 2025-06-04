@@ -193,5 +193,17 @@
     <string name="close">Close</string>
     <string name="patient_panel_no_upcoming_visits">no upcoming visits</string>
 
+    <!-- Strings for Schedule Screen for doctors -->
+    <string name="calendar_screen_select_a_week">Schedule Picker</string>
+    <string name="calendar_screen_week">Week</string>
+    <string name="calendar_screen_selected_week">Selected Week:</string>
+    <string name="calendar_screen_hour">Hour</string>
+    <string name="calendar_screen_available">Available</string>
+    <string name="calendar_screen_unavailable">Unavailable</string>
+    <string name="calendar_screen_booked">Booked</string>
+    <string name="calendar_screen_exit">Exit</string>
+    <string name="calendar_screen_back">Back</string>
+    <string name="calendar_screen_past">Past</string>
+
 
 </resources>
