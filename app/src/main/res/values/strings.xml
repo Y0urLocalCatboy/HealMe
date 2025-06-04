@@ -78,6 +78,9 @@
     <string name ="admin_panel_birthdate">Birthdate</string>
     <string name="admin_panel_specialization">Specialization</string>
     <string name="admin_panel_logout">Logout</string>
+    <string name="admin_panel_search">Search...</string>
+    <string name="admin_panel_all">Everyone</string>
+    <string name="admin_panel_no_results">No results</string>
 
     <!-- Strings used for doctor panel -->
     <string name="doctor_panel_title">Doctor Panel</string>
@@ -99,6 +102,7 @@
     <string name="doctor_panel_latest_patients">Latest patients</string>
     <string name="doctor_panel_last_visit">Last visit</string>
     <string name="doctor_panel_fast_menu">Fast menu:</string>
+
     <!-- Strings used for doctor panel, patients part -->
     <string name="doctor_patients_no_patients">No Patients Found</string>
     <string name="doctor_patients_email">Email</string>
