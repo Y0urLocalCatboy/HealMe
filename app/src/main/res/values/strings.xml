@@ -60,8 +60,8 @@
     <string name="chat_send_message_button_description">Send</string>
     <string name="chat_message_input_placeholder">Message...</string>
     <string name="chat_back_button_description">Back</string>
-    <string name="chat_yesterday">Back</string>
-    <string name="chat_today">Back</string>
+    <string name="chat_yesterday">Yesterday</string>
+    <string name="chat_today">Today</string>
 
 
     <!-- Strings used for editing profile -->
