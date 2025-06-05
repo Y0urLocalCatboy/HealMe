@@ -144,7 +144,8 @@ fun ChatScreen(
     }
 
     val messageInputError = if (showInputError) chatViewModel.messageValidity(messageText) else null
-
+    val yesterday = stringResource(R.string.chat_yesterday)
+    val today = stringResource(R.string.chat_today)
     appUser?.let { currentUserInstance ->
         ChatContent(
             currentUser = currentUserInstance,
@@ -200,7 +201,7 @@ fun ChatScreen(
                 navController.popBackStack()
             },
             messageInputError = messageInputError,
-            formatTimestamp = { timestamp -> chatViewModel.formatTimestamp(timestamp) }
+            formatTimestamp = { timestamp -> chatViewModel.formatTimestamp(timestamp, yesterday, today) }
         )
     } ?: run {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
@@ -258,7 +259,10 @@ fun ChatContent(
                             },
                             modifier = Modifier
                                 .weight(1f)
-                                .padding(start = if (isCurrentUserDoctor) 0.dp else 8.dp, end = 8.dp)
+                                .padding(
+                                    start = if (isCurrentUserDoctor) 0.dp else 8.dp,
+                                    end = 8.dp
+                                )
                         ) {
                             OutlinedTextField(
                                 value = searchQuery,
@@ -385,24 +389,49 @@ fun ChatContent(
                         horizontalArrangement = if (isUserMessage) Arrangement.End else Arrangement.Start
                     ) {
                         Card(
-                            modifier = Modifier.widthIn(max = 280.dp),
+                            modifier = Modifier
+                                .widthIn(max = 320.dp)
+                                .padding(
+                                    start = if (isUserMessage) 48.dp else 0.dp,
+                                    end = if (isUserMessage) 0.dp else 48.dp
+                                ),
                             colors = CardDefaults.cardColors(
                                 containerColor = if (isUserMessage)
                                     MaterialTheme.colorScheme.primaryContainer
                                 else
                                     MaterialTheme.colorScheme.secondaryContainer
-                            )
+                            ),
+                            elevation = CardDefaults.cardElevation(2.dp)
                         ) {
-                            Column(modifier = Modifier.padding(8.dp)) {
+                            Column(
+                                modifier = Modifier
+                                    .padding(12.dp)
+                                    .fillMaxWidth()
+                            ) {
                                 Text(
                                     text = msg.content,
-                                    style = MaterialTheme.typography.bodyMedium
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer.takeIf { isUserMessage }
+                                        ?: MaterialTheme.colorScheme.onSecondaryContainer
                                 )
-                                Text(
-                                    text = formatTimestamp(msg.timestamp),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    modifier = Modifier.align(Alignment.End)
-                                )
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Start
+                                ) {
+                                    Text(
+                                        text = formatTimestamp(msg.timestamp),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.outline,
+                                        maxLines = 1,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(end = 2.dp)
+                                            .align(Alignment.CenterVertically)
+                                    )
+                                }
                             }
                         }
                     }

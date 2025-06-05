@@ -41,7 +41,7 @@ class ChatViewModel : ViewModel() {
      * @param timestamp The timestamp string to be formatted.
      * @return A formatted date string.
      */
-    fun formatTimestamp(timestamp: String): String {
+    fun formatTimestamp(timestamp: String, yesterday: String, today: String): String {
         return try {
             val millis = timestamp.toLong()
             val date = Date(millis)
@@ -53,11 +53,10 @@ class ChatViewModel : ViewModel() {
 
             when {
                 now.get(Calendar.DATE) == messageTime.get(Calendar.DATE) ->
-                    "Today ${timeFormat.format(date)}"
+                    "${today} ${timeFormat.format(date)}"
 
                 now.get(Calendar.DATE) - messageTime.get(Calendar.DATE) == 1 ->
-                    "Yesteday ${timeFormat.format(date)}"
-                    //DODAĆ DODAĆ DODAĆ STRING RESOURCES DODAC DODAĆ TODO TODO TODO TODO
+                    "${yesterday} ${timeFormat.format(date)}"
                 else -> "${dateFormat.format(date)} ${timeFormat.format(date)}"
             }
         } catch (e: Exception) {
