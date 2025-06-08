@@ -52,11 +52,17 @@
     <!-- Strings used for chat and message validation -->
     <string name="chat_message_short">Message can\'t be empty</string>
     <string name="chat_message_long">Message must be shorter than 200 characters</string>
-    <string name="chat_dr_next">Next Doctor</string>
-    <string name="chat_dr_previous">Previous Doctor</string>
-    <string name="chat_pat_next">Next Patient</string>
-    <string name="chat_pat_previous">Previous Patient</string>
     <string name="chat_no_contacts">No contacts</string>
+    <string name="chat_select_contact_prompt">Choose a Contant</string>
+    <string name="chat_search_placeholder">Search</string>
+    <string name="chat_no_results">No results</string>
+    <string name="chat_no_contacts_available">No contacts</string>
+    <string name="chat_send_message_button_description">Send</string>
+    <string name="chat_message_input_placeholder">Message...</string>
+    <string name="chat_back_button_description">Back</string>
+    <string name="chat_yesterday">Yesterday</string>
+    <string name="chat_today">Today</string>
+
 
     <!-- Strings used for editing profile -->
     <string name="edit_profile_title">Edit Profile</string>
@@ -78,6 +84,9 @@
     <string name ="admin_panel_birthdate">Birthdate</string>
     <string name="admin_panel_specialization">Specialization</string>
     <string name="admin_panel_logout">Logout</string>
+    <string name="admin_panel_search">Search...</string>
+    <string name="admin_panel_all">Everyone</string>
+    <string name="admin_panel_no_results">No results</string>
 
     <!-- Strings used for doctor panel -->
     <string name="doctor_panel_title">Doctor Panel</string>
@@ -99,6 +108,7 @@
     <string name="doctor_panel_latest_patients">Latest patients</string>
     <string name="doctor_panel_last_visit">Last visit</string>
     <string name="doctor_panel_fast_menu">Fast menu:</string>
+
     <!-- Strings used for doctor panel, patients part -->
     <string name="doctor_patients_no_patients">No Patients Found</string>
     <string name="doctor_patients_email">Email</string>

@@ -5,8 +5,10 @@ import com.example.healme.R
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModel
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import kotlin.text.format
 
 /**
  * ViewModel for handling chat-related logic.
@@ -39,12 +41,26 @@ class ChatViewModel : ViewModel() {
      * @param timestamp The timestamp string to be formatted.
      * @return A formatted date string.
      */
-    fun formatTimestamp(timestamp: String): String {
+    fun formatTimestamp(timestamp: String, yesterday: String, today: String): String {
         return try {
-            val date = Date(timestamp.toLong())
-            SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.getDefault()).format(date)
+            val millis = timestamp.toLong()
+            val date = Date(millis)
+            val timeFormat = SimpleDateFormat("HH:mm", Locale("pl"))
+            val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale("pl"))
+
+            val now = Calendar.getInstance()
+            val messageTime = Calendar.getInstance().apply { timeInMillis = millis }
+
+            when {
+                now.get(Calendar.DATE) == messageTime.get(Calendar.DATE) ->
+                    "${today} ${timeFormat.format(date)}"
+
+                now.get(Calendar.DATE) - messageTime.get(Calendar.DATE) == 1 ->
+                    "${yesterday} ${timeFormat.format(date)}"
+                else -> "${dateFormat.format(date)} ${timeFormat.format(date)}"
+            }
         } catch (e: Exception) {
-            timestamp
+            "Date Error"
         }
     }
 }

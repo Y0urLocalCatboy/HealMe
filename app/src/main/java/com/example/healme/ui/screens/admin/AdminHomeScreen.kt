@@ -29,6 +29,8 @@ import com.example.healme.data.models.user.User
 import com.example.healme.ui.components.menu.CalendarPicker
 import com.example.healme.viewmodel.AdminViewModel
 import com.google.firebase.auth.FirebaseAuth
+import kotlin.text.compareTo
+import kotlin.text.get
 
 /**
  * AdminHomeScreen is the main screen for the admin panel.
@@ -43,10 +45,31 @@ fun AdminHomeScreen(
 ) {
     val users by adminViewModel.users.collectAsState()
     var selectedIndex by remember { mutableStateOf(0) }
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedRoleFilter by remember { mutableStateOf("") } // Pusty string oznacza "Wszyscy"
 
     val adminRole by rememberUpdatedState(newValue = stringResource(R.string.admin_panel_admin))
     val doctorRole by rememberUpdatedState(newValue = stringResource(R.string.admin_panel_doctor))
     val patientRole by rememberUpdatedState(newValue = stringResource(R.string.admin_panel_patient))
+    val allRole by rememberUpdatedState(newValue = stringResource(R.string.admin_panel_all))
+
+    // Filtrowanie użytkowników
+    val filteredUsers = remember(users, searchQuery, selectedRoleFilter) {
+        users.filter { user ->
+            val matchesSearch = searchQuery.isEmpty() ||
+                    "${user.name} ${user.surname}".contains(searchQuery, ignoreCase = true) ||
+                    user.email.contains(searchQuery, ignoreCase = true)
+
+            val matchesRole = selectedRoleFilter.isEmpty() || when (selectedRoleFilter) {
+                doctorRole -> user is Doctor
+                patientRole -> user is Patient
+                adminRole -> user !is Doctor && user !is Patient
+                else -> true
+            }
+
+            matchesSearch && matchesRole
+        }
+    }
 
     LaunchedEffect(Unit) {
         adminViewModel.loadAllUsers()
@@ -56,19 +79,18 @@ fun AdminHomeScreen(
         adminViewModel.loadAllUsers()
     }
 
-    LaunchedEffect(users.size) {
-        if (selectedIndex >= users.size && users.isNotEmpty()) {
+    LaunchedEffect(filteredUsers.size) {
+        if (selectedIndex >= filteredUsers.size && filteredUsers.isNotEmpty()) {
             selectedIndex = 0
         }
     }
 
     val onEditUser: (String) -> Unit = { userId ->
         navController.navigate("admin_change_user?userId=$userId")
-
     }
 
-    val roles = remember(users) {
-        users.map { user ->
+    val roles = remember(filteredUsers) {
+        filteredUsers.map { user ->
             when(user) {
                 is Doctor -> doctorRole
                 is Patient -> patientRole
@@ -85,28 +107,25 @@ fun AdminHomeScreen(
     }
 
     AdminHomeContent(
-        users = users,
+        users = filteredUsers,
         roles = roles,
         selectedIndex = selectedIndex,
         onSelectedIndexChange = { selectedIndex = it },
-        specificRole = if (users.isNotEmpty() && selectedIndex < roles.size)
+        specificRole = if (filteredUsers.isNotEmpty() && selectedIndex < roles.size)
             roles[selectedIndex] else "",
         onEditUser = onEditUser,
-        onLogOut = onLogOut
+        onLogOut = onLogOut,
+        searchQuery = searchQuery,
+        onSearchQueryChange = { searchQuery = it },
+        selectedRoleFilter = selectedRoleFilter,
+        onRoleFilterChange = { selectedRoleFilter = it },
+        doctorRole = doctorRole,
+        patientRole = patientRole,
+        adminRole = adminRole,
+        allRole = allRole
     )
 }
 
-/**
- * AdminHomeContent is the main content of the AdminHomeScreen.
- *
- * @param users List of User objects to display.
- * @param roles List of roles corresponding to the users.
- * @param selectedIndex The currently selected index in the list of users.
- * @param onSelectedIndexChange Callback function to handle index changes.
- * @param specificRole The role of the currently selected user.
- * @param onEditUser Callback function to handle user edit action.
- * @param onLogOut Callback function to handle logout action.
- */
 @Composable
 fun AdminHomeContent(
     users: List<User>,
@@ -115,7 +134,15 @@ fun AdminHomeContent(
     onSelectedIndexChange: (Int) -> Unit,
     specificRole: String,
     onEditUser: (String) -> Unit,
-    onLogOut: () -> Unit = {}
+    onLogOut: () -> Unit = {},
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    selectedRoleFilter: String,
+    onRoleFilterChange: (String) -> Unit,
+    doctorRole: String,
+    patientRole: String,
+    adminRole: String,
+    allRole: String
 ) {
     Column(
         modifier = Modifier
@@ -144,12 +171,71 @@ fun AdminHomeContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = onSearchQueryChange,
+            label = { Text(stringResource(R.string.admin_panel_search)) },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Filtry według roli
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            FilterChip(
+                selected = selectedRoleFilter == "",
+                onClick = { onRoleFilterChange("") },
+                label = { Text(allRole) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = colorResource(id = R.color.green)
+                )
+            )
+
+            FilterChip(
+                selected = selectedRoleFilter == doctorRole,
+                onClick = { onRoleFilterChange(doctorRole) },
+                label = { Text(doctorRole) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = colorResource(id = R.color.green)
+                )
+            )
+
+            FilterChip(
+                selected = selectedRoleFilter == patientRole,
+                onClick = { onRoleFilterChange(patientRole) },
+                label = { Text(patientRole) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = colorResource(id = R.color.green)
+                )
+            )
+
+            FilterChip(
+                selected = selectedRoleFilter == adminRole,
+                onClick = { onRoleFilterChange(adminRole) },
+                label = { Text(adminRole) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = colorResource(id = R.color.green)
+                )
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         if (users.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text(stringResource(id = R.string.admin_panel_loading))
+                Text(
+                    if (searchQuery.isEmpty() && selectedRoleFilter.isEmpty())
+                        stringResource(id = R.string.admin_panel_loading)
+                    else
+                        stringResource(id = R.string.admin_panel_no_results)
+                )
             }
         } else {
             Row(
@@ -200,7 +286,7 @@ fun AdminHomeContent(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = stringResource(R.string.admin_panel_all_users),
+                text = stringResource(R.string.admin_panel_all_users) + " (${users.size})",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
