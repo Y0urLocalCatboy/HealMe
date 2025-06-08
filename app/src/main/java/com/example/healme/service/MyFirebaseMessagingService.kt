@@ -10,6 +10,8 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.healme.MainActivity
 import com.example.healme.R
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
@@ -17,9 +19,38 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        Log.d("FCM", "🆕 New FCM token generated: $token")
-        // TODO: Optionally send this token to Firestore or your server
+        Log.d("FCM", "New FCM token generated: $token")
+
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            val userId = user.uid
+
+            val userType = "patient"
+
+            val collection = when (userType) {
+                "patient" -> "patients"
+                "doctor" -> "doctors"
+                "admin" -> "admins"
+                else -> null
+            }
+
+            collection?.let {
+                FirebaseFirestore.getInstance()
+                    .collection(it)
+                    .document(userId)
+                    .update("fcmToken", token)
+                    .addOnSuccessListener {
+                        Log.i("FCM", "Token updated in Firestore for $userId")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("FCM", "Failed to update token: ${e.message}", e)
+                    }
+            } ?: Log.w("FCM", "Unknown userType. Token not saved.")
+        } else {
+            Log.d("FCM", "No authenticated user to update token for.")
+        }
     }
+
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
