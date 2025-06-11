@@ -49,6 +49,8 @@ composeCompiler {
 
 dependencies {
 
+    implementation("com.google.firebase:firebase-storage-ktx:20.3.0")
+    implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
     implementation("com.google.firebase:firebase-messaging-ktx:24.1.1")
     implementation(libs.androidx.navigation.runtime.android)

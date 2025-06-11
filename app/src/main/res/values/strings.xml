@@ -62,7 +62,8 @@
     <string name="chat_back_button_description">Back</string>
     <string name="chat_yesterday">Yesterday</string>
     <string name="chat_today">Today</string>
-
+    <string name="chat_pick_image_description">Choose Image</string>
+    <string name="chat_image_message_description">Sent Image</string>
 
     <!-- Strings used for editing profile -->
     <string name="edit_profile_title">Edit Profile</string>

@@ -2,6 +2,9 @@ package com.example.healme.ui.screens.mutual
 
 import android.R.attr.navigationIcon
 import android.annotation.SuppressLint
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,6 +26,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,6 +35,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -50,11 +55,17 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.healme.R
+import com.example.healme.data.models.Message.MessageType
 import com.google.firebase.firestore.ListenerRegistration
 
 /**
@@ -71,6 +82,9 @@ fun ChatScreen(
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
 
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+
+
     var messageText by remember { mutableStateOf("") }
     var showInputError by remember { mutableStateOf(false) }
     var sendErrorMessage by remember { mutableStateOf<String?>(null) }
@@ -83,6 +97,27 @@ fun ChatScreen(
     var chosenContact by remember { mutableStateOf<User?>(null) }
     var messages by remember { mutableStateOf<List<Message>>(emptyList()) }
     var messageListener by remember { mutableStateOf<ListenerRegistration?>(null) }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            selectedImageUri = it
+
+            if (chosenContact != null) {
+                chatViewModel.uploadAndSendImage(
+                    uri = it,
+                    currentUser = currentUser,
+                    chosenContact = chosenContact,
+                    fs = fs,
+                    onError = { errorMsg ->
+                        sendErrorMessage = errorMsg
+                    }
+                )
+                selectedImageUri = null
+            }
+        }
+    }
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -146,6 +181,7 @@ fun ChatScreen(
     val messageInputError = if (showInputError) chatViewModel.messageValidity(messageText) else null
     val yesterday = stringResource(R.string.chat_yesterday)
     val today = stringResource(R.string.chat_today)
+
     appUser?.let { currentUserInstance ->
         ChatContent(
             currentUser = currentUserInstance,
@@ -201,8 +237,10 @@ fun ChatScreen(
                 navController.popBackStack()
             },
             messageInputError = messageInputError,
-            formatTimestamp = { timestamp -> chatViewModel.formatTimestamp(timestamp, yesterday, today) }
-        )
+            formatTimestamp = { timestamp -> chatViewModel.formatTimestamp(timestamp, yesterday, today) },
+            onPickImage = { imagePickerLauncher.launch("image/*") }
+
+            )
     } ?: run {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
             Text("Loading user data...")
@@ -228,7 +266,8 @@ fun ChatContent(
     onSendMessage: () -> Unit,
     onNavigateBack: () -> Unit,
     messageInputError: String?,
-    formatTimestamp: (String) -> String
+    formatTimestamp: (String) -> String,
+    onPickImage: () -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -346,7 +385,15 @@ fun ChatContent(
                         supportingText = { if (messageInputError != null) Text(messageInputError) },
                         enabled = chosenContact != null
                     )
-
+                    IconButton(
+                        onClick = onPickImage,
+                        enabled = chosenContact != null
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Image,
+                            contentDescription = stringResource(R.string.chat_pick_image_description)
+                        )
+                    }
                     Button(
                         onClick = onSendMessage,
                         enabled = chosenContact != null && messageText.isNotBlank()
@@ -408,29 +455,44 @@ fun ChatContent(
                                     .padding(12.dp)
                                     .fillMaxWidth()
                             ) {
-                                Text(
-                                    text = msg.content,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer.takeIf { isUserMessage }
-                                        ?: MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Start
-                                ) {
-                                    Text(
-                                        text = formatTimestamp(msg.timestamp),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.outline,
-                                        maxLines = 1,
+                                if (msg.type == MessageType.IMAGE && msg.imageUrl != null) {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(LocalContext.current)
+                                            .data(msg.imageUrl)
+                                            .crossfade(true)
+                                            .build(),
+                                        contentDescription = stringResource(R.string.chat_image_message_description),
+                                        contentScale = ContentScale.Fit,
                                         modifier = Modifier
-                                            .weight(1f)
-                                            .padding(end = 2.dp)
-                                            .align(Alignment.CenterVertically)
+                                            .fillMaxWidth()
+                                            .height(200.dp)
+                                            .clip(MaterialTheme.shapes.medium)
                                     )
+                                } else {
+                                    Text(
+                                        text = msg.content,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer.takeIf { isUserMessage }
+                                            ?: MaterialTheme.colorScheme.onSecondaryContainer
+                                    )
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Start
+                                    ) {
+                                        Text(
+                                            text = formatTimestamp(msg.timestamp),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.outline,
+                                            maxLines = 1,
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .padding(end = 2.dp)
+                                                .align(Alignment.CenterVertically)
+                                        )
+                                    }
                                 }
                             }
                         }

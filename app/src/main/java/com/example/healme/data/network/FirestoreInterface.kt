@@ -1,5 +1,6 @@
 package com.example.healme.data.network
 
+import android.net.Uri
 import com.example.healme.data.models.MedicalHistory
 import com.example.healme.data.models.Message
 import com.example.healme.data.models.Prescription
@@ -232,6 +233,13 @@ interface FirestoreInterface {
      */
     suspend fun sendNotificationToToken(token: String, title: String, message: String)
 
-
+    /**
+     * Uploads an image to Firebase Storage and returns the download URL.
+     *
+     * @param uri The URI of the image to upload.
+     * @param onSuccess Callback function invoked with the download URL on success.
+     * @param onFailure Callback function invoked with an exception on failure.
+     */
+    fun uploadImage(uri: Uri, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit)
 
 }

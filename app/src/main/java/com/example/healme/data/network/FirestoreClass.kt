@@ -1,9 +1,11 @@
 package com.example.healme.data.network
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.ui.res.stringResource
 import com.example.healme.data.models.MedicalHistory
 import com.example.healme.data.models.Message
+import com.example.healme.data.models.Message.MessageType
 import com.example.healme.data.models.Prescription
 import com.example.healme.data.models.Visit
 import com.example.healme.data.models.user.Doctor
@@ -18,6 +20,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageMetadata
 import kotlinx.coroutines.tasks.await
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -28,6 +32,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.UUID
 import kotlin.text.get
+import kotlin.toString
 
 
 class FirestoreClass: FirestoreInterface {
@@ -163,6 +168,8 @@ class FirestoreClass: FirestoreInterface {
         val messageData = hashMapOf(
             "content" to message.content,
             "timestamp" to message.timestamp,
+            "type" to message.type.toString(),
+            "imageUrl" to (message.imageUrl ?: "")
         )
 
         val messageDate = Date(message.timestamp.toLong())
@@ -232,7 +239,13 @@ class FirestoreClass: FirestoreInterface {
                                 content = messageData["content"] as String,
                                 timestamp = messageData["timestamp"] as String,
                                 senderId = document.get("senderId") as String,
-                                receiverId = document.get("receiverId") as String
+                                receiverId = document.get("receiverId") as String,
+                                imageUrl = (messageData["imageUrl"] as? String)?.takeIf { it.isNotEmpty() },
+                                type = try {
+                                    (messageData["type"] as? String)?.let { MessageType.valueOf(it) } ?: MessageType.TEXT
+                                } catch (e: Exception) {
+                                    MessageType.TEXT
+                                }
                             )
                             messages.add(message)
                         }
@@ -293,7 +306,13 @@ class FirestoreClass: FirestoreInterface {
                                 content = messageData["content"] as String,
                                 timestamp = messageData["timestamp"] as String,
                                 senderId = document.get("senderId") as String,
-                                receiverId = document.get("receiverId") as String
+                                receiverId = document.get("receiverId") as String,
+                                imageUrl = (messageData["imageUrl"] as? String)?.takeIf { it.isNotEmpty() },
+                                type = try {
+                                    (messageData["type"] as? String)?.let { MessageType.valueOf(it) } ?: MessageType.TEXT
+                                } catch (e: Exception) {
+                                    MessageType.TEXT
+                                }
                             )
                             messages.add(message)
                         }
@@ -716,7 +735,8 @@ class FirestoreClass: FirestoreInterface {
             val currentTimestamp = System.currentTimeMillis() / 1000
 
             val historyDoc = fs.collection("medicalHistory").document(patientId).get().await()
-            val medicalRecords = historyDoc.get("records") as? Map<String, Map<String, Any>> ?: emptyMap()
+            val medicalRecords =
+                historyDoc.get("records") as? Map<String, Map<String, Any>> ?: emptyMap()
 
             val medicalTimestamps = medicalRecords.values.mapNotNull {
                 it["timestamp"] as? Long
@@ -728,7 +748,8 @@ class FirestoreClass: FirestoreInterface {
             }.keys
 
             if (visitsToDelete.isNotEmpty()) {
-                val updates = visitsToDelete.associate { "visits.$it" to com.google.firebase.firestore.FieldValue.delete() }
+                val updates =
+                    visitsToDelete.associate { "visits.$it" to com.google.firebase.firestore.FieldValue.delete() }
                 fs.collection("visits").document(patientId).update(updates).await()
             }
 
@@ -801,5 +822,32 @@ class FirestoreClass: FirestoreInterface {
         println("📨 Notification sent. Response: ${response.body?.string()}")
     }
 
+    override fun uploadImage(
+        uri: Uri,
+        onSuccess: (String) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val storageRef = FirebaseStorage.getInstance().reference
+        val timestamp = System.currentTimeMillis()
+        val imageFileName = "chat_images/${timestamp}_${UUID.randomUUID()}.jpg"
+        val fileRef = storageRef.child(imageFileName)
 
+        val metadata = StorageMetadata.Builder()
+            .setContentType("image/jpeg")
+            .build()
+
+        fileRef.putFile(uri, metadata)
+            .addOnSuccessListener {
+                fileRef.downloadUrl
+                    .addOnSuccessListener { downloadUri ->
+                        onSuccess(downloadUri.toString())
+                    }
+                    .addOnFailureListener { exception ->
+                        onFailure(exception)
+                    }
+            }
+            .addOnFailureListener { exception ->
+                onFailure(exception)
+            }
+    }
 }
