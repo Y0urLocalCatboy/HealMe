@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.compose.compiler)
 }
-
 android {
     namespace = "com.example.healme"
     compileSdk = 35
@@ -71,16 +70,11 @@ dependencies {
 
 
     implementation(libs.androidx.material.icons.extended)
-    // Optional - Add window size utils
     implementation(libs.androidx.adaptive)
 
-    // Optional - Integration with activities
     implementation(libs.androidx.activity.compose)
-    // Optional - Integration with ViewModels
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    // Optional - Integration with LiveData
     implementation(libs.androidx.runtime.livedata)
-    // Optional - Integration with RxJava
     implementation(libs.androidx.runtime.rxjava2)
 
     implementation(platform(libs.firebase.bom))
@@ -92,6 +86,8 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth.ktx)
 
+    implementation(libs.truetime)
+    implementation(libs.truetime.rx)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

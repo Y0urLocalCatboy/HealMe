@@ -67,6 +67,7 @@ import coil.request.ImageRequest
 import com.example.healme.R
 import com.example.healme.data.models.Message.MessageType
 import com.google.firebase.firestore.ListenerRegistration
+import com.instacart.library.truetime.TrueTime
 
 /**
  * ChatScreen is a Composable function that displays the chat interface.
@@ -177,6 +178,7 @@ fun ChatScreen(
             messageListener?.remove()
         }
     }
+    lateinit var appTrueTime: TrueTime
 
     val messageInputError = if (showInputError) chatViewModel.messageValidity(messageText) else null
     val yesterday = stringResource(R.string.chat_yesterday)
@@ -212,8 +214,11 @@ fun ChatScreen(
                             content = messageText,
                             senderId = currentUserInstance.id,
                             receiverId = chosenContact!!.id,
-                            timestamp = System.currentTimeMillis().toString()
-                        ),
+                            timestamp = try {
+                                TrueTime.now().time.toString()
+                            } catch (e: Exception) {
+                                System.currentTimeMillis().toString()
+                            },                        ),
                         onResult = { success, errorMsg ->
                             if (success) {
                                 messageText = ""
