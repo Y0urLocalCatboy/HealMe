@@ -64,6 +64,8 @@
     <string name="chat_today">Today</string>
     <string name="chat_pick_image_description">Choose Image</string>
     <string name="chat_image_message_description">Sent Image</string>
+    <string name ="chat_image_message_download">Download image</string>
+    <string name ="chat_loading">Loading user data...</string>
 
     <!-- Strings used for editing profile -->
     <string name="edit_profile_title">Edit Profile</string>

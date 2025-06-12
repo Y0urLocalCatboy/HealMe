@@ -3,8 +3,11 @@ package com.example.healme.ui.screens.mutual
 import android.R.attr.navigationIcon
 import android.annotation.SuppressLint
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,6 +56,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,6 +65,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -68,6 +73,12 @@ import com.example.healme.R
 import com.example.healme.data.models.Message.MessageType
 import com.google.firebase.firestore.ListenerRegistration
 import com.instacart.library.truetime.TrueTime
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import java.net.URL
 
 /**
  * ChatScreen is a Composable function that displays the chat interface.
@@ -248,7 +259,7 @@ fun ChatScreen(
             )
     } ?: run {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Loading user data...")
+            Text(stringResource(R.string.chat_loading), style = MaterialTheme.typography.headlineSmall)
         }
     }
 }
@@ -275,6 +286,10 @@ fun ChatContent(
     onPickImage: () -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    var zoomedImageUrl by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -448,7 +463,9 @@ fun ChatContent(
                                     end = if (isUserMessage) 0.dp else 48.dp
                                 ),
                             colors = CardDefaults.cardColors(
-                                containerColor = if (isUserMessage)
+                                containerColor = if (msg.type == MessageType.IMAGE)
+                                    MaterialTheme.colorScheme.background
+                                else if (isUserMessage)
                                     MaterialTheme.colorScheme.primaryContainer
                                 else
                                     MaterialTheme.colorScheme.secondaryContainer
@@ -472,7 +489,9 @@ fun ChatContent(
                                             .fillMaxWidth()
                                             .height(200.dp)
                                             .clip(MaterialTheme.shapes.medium)
-                                    )
+                                            .clickable { zoomedImageUrl = msg.imageUrl },
+
+                                        )
                                 } else {
                                     Text(
                                         text = msg.content,
@@ -505,5 +524,65 @@ fun ChatContent(
                 }
             }
         }
+        if (zoomedImageUrl != null) {
+            Dialog(onDismissRequest = { zoomedImageUrl = null }) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .background(
+                            MaterialTheme.colorScheme.background,
+                            MaterialTheme.shapes.medium
+                        )
+                ) {
+                    AsyncImage(
+                        model = zoomedImageUrl,
+                        contentDescription = stringResource(R.string.chat_image_message_description),
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(400.dp)
+                    )
+                    Button(
+                        onClick = {
+                            coroutineScope.launch {
+                                try {
+                                    withContext(Dispatchers.IO) {
+                                        val url = URL(zoomedImageUrl)
+                                        val connection = url.openConnection()
+                                        connection.connect()
+                                        val input = connection.getInputStream()
+                                        val file = File(
+                                            context.getExternalFilesDir(null),
+                                            "downloaded_image.jpg"
+                                        )
+                                        val output = FileOutputStream(file)
+                                        input.copyTo(output)
+                                        output.close()
+                                        input.close()
+                                    }
+                                    Toast.makeText(
+                                        context,
+                                        "Image downloaded",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                } catch (e: Exception) {
+                                    Toast.makeText(
+                                        context,
+                                        "Download failed: ${e.toString()}",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+                        },
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        Text(stringResource(R.string.chat_image_message_download))
+                    }
+                }
+            }
+        }
     }
 }
+
+
