@@ -66,6 +66,15 @@
     <string name="chat_image_message_description">Sent Image</string>
     <string name ="chat_image_message_download">Download image</string>
     <string name ="chat_loading">Loading user data...</string>
+    <string name="chat_image_preview_title">Send Image</string>
+    <string name="chat_image_preview_message_placeholder">Add a message (optional)</string>
+    <string name="chat_image_preview_send_button">Send</string>
+    <string name="chat_image_preview_close_button_description">Close</string>
+    <string name="chat_image_preview_content_description">Preview of selected image</string>
+    <string name="chat_message_with_image_description">Image with message</string>
+    <string name="chat_image_upload_error">Image upload failed. Please try again.</string>
+    <string name="chat_send_message_error">Couldn\'t send message.</string>
+
 
     <!-- Strings used for editing profile -->
     <string name="edit_profile_title">Edit Profile</string>

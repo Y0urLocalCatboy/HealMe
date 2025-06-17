@@ -27,9 +27,11 @@ import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -38,6 +40,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
@@ -94,9 +97,6 @@ fun ChatScreen(
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
 
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-
-
     var messageText by remember { mutableStateOf("") }
     var showInputError by remember { mutableStateOf(false) }
     var sendErrorMessage by remember { mutableStateOf<String?>(null) }
@@ -110,26 +110,67 @@ fun ChatScreen(
     var messages by remember { mutableStateOf<List<Message>>(emptyList()) }
     var messageListener by remember { mutableStateOf<ListenerRegistration?>(null) }
 
+    var showImagePreviewDialog by remember { mutableStateOf(false) }
+    var imagePreviewUri by remember { mutableStateOf<Uri?>(null) }
+    val context = LocalContext.current
+
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         uri?.let {
-            selectedImageUri = it
-
             if (chosenContact != null) {
-                chatViewModel.uploadAndSendImage(
-                    uri = it,
-                    currentUser = currentUser,
-                    chosenContact = chosenContact,
-                    fs = fs,
-                    onError = { errorMsg ->
-                        sendErrorMessage = errorMsg
-                    }
-                )
-                selectedImageUri = null
+                imagePreviewUri = it
+                showImagePreviewDialog = true
+            } else {
+                // Optionally show a message that a contact must be selected first
+                sendErrorMessage = context.getString(R.string.chat_select_contact_prompt)
             }
         }
     }
+
+    if (showImagePreviewDialog && imagePreviewUri != null && chosenContact != null) {
+        ImagePreviewDialog(
+            imageUri = imagePreviewUri!!,
+            onDismiss = {
+                showImagePreviewDialog = false
+                imagePreviewUri = null
+            },
+            onSend = { dialogMessageText ->
+                showImagePreviewDialog = false
+                val uriToSend = imagePreviewUri!!
+                imagePreviewUri = null
+
+                fs.uploadImage(
+                    uriToSend,
+                    onSuccess = { imageUrl ->
+                        fs.saveMessage(
+                            Message(
+                                content = dialogMessageText,
+                                senderId = currentUser?.uid ?: "",
+                                receiverId = chosenContact!!.id,
+                                timestamp = try {
+                                    TrueTime.now().time.toString()
+                                } catch (e: Exception) {
+                                    System.currentTimeMillis().toString()
+                                },
+                                imageUrl = imageUrl,
+                                type = MessageType.IMAGE
+                            ),
+                            onResult = { success, errorMsg ->
+                                if (!success) {
+                                    sendErrorMessage = errorMsg.takeIf { !it.isNullOrBlank() } ?: context.getString(R.string.chat_send_message_error)
+                                }
+                            }
+                        )
+                    },
+                    onFailure = { exception ->
+                        sendErrorMessage = exception.message ?: context.getString(R.string.chat_image_upload_error)
+                    }
+                )
+            }
+        )
+    }
+
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -189,7 +230,7 @@ fun ChatScreen(
             messageListener?.remove()
         }
     }
-    lateinit var appTrueTime: TrueTime
+     lateinit var appTrueTime: TrueTime
 
     val messageInputError = if (showInputError) chatViewModel.messageValidity(messageText) else null
     val yesterday = stringResource(R.string.chat_yesterday)
@@ -229,12 +270,14 @@ fun ChatScreen(
                                 TrueTime.now().time.toString()
                             } catch (e: Exception) {
                                 System.currentTimeMillis().toString()
-                            },                        ),
+                            },
+                            type = MessageType.TEXT
+                        ),
                         onResult = { success, errorMsg ->
                             if (success) {
                                 messageText = ""
                             } else {
-                                sendErrorMessage = errorMsg ?: "Couldn't send message"
+                                sendErrorMessage = errorMsg.takeIf { !it.isNullOrBlank() } ?: context.getString(R.string.chat_send_message_error)
                             }
                         }
                     )
@@ -243,20 +286,25 @@ fun ChatScreen(
                     if (validationError != null) {
                         sendErrorMessage = validationError
                     } else if (messageText.isEmpty()) {
-                        sendErrorMessage = "Message cannot be empty."
+                        sendErrorMessage = context.getString(R.string.chat_message_short)
                     } else if (chosenContact == null) {
-                        sendErrorMessage = "Please select a contact to chat with."
+                        sendErrorMessage = context.getString(R.string.chat_select_contact_prompt)
                     }
                 }
             },
             onNavigateBack = {
                 navController.popBackStack()
             },
-            messageInputError = messageInputError,
+            messageInputError = messageInputError, // Use the validated error
             formatTimestamp = { timestamp -> chatViewModel.formatTimestamp(timestamp, yesterday, today) },
-            onPickImage = { imagePickerLauncher.launch("image/*") }
-
-            )
+            onPickImage = {
+                if (chosenContact != null) {
+                    imagePickerLauncher.launch("image/*")
+                } else {
+                    sendErrorMessage = context.getString(R.string.chat_select_contact_prompt)
+                }
+            }
+        )
     } ?: run {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
             Text(stringResource(R.string.chat_loading), style = MaterialTheme.typography.headlineSmall)
@@ -286,7 +334,6 @@ fun ChatContent(
     onPickImage: () -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-
     var zoomedImageUrl by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -300,7 +347,7 @@ fun ChatContent(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        if (isCurrentUserDoctor) {
+                        if (isCurrentUserDoctor) { // Show back button only for doctors as per original logic
                             IconButton(onClick = onNavigateBack) {
                                 Icon(
                                     imageVector = Icons.Filled.ArrowBack,
@@ -314,7 +361,7 @@ fun ChatContent(
                             expanded = searchExpanded,
                             onExpandedChange = {
                                 searchExpanded = !searchExpanded
-                                if (searchExpanded) keyboardController?.show()
+                                if (searchExpanded && filteredContacts.isNotEmpty()) keyboardController?.show() else keyboardController?.hide()
                             },
                             modifier = Modifier
                                 .weight(1f)
@@ -324,10 +371,10 @@ fun ChatContent(
                                 )
                         ) {
                             OutlinedTextField(
-                                value = searchQuery,
+                                value = if (searchExpanded) searchQuery else chosenContact?.let { "${it.name} ${it.surname}" } ?: searchQuery,
                                 onValueChange = { query ->
                                     onSearchQueryChange(query)
-                                    searchExpanded = true
+                                    if (!searchExpanded) searchExpanded = true
                                 },
                                 label = {
                                     Text(
@@ -348,7 +395,7 @@ fun ChatContent(
                             )
 
                             ExposedDropdownMenu(
-                                expanded = searchExpanded && (filteredContacts.isNotEmpty() || (searchQuery.isNotEmpty() && filteredContacts.isEmpty())),
+                                expanded = searchExpanded && (filteredContacts.isNotEmpty() || (searchQuery.isNotEmpty() && filteredContacts.isEmpty()) || allContactsEmpty),
                                 onDismissRequest = { searchExpanded = false }
                             ) {
                                 if (filteredContacts.isNotEmpty()) {
@@ -362,7 +409,7 @@ fun ChatContent(
                                             }
                                         )
                                     }
-                                } else if (searchQuery.isNotEmpty()) {
+                                } else if (searchQuery.isNotEmpty() && !allContactsEmpty) {
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.chat_no_results)) },
                                         onClick = { searchExpanded = false },
@@ -463,12 +510,13 @@ fun ChatContent(
                                     end = if (isUserMessage) 0.dp else 48.dp
                                 ),
                             colors = CardDefaults.cardColors(
-                                containerColor = if (msg.type == MessageType.IMAGE)
-                                    MaterialTheme.colorScheme.background
-                                else if (isUserMessage)
+                                containerColor = if (msg.imageUrl != null && msg.content.isBlank()) {
+                                    MaterialTheme.colorScheme.surfaceVariant
+                                } else if (isUserMessage) {
                                     MaterialTheme.colorScheme.primaryContainer
-                                else
+                                } else {
                                     MaterialTheme.colorScheme.secondaryContainer
+                                }
                             ),
                             elevation = CardDefaults.cardElevation(2.dp)
                         ) {
@@ -477,44 +525,47 @@ fun ChatContent(
                                     .padding(12.dp)
                                     .fillMaxWidth()
                             ) {
-                                if (msg.type == MessageType.IMAGE && msg.imageUrl != null) {
+                                var contentDisplayed = false
+                                if (msg.imageUrl != null) {
                                     AsyncImage(
                                         model = ImageRequest.Builder(LocalContext.current)
                                             .data(msg.imageUrl)
                                             .crossfade(true)
                                             .build(),
-                                        contentDescription = stringResource(R.string.chat_image_message_description),
+                                        contentDescription = if (msg.content.isNotBlank()) stringResource(R.string.chat_message_with_image_description) else stringResource(R.string.chat_image_message_description),
                                         contentScale = ContentScale.Fit,
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .height(200.dp)
+                                            .heightIn(max = 250.dp)
                                             .clip(MaterialTheme.shapes.medium)
-                                            .clickable { zoomedImageUrl = msg.imageUrl },
+                                            .clickable { zoomedImageUrl = msg.imageUrl }
+                                    )
+                                    if (msg.content.isNotBlank()) {
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                    }
+                                    contentDisplayed = true
+                                }
 
-                                        )
-                                } else {
+                                if (msg.content.isNotBlank()) {
                                     Text(
                                         text = msg.content,
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer.takeIf { isUserMessage }
-                                            ?: MaterialTheme.colorScheme.onSecondaryContainer
+                                        color = if (isUserMessage) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer
                                     )
+                                    contentDisplayed = true
+                                }
+
+                                if (contentDisplayed) {
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(top = 4.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Start
+                                        horizontalArrangement = Arrangement.End
                                     ) {
                                         Text(
                                             text = formatTimestamp(msg.timestamp),
                                             style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.outline,
-                                            maxLines = 1,
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .padding(end = 2.dp)
-                                                .align(Alignment.CenterVertically)
+                                            color = MaterialTheme.colorScheme.outline
                                         )
                                     }
                                 }
@@ -541,7 +592,7 @@ fun ChatContent(
                         contentScale = ContentScale.Fit,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(400.dp)
+                            .heightIn(max = 400.dp)
                     )
                     Button(
                         onClick = {
@@ -554,25 +605,18 @@ fun ChatContent(
                                         val input = connection.getInputStream()
                                         val file = File(
                                             context.getExternalFilesDir(null),
-                                            "downloaded_image.jpg"
+                                            "downloaded_image_${System.currentTimeMillis()}.jpg"
                                         )
-                                        val output = FileOutputStream(file)
-                                        input.copyTo(output)
-                                        output.close()
+                                        FileOutputStream(file).use { output ->
+                                            input.copyTo(output)
+                                        }
                                         input.close()
                                     }
-                                    Toast.makeText(
-                                        context,
-                                        "Image downloaded",
-                                        Toast.LENGTH_LONG
-                                    ).show()
+                                    Toast.makeText(context, context.getString(R.string.chat_image_message_download) + " " + "saved.", Toast.LENGTH_LONG).show()
                                 } catch (e: Exception) {
-                                    Toast.makeText(
-                                        context,
-                                        "Download failed: ${e.toString()}",
-                                        Toast.LENGTH_LONG
-                                    ).show()
+                                    Toast.makeText(context, "Download failed: ${e.message}", Toast.LENGTH_LONG).show()
                                 }
+                                zoomedImageUrl = null
                             }
                         },
                         modifier = Modifier.padding(top = 8.dp)
@@ -585,4 +629,64 @@ fun ChatContent(
     }
 }
 
+@Composable
+fun ImagePreviewDialog(
+    imageUri: Uri,
+    onDismiss: () -> Unit,
+    onSend: (messageText: String) -> Unit
+) {
+    var messageTextState by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
+    Dialog(onDismissRequest = onDismiss) {
+        Card(modifier = Modifier.fillMaxWidth(0.95f)) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.chat_image_preview_title),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = stringResource(R.string.chat_image_preview_close_button_description)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(imageUri)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = stringResource(R.string.chat_image_preview_content_description),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(MaterialTheme.shapes.medium)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentScale = ContentScale.Fit
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = messageTextState,
+                    onValueChange = { messageTextState = it },
+                    label = { Text(stringResource(R.string.chat_image_preview_message_placeholder)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    maxLines = 3
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = { onSend(messageTextState) },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text(stringResource(R.string.chat_image_preview_send_button))
+                }
+            }
+        }
+    }
+}
