@@ -53,6 +53,11 @@ interface FirestoreInterface {
      */
     suspend fun patientToDoctor(patientId: String)
 
+    /**
+     * Converts a doctor account to a patient account.
+     *
+     * @param doctorId ID of the doctor to convert.
+     */
     suspend fun doctorToPatient(doctorId: String)
 
     /**

@@ -10,6 +10,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.healme.MainActivity
 import com.example.healme.R
+import com.example.healme.data.network.FirestoreClass
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -25,30 +26,57 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         if (user != null) {
             val userId = user.uid
 
-            val userType = "patient"
-
-            val collection = when (userType) {
-                "patient" -> "patients"
-                "doctor" -> "doctors"
-                "admin" -> "admins"
-                else -> null
-            }
-
-            collection?.let {
-                FirebaseFirestore.getInstance()
-                    .collection(it)
-                    .document(userId)
-                    .update("fcmToken", token)
-                    .addOnSuccessListener {
-                        Log.i("FCM", "Token updated in Firestore for $userId")
-                    }
-                    .addOnFailureListener { e ->
-                        Log.e("FCM", "Failed to update token: ${e.message}", e)
-                    }
-            } ?: Log.w("FCM", "Unknown userType. Token not saved.")
+            determineUserTypeAndUpdateToken(userId, token)
         } else {
             Log.d("FCM", "No authenticated user to update token for.")
         }
+    }
+
+    private fun determineUserTypeAndUpdateToken(userId: String, token: String) {
+        FirebaseFirestore.getInstance().collection("patients").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    updateTokenInCollection("patients", userId, token)
+                } else {
+                    FirebaseFirestore.getInstance().collection("doctors").document(userId).get()
+                        .addOnSuccessListener { docDocument ->
+                            if (docDocument.exists()) {
+                                updateTokenInCollection("doctors", userId, token)
+                            } else {
+                                FirebaseFirestore.getInstance().collection("admins").document(userId).get()
+                                    .addOnSuccessListener { adminDocument ->
+                                        if (adminDocument.exists()) {
+                                            updateTokenInCollection("admins", userId, token)
+                                        } else {
+                                            Log.w("FCM", "User not found in any collection. Token not saved.")
+                                        }
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.e("FCM", "Error checking admin collection: ${e.message}", e)
+                                    }
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("FCM", "Error checking doctor collection: ${e.message}", e)
+                        }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("FCM", "Error checking patient collection: ${e.message}", e)
+            }
+    }
+
+    private fun updateTokenInCollection(collection: String, userId: String, token: String) {
+        FirebaseFirestore.getInstance()
+            .collection(collection)
+            .document(userId)
+            .update("fcmToken", token)
+            .addOnSuccessListener {
+                Log.i("FCM", "Token updated in Firestore for $userId in $collection")
+            }
+            .addOnFailureListener { e ->
+                Log.e("FCM", "Failed to update token: ${e.message}", e)
+            }
     }
 
 
@@ -91,7 +119,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         )
 
         val builder = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(android.R.drawable.ic_dialog_info) // Make sure this icon exists!
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentTitle(title)
             .setContentText(message)
             .setAutoCancel(true)

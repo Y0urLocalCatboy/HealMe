@@ -85,6 +85,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth.ktx)
+    implementation("com.google.firebase:firebase-messaging-ktx")
 
     implementation(libs.truetime)
     implementation(libs.truetime.rx)
