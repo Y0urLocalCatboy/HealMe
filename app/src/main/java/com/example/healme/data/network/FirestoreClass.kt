@@ -761,25 +761,28 @@ class FirestoreClass: FirestoreInterface {
     override suspend fun updateUserFcmToken(userId: String, userType: String, token: String) {
         try {
             val collection = when (userType) {
-                "patient" -> "patients"
-                "doctor" -> "doctors"
-                "admin" -> "admins"
-                else -> throw IllegalArgumentException("Unknown user type: $userType")
+                "patients" -> "patients"
+                "doctors" -> "doctors"
+                else -> {
+                    println("Skipping FCM update for unsupported type: $userType")
+                    return
+                }
             }
 
             fs.collection(collection)
                 .document(userId)
                 .update("fcmToken", token)
                 .addOnSuccessListener {
-                    println("✅ FCM token updated successfully for $userId")
+                    println("FCM token updated successfully for $userId")
                 }
                 .addOnFailureListener {
-                    println("❌ Failed to update FCM token: ${it.message}")
+                    println("Failed to update FCM token: ${it.message}")
                 }
         } catch (e: Exception) {
-            println("🔥 Exception in updateUserFcmToken: ${e.message}")
+            println("Exception in updateUserFcmToken: ${e.message}")
         }
     }
+
 
     override suspend fun getUserFcmToken(userId: String, userType: String): String? {
         return try {

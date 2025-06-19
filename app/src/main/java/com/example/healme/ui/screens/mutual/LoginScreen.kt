@@ -73,15 +73,17 @@ fun LoginScreen(navController: NavController) {
                 val firestore = FirestoreClass()
                 var isAdmin = false
                 var isDoctor = false
+
                 CoroutineScope(Dispatchers.Main).launch {
                     isAdmin = firestore.isAdmin(email)
                     isDoctor = firestore.isDoctor(email)
+
                     firestore.loginUser(email, password) { success, message ->
                         if (success) {
                             val userType = when {
-                                isAdmin -> "admin"
-                                isDoctor -> "doctor"
-                                else -> "patient"
+                                isDoctor -> "doctors"
+                                !isAdmin -> "patients"
+                                else -> null // Do not update FCM token for admins
                             }
 
                             val currentUser = FirebaseAuth.getInstance().currentUser
@@ -89,8 +91,10 @@ fun LoginScreen(navController: NavController) {
                                 FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
                                     if (task.isSuccessful) {
                                         val token = task.result
-                                        CoroutineScope(Dispatchers.IO).launch {
-                                            firestore.updateUserFcmToken(uid, userType, token)
+                                        if (userType != null) {
+                                            CoroutineScope(Dispatchers.IO).launch {
+                                                firestore.updateUserFcmToken(uid, userType, token)
+                                            }
                                         }
                                     }
                                 }
@@ -98,15 +102,13 @@ fun LoginScreen(navController: NavController) {
 
                             if (isAdmin) {
                                 navController.navigate("admin")
+                            } else if (isDoctor) {
+                                navController.navigate("doctor") {
+                                    popUpTo("login") { inclusive = true }
+                                }
                             } else {
-                                if (isDoctor) {
-                                    navController.navigate("doctor") {
-                                        popUpTo("login") { inclusive = true }
-                                    }
-                                } else {
-                                    navController.navigate("patient") {
-                                        popUpTo("login") { inclusive = true }
-                                    }
+                                navController.navigate("patient") {
+                                    popUpTo("login") { inclusive = true }
                                 }
                             }
                         } else {

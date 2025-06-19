@@ -1,26 +1,18 @@
 const { onDocumentUpdated } = require("firebase-functions/v2/firestore");
-const { logger } = require("firebase-functions");
 const admin = require("firebase-admin");
-
-admin.initializeApp();
+const { logger } = require("firebase-functions");
 const db = admin.firestore();
 
-exports.notifyNewChatMessage = onDocumentUpdated("messages/{chatId}", async (event) => {
+module.exports = onDocumentUpdated("messages/{chatId}", async (event) => {
   const after = event.data?.after?.data();
   const before = event.data?.before?.data();
 
-  if (!after?.weeklymessages || !Array.isArray(after.weeklymessages)) {
-    logger.warn("No weekly messages array found");
-    return;
-  }
+  if (!after?.weeklymessages || !Array.isArray(after.weeklymessages)) return;
 
   const beforeMessages = before?.weeklymessages || [];
   const afterMessages = after.weeklymessages;
 
-  if (afterMessages.length <= beforeMessages.length) {
-    logger.log("No new message detected");
-    return;
-  }
+  if (afterMessages.length <= beforeMessages.length) return;
 
   const newMessage = afterMessages[afterMessages.length - 1];
   const receiverId = after.receiverId;
@@ -28,10 +20,7 @@ exports.notifyNewChatMessage = onDocumentUpdated("messages/{chatId}", async (eve
   const userDoc = await db.collection("patients").doc(receiverId).get();
   const fcmToken = userDoc.data()?.fcmToken;
 
-  if (!fcmToken) {
-    logger.warn("No FCM token for receiver", receiverId);
-    return;
-  }
+  if (!fcmToken) return;
 
   await admin.messaging().send({
     token: fcmToken,
@@ -39,7 +28,9 @@ exports.notifyNewChatMessage = onDocumentUpdated("messages/{chatId}", async (eve
       title: "New message",
       body: newMessage.content || "You have received a new message"
     },
-    android: { priority: "high" }
+    android: {
+      priority: "high"
+    }
   });
 
   logger.log("Notification sent to", receiverId);

@@ -229,4 +229,18 @@
     <string name="login_password">Password</string>
     <string name="login_register_prompt">Dont have an account? Register here</string>
     <string name="admin_newsletter">Newsletter</string>
+
+    <!-- Strings for Newsletter -->
+    <string name="newsletter_title">Create Newsletter</string>
+    <string name="newsletter_message">Message</string>
+    <string name="newsletter_patients">Patients</string>
+    <string name="newsletter_doctors">Doctors</string>
+    <string name="newsletter_time_label">Send time (HH:mm)</string>
+    <string name="newsletter_schedule">Schedule</string>
+    <string name="newsletter_back">Back to Admin</string>
+    <string name="newsletter_error_time_format">Enter valid time e.g. 15:30</string>
+    <string name="newsletter_error_fill_all">Fill all fields</string>
+    <string name="newsletter_success">Scheduled for %1$s</string>
+    <string name="newsletter_error_generic">Error: %1$s</string>
+
 </resources>

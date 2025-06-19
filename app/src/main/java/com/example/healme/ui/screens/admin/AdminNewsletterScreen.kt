@@ -1,103 +1,158 @@
 package com.example.healme.ui.screens.admin
 
-import android.app.TimePickerDialog
-import android.widget.TimePicker
+import android.util.Log
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.healme.R
+import com.google.firebase.firestore.FirebaseFirestore
+import com.instacart.library.truetime.TrueTimeRx
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.*
 
 @Composable
 fun AdminNewsletterScreen(navController: NavHostController) {
     var message by remember { mutableStateOf("") }
+    var sendToPatients by remember { mutableStateOf(true) }
     var sendToDoctors by remember { mutableStateOf(false) }
-    var sendToPatients by remember { mutableStateOf(false) }
-    var selectedHour by remember { mutableStateOf(-1) }
-    var selectedMinute by remember { mutableStateOf(-1) }
-
-    val context = LocalContext.current
+    var timeStr by remember { mutableStateOf("") }
+    var infoMessage by remember { mutableStateOf<String?>(null) }
+    var infoArg by remember { mutableStateOf<String?>(null) }
+    var messageType by remember { mutableStateOf("none") }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            IconButton(onClick = { navController.navigate("admin") }) {
-                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
-            }
-            Text(
-                text = "Send Newsletter",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 8.dp)
-            )
-        }
+        Text(
+            text = stringResource(R.string.newsletter_title),
+            style = MaterialTheme.typography.headlineSmall
+        )
 
         OutlinedTextField(
             value = message,
             onValueChange = { message = it },
-            label = { Text("Message") },
+            label = { Text(stringResource(R.string.newsletter_message)) },
             modifier = Modifier.fillMaxWidth()
         )
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = sendToDoctors,
-                onCheckedChange = { sendToDoctors = it }
-            )
-            Text("Send to Doctors")
+            Checkbox(checked = sendToPatients, onCheckedChange = { sendToPatients = it })
+            Text(stringResource(R.string.newsletter_patients))
+            Spacer(modifier = Modifier.width(16.dp))
+            Checkbox(checked = sendToDoctors, onCheckedChange = { sendToDoctors = it })
+            Text(stringResource(R.string.newsletter_doctors))
         }
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = sendToPatients,
-                onCheckedChange = { sendToPatients = it }
-            )
-            Text("Send to Patients")
-        }
-
-        Button(onClick = {
-            val calendar = Calendar.getInstance()
-            TimePickerDialog(
-                context,
-                { _: TimePicker, hour: Int, minute: Int ->
-                    selectedHour = hour
-                    selectedMinute = minute
-                },
-                calendar.get(Calendar.HOUR_OF_DAY),
-                calendar.get(Calendar.MINUTE),
-                true
-            ).show()
-        }) {
-            Text("Pick Time")
-        }
-
-        if (selectedHour != -1 && selectedMinute != -1) {
-            Text("Selected time: %02d:%02d".format(selectedHour, selectedMinute))
-        }
+        OutlinedTextField(
+            value = timeStr,
+            onValueChange = { timeStr = it },
+            label = { Text(stringResource(R.string.newsletter_time_label)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.fillMaxWidth()
+        )
 
         Button(
             onClick = {
-                // TODO: Replace with your Firebase logic
-                println("Sending message: $message to ${if (sendToDoctors) "Doctors " else ""}${if (sendToPatients) "Patients" else ""} at $selectedHour:$selectedMinute")
-                navController.popBackStack()
+                val parts = timeStr.split(":")
+                if (parts.size != 2) {
+                    messageType = "error"
+                    infoMessage = "invalid_time"
+                    return@Button
+                }
+
+                val hour = parts[0].toIntOrNull()
+                val minute = parts[1].toIntOrNull()
+                if (hour == null || minute == null || hour !in 0..23 || minute !in 0..59) {
+                    messageType = "error"
+                    infoMessage = "invalid_time"
+                    return@Button
+                }
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        val now = TrueTimeRx.now()
+                        val calendar = Calendar.getInstance().apply {
+                            time = now
+                            set(Calendar.HOUR_OF_DAY, hour)
+                            set(Calendar.MINUTE, minute)
+                            set(Calendar.SECOND, 0)
+                            set(Calendar.MILLISECOND, 0)
+                            if (timeInMillis <= now.time) {
+                                add(Calendar.DATE, 1)
+                            }
+                        }
+
+                        val unixTimestamp = calendar.timeInMillis / 1000
+                        val targets = listOfNotNull(
+                            "patients".takeIf { sendToPatients },
+                            "doctors".takeIf { sendToDoctors }
+                        )
+
+                        if (message.isBlank() || targets.isEmpty()) {
+                            messageType = "error"
+                            infoMessage = "fill_all"
+                            return@launch
+                        }
+
+                        val data = hashMapOf(
+                            "message" to message,
+                            "timestamp" to unixTimestamp,
+                            "targetRoles" to targets
+                        )
+
+                        FirebaseFirestore.getInstance()
+                            .collection("newsletters")
+                            .add(data)
+                            .addOnSuccessListener {
+                                messageType = "success"
+                                infoMessage = "success"
+                                infoArg = timeStr
+                            }
+                            .addOnFailureListener {
+                                messageType = "error"
+                                infoMessage = "generic"
+                                infoArg = it.message ?: ""
+                            }
+                    } catch (e: Exception) {
+                        Log.e("Newsletter", "TrueTime error: ${e.message}")
+                        messageType = "error"
+                        infoMessage = "generic"
+                        infoArg = e.message ?: "Unknown"
+                    }
+                }
             },
-            enabled = message.isNotBlank() && (sendToDoctors || sendToPatients)
+            modifier = Modifier.fillMaxWidth(0.6f)
         ) {
-            Text("Send Newsletter")
+            Text(stringResource(R.string.newsletter_schedule))
+        }
+
+        OutlinedButton(onClick = { navController.popBackStack() }) {
+            Text(stringResource(R.string.newsletter_back))
+        }
+
+        infoMessage?.let {
+            val text = when (it) {
+                "invalid_time" -> stringResource(R.string.newsletter_error_time_format)
+                "fill_all" -> stringResource(R.string.newsletter_error_fill_all)
+                "success" -> stringResource(R.string.newsletter_success, infoArg ?: "")
+                "generic" -> stringResource(R.string.newsletter_error_generic, infoArg ?: "")
+                else -> ""
+            }
+            val color = if (messageType == "error") MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+            Text(text = text, color = color)
         }
     }
 }
