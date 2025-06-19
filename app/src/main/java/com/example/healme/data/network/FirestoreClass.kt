@@ -33,6 +33,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.UUID
 import kotlin.text.get
+import kotlin.text.set
 import kotlin.toString
 
 
@@ -168,6 +169,7 @@ class FirestoreClass: FirestoreInterface {
     ) {
         val messageData = hashMapOf(
             "content" to message.content,
+            "senderId" to message.senderId,
             "timestamp" to message.timestamp,
             "type" to message.type.toString(),
             "imageUrl" to (message.imageUrl ?: "")
@@ -184,13 +186,20 @@ class FirestoreClass: FirestoreInterface {
         }
         val startDate = calendar.time.time.toString()
 
+        val participants = listOf(message.senderId, message.receiverId)
         db.collection("messages")
-            .whereEqualTo("senderId", message.senderId)
-            .whereEqualTo("receiverId", message.receiverId)
+            .whereIn("senderId", participants)
+            .whereIn("receiverId", participants)
             .whereEqualTo("startDate", startDate)
             .get()
             .addOnSuccessListener { querySnapshot ->
-                if (querySnapshot.isEmpty) {
+                val correctDoc = querySnapshot.documents.find { doc ->
+                    val p1 = doc.getString("senderId")
+                    val p2 = doc.getString("receiverId")
+                    (p1 == message.senderId && p2 == message.receiverId) || (p1 == message.receiverId && p2 == message.senderId)
+                }
+
+                if (correctDoc == null) {
                     val newMessageData = hashMapOf(
                         "senderId" to message.senderId,
                         "receiverId" to message.receiverId,
@@ -205,10 +214,9 @@ class FirestoreClass: FirestoreInterface {
                             onResult(false, e.message ?: "Unknown error sending message")
                         }
                 } else {
-                    val docRef = querySnapshot.documents[0].reference
-                    docRef.update(
+                    correctDoc.reference.update(
                         "weeklymessages",
-                        com.google.firebase.firestore.FieldValue.arrayUnion(messageData)
+                        FieldValue.arrayUnion(messageData)
                     )
                         .addOnSuccessListener {
                             onResult(true, "Message sent successfully!")
@@ -217,6 +225,9 @@ class FirestoreClass: FirestoreInterface {
                             onResult(false, e.message ?: "Unknown error updating message")
                         }
                 }
+            }
+            .addOnFailureListener { e ->
+                onResult(false, "Error finding chat document: ${e.message}")
             }
     }
 
@@ -231,16 +242,23 @@ class FirestoreClass: FirestoreInterface {
             .get()
             .addOnSuccessListener { querySnapshot ->
                 if (querySnapshot.isEmpty) {
-                    onResult(false, emptyList())
+                    onResult(true, emptyList())
                 } else {
                     val messages = mutableListOf<Message>()
                     for (document in querySnapshot.documents) {
-                        for (messageData in document.get("weeklymessages") as List<Map<String, Any>>) {
+                        val docP1 = document.getString("senderId") ?: ""
+                        val docP2 = document.getString("receiverId") ?: ""
+                        val weeklyMessages = document.get("weeklymessages") as? List<Map<String, Any>> ?: continue
+
+                        for (messageData in weeklyMessages) {
+                            val msgSenderId = messageData["senderId"] as? String ?: ""
+                            val msgReceiverId = if (msgSenderId.isNotBlank() && msgSenderId == docP1) docP2 else docP1
+
                             val message = Message(
-                                content = messageData["content"] as String,
-                                timestamp = messageData["timestamp"] as String,
-                                senderId = document.get("senderId") as String,
-                                receiverId = document.get("receiverId") as String,
+                                content = messageData["content"] as? String ?: "",
+                                timestamp = messageData["timestamp"] as? String ?: "",
+                                senderId = msgSenderId,
+                                receiverId = msgReceiverId,
                                 imageUrl = (messageData["imageUrl"] as? String)?.takeIf { it.isNotEmpty() },
                                 type = try {
                                     (messageData["type"] as? String)?.let { MessageType.valueOf(it) } ?: MessageType.TEXT
@@ -301,13 +319,19 @@ class FirestoreClass: FirestoreInterface {
                 if (snapshot != null && !snapshot.isEmpty) {
                     val messages = mutableListOf<Message>()
                     for (document in snapshot.documents) {
-                        for (messageData in document.get("weeklymessages") as? List<Map<String, Any>>
-                            ?: emptyList()) {
+                        val docP1 = document.getString("senderId") ?: ""
+                        val docP2 = document.getString("receiverId") ?: ""
+                        val weeklyMessages = document.get("weeklymessages") as? List<Map<String, Any>> ?: continue
+
+                        for (messageData in weeklyMessages) {
+                            val msgSenderId = messageData["senderId"] as? String ?: ""
+                            val msgReceiverId = if (msgSenderId.isNotBlank() && msgSenderId == docP1) docP2 else docP1
+
                             val message = Message(
-                                content = messageData["content"] as String,
-                                timestamp = messageData["timestamp"] as String,
-                                senderId = document.get("senderId") as String,
-                                receiverId = document.get("receiverId") as String,
+                                content = messageData["content"] as? String ?: "",
+                                timestamp = messageData["timestamp"] as? String ?: "",
+                                senderId = msgSenderId,
+                                receiverId = msgReceiverId,
                                 imageUrl = (messageData["imageUrl"] as? String)?.takeIf { it.isNotEmpty() },
                                 type = try {
                                     (messageData["type"] as? String)?.let { MessageType.valueOf(it) } ?: MessageType.TEXT
