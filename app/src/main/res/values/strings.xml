@@ -228,4 +228,5 @@
     <string name="login_email">Email</string>
     <string name="login_password">Password</string>
     <string name="login_register_prompt">Dont have an account? Register here</string>
+    <string name="admin_newsletter">Newsletter</string>
 </resources>

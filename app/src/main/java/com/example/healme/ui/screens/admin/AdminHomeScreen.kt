@@ -124,7 +124,8 @@ fun AdminHomeScreen(
         doctorRole = doctorRole,
         patientRole = patientRole,
         adminRole = adminRole,
-        allRole = allRole
+        allRole = allRole,
+        navController = navController
     )
 }
 
@@ -144,41 +145,55 @@ fun AdminHomeContent(
     doctorRole: String,
     patientRole: String,
     adminRole: String,
-    allRole: String
+    allRole: String,
+    navController: NavHostController
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Button(
-                onClick = onLogOut,
-                modifier = Modifier.padding(end = 8.dp),
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(stringResource(R.string.admin_panel_logout))
+                Button(
+                    onClick = onLogOut,
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .defaultMinSize(minWidth = 90.dp)
+                ) {
+                    Text(stringResource(R.string.admin_panel_logout))
+                }
+
+                Text(
+                    text = stringResource(R.string.admin_panel_title),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.End
+                )
             }
 
-            Button(
-                onClick = { navController.navigate("newsletter") },
-                modifier = Modifier.padding(end = 8.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.green))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
             ) {
-                Text(stringResource(R.string.admin_newsletter)
+                Button(
+                    onClick = { navController.navigate("newsletter") },
+                    modifier = Modifier
+                        .width(260.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.green))
+                ) {
+                    Text(stringResource(R.string.admin_newsletter))
+                }
             }
-
-
-            Text(
-                text = stringResource(R.string.admin_panel_title),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Right
-            )
         }
+
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
