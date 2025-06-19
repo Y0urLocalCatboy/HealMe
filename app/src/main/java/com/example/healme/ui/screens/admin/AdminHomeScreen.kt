@@ -106,6 +106,8 @@ fun AdminHomeScreen(
         }
     }
 
+
+
     AdminHomeContent(
         users = filteredUsers,
         roles = roles,
@@ -160,6 +162,15 @@ fun AdminHomeContent(
             ) {
                 Text(stringResource(R.string.admin_panel_logout))
             }
+
+            Button(
+                onClick = { navController.navigate("newsletter") },
+                modifier = Modifier.padding(end = 8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.green))
+            ) {
+                Text(stringResource(R.string.admin_newsletter)
+            }
+
 
             Text(
                 text = stringResource(R.string.admin_panel_title),

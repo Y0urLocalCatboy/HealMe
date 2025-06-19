@@ -223,5 +223,9 @@
     <string name="calendar_screen_back">Back</string>
     <string name="calendar_screen_past">Past</string>
 
-
+    <!-- Strings for Login screen -->
+    <string name="login_title">Login</string>
+    <string name="login_email">Email</string>
+    <string name="login_password">Password</string>
+    <string name="login_register_prompt">Dont have an account? Register here</string>
 </resources>
