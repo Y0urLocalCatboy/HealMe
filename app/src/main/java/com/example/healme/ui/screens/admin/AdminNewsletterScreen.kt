@@ -3,6 +3,8 @@ package com.example.healme.ui.screens.admin
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,6 +38,20 @@ fun AdminNewsletterScreen(navController: NavHostController) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.Start
+        ) {
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = "Back to Admin"
+                )
+            }
+        }
+
         Text(
             text = stringResource(R.string.newsletter_title),
             style = MaterialTheme.typography.headlineSmall
@@ -83,19 +99,15 @@ fun AdminNewsletterScreen(navController: NavHostController) {
 
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
-                        val now = TrueTimeRx.now()
-                        val calendar = Calendar.getInstance().apply {
-                            time = now
-                            set(Calendar.HOUR_OF_DAY, hour)
-                            set(Calendar.MINUTE, minute)
-                            set(Calendar.SECOND, 0)
-                            set(Calendar.MILLISECOND, 0)
-                            if (timeInMillis <= now.time) {
-                                add(Calendar.DATE, 1)
-                            }
-                        }
+                        val nowUtc = TrueTimeRx.now()
 
-                        val unixTimestamp = calendar.timeInMillis / 1000
+                        val utcMillis = nowUtc.time
+
+                        val localOffsetMillis = TimeZone.getDefault().getOffset(utcMillis).toLong()
+
+                        val localTimeMillis = utcMillis + localOffsetMillis
+                        val utcUnixTimestamp = localTimeMillis / 1000
+
                         val targets = listOfNotNull(
                             "patients".takeIf { sendToPatients },
                             "doctors".takeIf { sendToDoctors }
@@ -109,7 +121,7 @@ fun AdminNewsletterScreen(navController: NavHostController) {
 
                         val data = hashMapOf(
                             "message" to message,
-                            "timestamp" to unixTimestamp,
+                            "timestamp" to utcUnixTimestamp,
                             "targetRoles" to targets
                         )
 
@@ -139,9 +151,6 @@ fun AdminNewsletterScreen(navController: NavHostController) {
             Text(stringResource(R.string.newsletter_schedule))
         }
 
-        OutlinedButton(onClick = { navController.popBackStack() }) {
-            Text(stringResource(R.string.newsletter_back))
-        }
 
         infoMessage?.let {
             val text = when (it) {
@@ -156,3 +165,4 @@ fun AdminNewsletterScreen(navController: NavHostController) {
         }
     }
 }
+

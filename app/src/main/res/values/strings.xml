@@ -231,7 +231,7 @@
     <string name="admin_newsletter">Newsletter</string>
 
     <!-- Strings for Newsletter -->
-    <string name="newsletter_title">Create Newsletter</string>
+    <string name="newsletter_title">Create a new message</string>
     <string name="newsletter_message">Message</string>
     <string name="newsletter_patients">Patients</string>
     <string name="newsletter_doctors">Doctors</string>

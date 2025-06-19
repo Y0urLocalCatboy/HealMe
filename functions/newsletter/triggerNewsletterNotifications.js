@@ -6,26 +6,29 @@ const admin = require("firebase-admin");
 
 const db = admin.firestore();
 
-module.exports = onSchedule("every 5 minutes", async () => {
+module.exports = onSchedule("every 1 minutes", async () => {
   const now = Math.floor(Date.now() / 1000);
+  const buffer = 60;
+  const maxTimestamp = now + buffer;
+
   logger.log("🔄 Newsletter function triggered at Unix:", now);
 
   try {
     const snapshot = await db.collection("newsletters")
-      .where("timestamp", "<=", now + 60) // Allowing a 1-minute window
+      .where("timestamp", "<=", maxTimestamp)
       .get();
 
-    logger.log(`📦 Found ${snapshot.size} newsletter(s) ready to send`);
+    logger.log(`📦 Found ${snapshot.size} newsletter(s) ready to send (≤ ${maxTimestamp})`);
 
     for (const doc of snapshot.docs) {
       const data = doc.data();
       const { message, targetRoles, timestamp } = data;
 
-      logger.log(`📨 Processing newsletter ID: ${doc.id}`);
-      logger.log(`📅 Scheduled timestamp: ${timestamp}, current time: ${now}`);
+      logger.log(`📨 Processing newsletter: ${doc.id}`);
+      logger.log(`🕒 Timestamp: ${timestamp}, Now: ${now}, Max allowed: ${maxTimestamp}`);
 
       if (!message || !targetRoles || !Array.isArray(targetRoles)) {
-        logger.warn("⚠️ Invalid newsletter format in document:", doc.id);
+        logger.warn(`⚠️ Invalid newsletter format in doc: ${doc.id}`);
         continue;
       }
 
@@ -33,39 +36,41 @@ module.exports = onSchedule("every 5 minutes", async () => {
         const collectionName = role === "doctors" ? "doctors" : "patients";
         const usersSnapshot = await db.collection(collectionName).get();
 
-        logger.log(`👥 Preparing to send to ${usersSnapshot.size} ${collectionName}`);
+        logger.log(`📤 Sending to ${usersSnapshot.size} ${collectionName}`);
 
         for (const userDoc of usersSnapshot.docs) {
           const token = userDoc.data()?.fcmToken;
 
-          if (token) {
-            try {
-              await admin.messaging().send({
-                token,
-                notification: {
-                  title: "Newsletter",
-                  body: message,
-                },
-                android: {
-                  priority: "high",
-                },
-              });
-              logger.log(`✅ Newsletter sent to ${collectionName} user: ${userDoc.id}`);
-            } catch (error) {
-              logger.error(`❌ Failed to send to ${userDoc.id}`, error);
-            }
-          } else {
+          if (!token) {
             logger.warn(`⚠️ Missing FCM token for ${collectionName} user: ${userDoc.id}`);
+            continue;
+          }
+
+          try {
+            await admin.messaging().send({
+              token,
+              notification: {
+                title: "Newsletter",
+                body: message,
+              },
+              android: {
+                priority: "high",
+              },
+            });
+
+            logger.log(`✅ Sent to ${collectionName} user: ${userDoc.id}`);
+          } catch (err) {
+            logger.error(`❌ Failed to send to ${collectionName} user ${userDoc.id}:`, err.message);
           }
         }
       }
 
       await db.collection("newsletters").doc(doc.id).delete();
-      logger.log("🧹 Cleaned up processed newsletter:", doc.id);
+      logger.log(`🧹 Deleted processed newsletter: ${doc.id}`);
     }
 
-    logger.log("✅ Newsletter dispatch completed");
+    logger.log("✅ Newsletter dispatch function completed");
   } catch (err) {
-    logger.error("🔥 Newsletter dispatch failed:", err.message);
+    logger.error("🔥 Newsletter dispatch function failed:", err.message);
   }
 });
