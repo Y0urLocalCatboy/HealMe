@@ -14,6 +14,7 @@ import com.example.healme.ui.screens.doctor.CalendarScreen
 import com.example.healme.ui.screens.doctor.DoctorHomeScreen
 import com.example.healme.ui.screens.doctor.DoctorNewsletterScreen
 import com.example.healme.ui.screens.doctor.DoctorPatientsScreen
+import com.example.healme.ui.screens.doctor.DoctorAppointmentScreen
 import com.example.healme.ui.screens.mutual.ChangeUserScreen
 import com.example.healme.ui.screens.mutual.ChatScreen
 import com.example.healme.ui.screens.mutual.LoginScreen
@@ -62,6 +63,10 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
 
             composable("doctor_newsletter") {
                 DoctorNewsletterScreen(navController)
+            }
+
+            composable("doctor_appointments") {
+                DoctorAppointmentScreen(navController)
             }
 
             composable("doctor_schedule/{doctorId}") { backStackEntry ->

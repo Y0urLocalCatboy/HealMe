@@ -1,4 +1,6 @@
 package com.example.healme.ui.screens.patient
+
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,18 +12,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.healme.R
 import com.example.healme.data.models.user.Doctor
 import com.example.healme.data.network.FirestoreClass
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
-import android.widget.Toast
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.res.stringResource
-import com.example.healme.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,7 +80,6 @@ fun AppointmentScreen(navController: NavController) {
         Text(stringResource(R.string.appointment_screen_title), style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Doctor search
         OutlinedTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
@@ -170,27 +169,19 @@ fun AppointmentScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                "Dr. ${doctor.name} ${doctor.surname}",
-                style = MaterialTheme.typography.headlineSmall
-            )
-
-            Text(
-                doctor.specialization,
-                style = MaterialTheme.typography.titleSmall
-            )
+            Text("Dr. ${doctor.name} ${doctor.surname}", style = MaterialTheme.typography.headlineSmall)
+            Text(doctor.specialization, style = MaterialTheme.typography.titleSmall)
 
             Spacer(modifier = Modifier.height(16.dp))
 
             if (availability.isEmpty()) {
-                Text(stringResource(R.string.appointment_screen_doctor_prefix, doctor.name, doctor.surname),
-                style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.appointment_screen_doctor_prefix, doctor.name, doctor.surname), style = MaterialTheme.typography.bodyMedium)
             } else {
                 Text(stringResource(R.string.appointment_screen_available_slots_title), style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(8.dp))
 
                 LazyColumn {
-                    items(availability.keys.sorted().toList()) { timestamp ->
+                    items(availability.keys.sorted()) { timestamp ->
                         val date = Date(timestamp * 1000)
                         val formatted = SimpleDateFormat("EEE, dd MMM yyyy HH:mm", Locale.getDefault()).format(date)
 
@@ -199,15 +190,21 @@ fun AppointmentScreen(navController: NavController) {
                                 scope.launch {
                                     try {
                                         firestore.bookVisit(doctor.id, userId, timestamp)
+
+                                        val patientName = firestore.getCurrentPatientName(userId) ?: ""
+                                        firestore.saveDoctorAppointment(doctor.id, patientName, timestamp) {
+                                            navController.navigate("confirmation/${doctor.name}/${doctor.surname}/$timestamp")
+                                        }
+
+
+
                                         navController.navigate("confirmation/${doctor.name}/${doctor.surname}/$timestamp")
                                     } catch (e: Exception) {
                                         Toast.makeText(context, context.getString(R.string.appointment_screen_booking_failed_toast), Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 2.dp)
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)
                         ) {
                             Text(stringResource(R.string.appointment_screen_book_slot_button, formatted))
                         }

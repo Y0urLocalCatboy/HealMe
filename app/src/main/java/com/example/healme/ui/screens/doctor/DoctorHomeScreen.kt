@@ -1,5 +1,6 @@
 package com.example.healme.ui.screens.doctor
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,19 +32,23 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import com.example.healme.R
 import com.example.healme.data.models.user.Patient
+import com.example.healme.data.network.FirestoreClass
 import com.example.healme.viewmodel.DoctorViewModel
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 import java.time.LocalTime
+import java.text.SimpleDateFormat
+import java.time.ZoneId
+import java.util.Date
+import java.util.Locale
+import com.instacart.library.truetime.TrueTimeRx
+
 
 
 @Composable
-fun DoctorHomeScreen(navController: NavHostController,
-                     doctorViewModel: DoctorViewModel = viewModel()
-){
+fun DoctorHomeScreen(navController: NavHostController, doctorViewModel: DoctorViewModel = viewModel()) {
     val auth = FirebaseAuth.getInstance()
-
     val currentUser = auth.currentUser
-
     val coroutineScope = rememberCoroutineScope()
     var doctor by remember { mutableStateOf<MutableMap<String, Any?>?>(null) }
     var patients by remember { mutableStateOf<List<Patient>>(emptyList()) }
@@ -52,21 +57,19 @@ fun DoctorHomeScreen(navController: NavHostController,
         doctor = doctorViewModel.getDoctorById(currentUser?.uid.toString()) as MutableMap<String, Any?>?
         patients = doctorViewModel.getDoctorsPatients(currentUser?.uid.toString()) ?: emptyList()
     }
+
     DoctorHomeContent(
         doctor = doctor,
         patientList = patients,
-        onScheduleClick = {
-            currentUser?.uid?.let { uid ->
-                navController.navigate("doctor_schedule/$uid")
-            }
-        },
+        navController = navController,
+        onScheduleClick = { currentUser?.uid?.let { navController.navigate("doctor_schedule/$it") } },
         onPatientsClick = { navController.navigate("doctor_patients") },
         onPrescriptionsClick = { navController.navigate("doctor_prescription") },
         onMessagesClick = { navController.navigate("doctor_chat") },
-        onProfileClick = { navController.navigate("doctor_change_user")},
-        onNewsletterClick = { navController.navigate("doctor_newsletter")}
+        onProfileClick = { navController.navigate("doctor_change_user") },
+        onNewsletterClick = { navController.navigate("doctor_newsletter") },
+        onAppointmentsClick = { navController.navigate("doctor_appointments") }
     )
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,12 +77,14 @@ fun DoctorHomeScreen(navController: NavHostController,
 fun DoctorHomeContent(
     doctor: MutableMap<String, Any?>?,
     patientList: List<Patient> = emptyList(),
+    navController: NavHostController,
     onScheduleClick: () -> Unit = {},
     onPatientsClick: () -> Unit = {},
     onPrescriptionsClick: () -> Unit = {},
     onMessagesClick: () -> Unit = {},
     onProfileClick: () -> Unit = {},
-    onNewsletterClick: () -> Unit = {}
+    onNewsletterClick: () -> Unit = {},
+    onAppointmentsClick: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -115,13 +120,14 @@ fun DoctorHomeContent(
                     specialization = doctor?.get("specialization") as? String ?: "placeholder"
                 )
             }
-            item { TodayAppointmentsSection() }
+            item { UpcomingAppointmentsSection(navController) }
             item {
                 DoctorFunctionsSection(
                     onScheduleClick = onScheduleClick,
                     onPatientsClick = onPatientsClick,
                     onPrescriptionsClick = onPrescriptionsClick,
-                    onNewsletterClick = onNewsletterClick
+                    onNewsletterClick = onNewsletterClick,
+                    onAppointmentsClick = onAppointmentsClick
                 )
             }
             item { RecentPatientsSection(patientList) }
@@ -166,11 +172,46 @@ fun WelcomeSection(doctorName: String, specialization: String) {
     }
 }
 
+
 @Composable
-fun TodayAppointmentsSection() {
+fun UpcomingAppointmentsSection(navController: NavHostController) {
+    val TAG = "UpcomingAppointments"
+
+    val firestore = remember { FirestoreClass() }
+    val scope = rememberCoroutineScope()
+    val doctorId = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+
+    var appointments by remember { mutableStateOf<Map<String, Map<String, Any>>>(emptyMap()) }
+    var isLoading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        scope.launch {
+            Log.d(TAG, "Fetching appointments for doctorId: $doctorId")
+            appointments = firestore.getDoctorAppointments(doctorId) ?: emptyMap()
+            Log.d(TAG, "Fetched ${appointments.size} appointments")
+            appointments.forEach { (id, data) ->
+                Log.d(TAG, "Appointment ID: $id, Data: $data")
+            }
+            isLoading = false
+        }
+    }
+
+    val now = TrueTimeRx.now()
+    val startEpoch = now.toInstant().epochSecond
+    val endEpoch = startEpoch + 7 * 86400
+
+    Log.d(TAG, "Time range: $startEpoch to $endEpoch (${Date(startEpoch * 1000)} to ${Date(endEpoch * 1000)})")
+
+    val upcomingAppointments = appointments.values.filter {
+        val timestamp = it["timestamp"] as? Long ?: return@filter false
+        val isInRange = timestamp in startEpoch..endEpoch
+        Log.d(TAG, "Checking appointment at $timestamp (${Date(timestamp * 1000)}), inRange: $isInRange")
+        isInRange
+    }.sortedBy { it["timestamp"] as Long }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = stringResource(R.string.doctor_panel_appointments),
+            text = stringResource(R.string.doctor_title_appointments),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 8.dp)
@@ -181,24 +222,52 @@ fun TodayAppointmentsSection() {
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
+                when {
+                    isLoading -> {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                    }
+                    upcomingAppointments.isEmpty() -> {
+                        Log.d(TAG, "No upcoming appointments found")
+                        Text(
+                            text = stringResource(R.string.doctor_panel_no_today_appointments),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                    else -> {
+                        upcomingAppointments.forEachIndexed { index, appointment ->
+                            val patientName = appointment["patientId"] as? String ?: ""
+                            val time = (appointment["timestamp"] as? Long)?.let { ts ->
+                                val date = Date(ts * 1000)
+                                SimpleDateFormat("dd.MM HH:mm", Locale.getDefault()).format(date)
+                            } ?: "--:--"
 
-                AppointmentItem("9:00", "Brr Brr Patapim", "Control visit")
-                Divider(modifier = Modifier.padding(vertical = 8.dp))
-                AppointmentItem("10:30", "Tripi Tropi Tropa Tripa", "Control visit 2")
-                Divider(modifier = Modifier.padding(vertical = 8.dp))
-                AppointmentItem("12:15", "Lilili lalila", "Tomek zrób w końcu te appointments żeby działało")
+                            Log.d(TAG, "Displaying appointment for $patientName at $time")
 
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(
-                    onClick = { },
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Text(stringResource(R.string.doctor_panel_see_more))
+                            AppointmentItem(time, patientName, "Upcoming visit")
+
+                            if (index != upcomingAppointments.lastIndex) {
+                                Divider(modifier = Modifier.padding(vertical = 8.dp))
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = { navController.navigate("doctor_appointments") },
+                            modifier = Modifier.align(Alignment.End)
+                        ) {
+                            Text(stringResource(R.string.doctor_panel_see_more))
+                        }
+                    }
                 }
             }
         }
     }
 }
+
+
+
+
+
 
 @Composable
 fun AppointmentItem(time: String, patientName: String, reason: String) {
@@ -226,7 +295,8 @@ fun DoctorFunctionsSection(
     onScheduleClick: () -> Unit,
     onPatientsClick: () -> Unit,
     onPrescriptionsClick: () -> Unit,
-    onNewsletterClick: () -> Unit
+    onNewsletterClick: () -> Unit,
+    onAppointmentsClick: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -236,39 +306,50 @@ fun DoctorFunctionsSection(
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            FunctionButton(
-                title = stringResource(R.string.doctor_panel_schedule),
-                icon = Icons.Default.CalendarToday,
-                onClick = onScheduleClick,
-                modifier = Modifier.weight(1f)
-            )
-            FunctionButton(
-                title = stringResource(R.string.doctor_panel_patients),
-                icon = Icons.Default.Group,
-                onClick = onPatientsClick,
-                modifier = Modifier.weight(1f)
-            )
-            FunctionButton(
-                title = stringResource(R.string.doctor_panel_receipts),
-                icon = Icons.Default.Description,
-                onClick = onPrescriptionsClick,
-                modifier = Modifier.weight(1f)
-            )
-            FunctionButton(
-                title = stringResource(R.string.newsletter_title_patient),
-                icon = Icons.Default.Email,
-                onClick = { onNewsletterClick() },
-                modifier = Modifier.weight(1f)
-            )
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FunctionButton(
+                    title = stringResource(R.string.doctor_panel_schedule),
+                    icon = Icons.Default.CalendarToday,
+                    onClick = onScheduleClick,
+                    modifier = Modifier.weight(1f)
+                )
+                FunctionButton(
+                    title = stringResource(R.string.doctor_panel_patients),
+                    icon = Icons.Default.Group,
+                    onClick = onPatientsClick,
+                    modifier = Modifier.weight(1f)
+                )
+                FunctionButton(
+                    title = stringResource(R.string.doctor_panel_receipts),
+                    icon = Icons.Default.Description,
+                    onClick = onPrescriptionsClick,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FunctionButton(
+                    title = stringResource(R.string.newsletter_title_patient),
+                    icon = Icons.Default.Email,
+                    onClick = onNewsletterClick,
+                    modifier = Modifier.weight(1f)
+                )
+                FunctionButton(
+                    title = stringResource(R.string.doctor_fast_menu_appointments),
+                    icon = Icons.Default.Info,
+                    onClick = onAppointmentsClick,
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
-
     }
 }
-
 @Composable
 fun FunctionButton(
     title: String,

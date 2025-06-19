@@ -251,4 +251,11 @@
     <string name="newsletter_save_success">Preference saved.</string>
     <string name="newsletter_save_failure">Failed to save preference.</string>
 
+    <string name="doctor_panel_menu">menu</string>
+    <string name="doctor_panel_home">home</string>
+    <string name="doctor_panel_no_today_appointments">No appointments today</string>
+    <string name="doctor_fast_menu_appointments">Appointments</string>
+    <string name="doctor_title_appointments">Upcoming appointments</string>
+
+
 </resources>

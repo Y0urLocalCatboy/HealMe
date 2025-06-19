@@ -15,6 +15,7 @@ import com.example.healme.data.network.FirestoreInterface
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
@@ -822,7 +823,7 @@ class FirestoreClass: FirestoreInterface {
             .build()
 
         val response = client.newCall(request).execute()
-        println("📨 Notification sent. Response: ${response.body?.string()}")
+        println("Notification sent. Response: ${response.body?.string()}")
     }
 
     override fun uploadImage(
@@ -853,4 +854,90 @@ class FirestoreClass: FirestoreInterface {
                 onFailure(exception)
             }
     }
+
+
+    override suspend fun saveDoctorAppointment(
+        doctorId: String,
+        patientName: String,
+        timestamp: Long,
+        onComplete: () -> Unit
+    ) {
+        val appointmentData = mapOf(
+            "patientId" to patientName,
+            "timestamp" to timestamp
+        )
+
+        val docRef = db.collection("appointments").document(doctorId)
+
+        docRef.get().addOnSuccessListener { snapshot ->
+            if (!snapshot.exists()) {
+                docRef.set(mapOf("appointments" to emptyMap<String, Any>())).addOnSuccessListener {
+                    Log.d("Firestore", "Created base appointment document for doctorId=$doctorId")
+                    runTransactionToAddAppointment(docRef, appointmentData, onComplete)
+                }.addOnFailureListener { e ->
+                    Log.e("Firestore", "Failed to create base document: ${e.message}", e)
+                }
+            } else {
+                runTransactionToAddAppointment(docRef, appointmentData, onComplete)
+            }
+        }.addOnFailureListener {
+            Log.e("Firestore", "Failed to fetch doc to check existence: ${it.message}", it)
+        }
+    }
+
+    private fun runTransactionToAddAppointment(
+        docRef: DocumentReference,
+        appointmentData: Map<String, Any>,
+        onComplete: () -> Unit
+    ) {
+        db.runTransaction { transaction ->
+            val snapshot = transaction.get(docRef)
+            val currentAppointments = snapshot.get("appointments") as? Map<String, Any?> ?: emptyMap()
+            val newId = "appointment${currentAppointments.size + 1}"
+
+            Log.d("Firestore", "Current appointments count: ${currentAppointments.size}")
+            Log.d("Firestore", "New appointment ID: $newId")
+            Log.d("Firestore", "Appointment data: $appointmentData")
+
+            val updatedAppointments = currentAppointments.toMutableMap()
+            updatedAppointments[newId] = appointmentData
+
+            transaction.update(docRef, "appointments", updatedAppointments)
+        }.addOnSuccessListener {
+            Log.d("Firestore", "Appointment successfully saved for doctorId=${docRef.id}")
+            onComplete()
+        }.addOnFailureListener { e ->
+            Log.e("Firestore", "Failed to save appointment: ${e.message}", e)
+        }
+    }
+
+
+
+
+    override suspend fun getCurrentPatientName(userId: String): String? {
+        return try {
+            val snapshot = FirebaseFirestore.getInstance()
+                .collection("patients")
+                .document(userId)
+                .get()
+                .await()
+
+            val name = snapshot.getString("name")
+            val surname = snapshot.getString("surname")
+            if (name != null && surname != null) "$name $surname" else null
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    override suspend fun getDoctorAppointments(doctorId: String): Map<String, Map<String, Any>>? {
+        return try {
+            val snapshot = db.collection("appointments").document(doctorId).get().await()
+            snapshot.get("appointments") as? Map<String, Map<String, Any>>
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+
 }

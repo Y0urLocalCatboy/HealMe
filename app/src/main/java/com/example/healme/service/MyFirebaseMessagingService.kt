@@ -89,22 +89,22 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val title = notification?.title ?: "No Title"
         val body = notification?.body ?: "No Message"
 
-        Log.d("FCM", "🔔 Notification payload: title=$title, body=$body")
+        Log.d("FCM", "Notification payload: title=$title, body=$body")
 
         if (notification != null) {
             showNotification(title, body)
         } else if (remoteMessage.data.isNotEmpty()) {
             val dataTitle = remoteMessage.data["title"] ?: "No Title"
             val dataBody = remoteMessage.data["body"] ?: "No Message"
-            Log.d("FCM", "📦 Data payload received: title=$dataTitle, body=$dataBody")
+            Log.d("FCM", "Data payload received: title=$dataTitle, body=$dataBody")
             showNotification(dataTitle, dataBody)
         } else {
-            Log.w("FCM", "⚠️ No notification or data payload found!")
+            Log.w("FCM", "No notification or data payload found!")
         }
     }
 
     private fun showNotification(title: String, message: String) {
-        Log.d("FCM", "🚀 Attempting to show notification: $title - $message")
+        Log.d("FCM", "Attempting to show notification: $title - $message")
 
         val channelId = "default_channel_id"
         val channelName = "Default Channel"
@@ -134,14 +134,14 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 NotificationManager.IMPORTANCE_DEFAULT
             )
             manager.createNotificationChannel(channel)
-            Log.d("FCM", "✅ Notification channel created (API 26+)")
+            Log.d("FCM", "Notification channel created (API 26+)")
         }
 
         try {
             manager.notify(0, builder.build())
-            Log.d("FCM", "✅ Notification posted successfully")
+            Log.d("FCM", "Notification posted successfully")
         } catch (e: Exception) {
-            Log.e("FCM", "❌ Failed to show notification: ${e.message}", e)
+            Log.e("FCM", "Failed to show notification: ${e.message}", e)
         }
     }
 }

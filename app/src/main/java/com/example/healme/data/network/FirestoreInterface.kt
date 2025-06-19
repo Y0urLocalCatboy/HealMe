@@ -247,4 +247,36 @@ interface FirestoreInterface {
      */
     fun uploadImage(uri: Uri, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit)
 
+    /**
+     * Saves an appointment for a specific doctor to Firestore.
+     *
+     * @param doctorId The ID of the doctor.
+     * @param patientName The full name of the patient.
+     * @param timestamp The Unix timestamp of the appointment in seconds.
+     * @param onComplete Callback invoked with true if successful, false otherwise.
+     */
+    suspend fun saveDoctorAppointment(
+        doctorId: String,
+        patientName: String,
+        timestamp: Long,
+        onComplete: (() -> Unit)
+    )
+
+
+    /**
+     * Retrieves the full name (name + surname) of a patient from Firestore.
+     *
+     * @param userId The ID of the patient.
+     * @return The full name as a String, or null if not found.
+     */
+    suspend fun getCurrentPatientName(userId: String): String?
+
+    /**
+     * Retrieves all appointments for a given doctor from Firestore.
+     *
+     * @param doctorId The ID of the doctor whose appointments should be fetched.
+     * @return A map of appointment IDs to their data, or null if the retrieval fails.
+     */
+    suspend fun getDoctorAppointments(doctorId: String): Map<String, Map<String, Any>>?
+
 }
