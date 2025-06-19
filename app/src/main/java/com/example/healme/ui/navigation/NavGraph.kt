@@ -23,6 +23,7 @@ import com.example.healme.ui.screens.patient.PatientCalendarScreen
 import com.example.healme.ui.screens.patient.PatientHomeScreen
 import com.example.healme.ui.screens.patient.PatientMedicalHistoryScreen
 import com.example.healme.ui.screens.patient.PatientPrescriptionsScreen
+import com.example.healme.ui.screens.patient.PatientNewsletterScreen
 
 @Composable
 fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
@@ -30,7 +31,7 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
 
     val drawerEnabledRoutes = listOf(
         "patient", "chat", "change_user", "calendar", "available_dates",
-        "medical_history", "patient_prescription", "appointment"
+        "medical_history", "patient_prescription", "appointment", "patient_newsletter"
     )
 
     val showDrawer = currentDestination in drawerEnabledRoutes
@@ -55,7 +56,7 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
             composable("doctor_patients") { DoctorPatientsScreen(navController) }
 
             composable("newsletter") {
-                AdminNewsletterScreen(navController) // <-- Route added here
+                AdminNewsletterScreen(navController)
             }
 
             composable("doctor_schedule/{doctorId}") { backStackEntry ->
@@ -106,6 +107,10 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
 
             composable("medical_history") {
                 PatientMedicalHistoryScreen(navController)
+            }
+
+            composable("patient_newsletter") {
+                PatientNewsletterScreen(navController)
             }
         }
     }

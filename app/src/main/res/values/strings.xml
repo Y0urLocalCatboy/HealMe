@@ -242,5 +242,12 @@
     <string name="newsletter_error_fill_all">Fill all fields</string>
     <string name="newsletter_success">Scheduled for %1$s</string>
     <string name="newsletter_error_generic">Error: %1$s</string>
-
+    <string name="patient_newsletter">Newsletter</string>
+    <string name="newsletter_title_patient">Newsletter</string>
+    <string name="back_button_desc">Back</string>
+    <string name="newsletter_subscription_heading">Newsletter Subscription</string>
+    <string name="newsletter_optin_label">I want to receive newsletters</string>
+    <string name="save_button">Save</string>
+    <string name="newsletter_save_success">Preference saved.</string>
+    <string name="newsletter_save_failure">Failed to save preference.</string>
 </resources>

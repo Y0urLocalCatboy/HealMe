@@ -84,7 +84,8 @@ fun PatientHomeScreen(
             onMedicalHistoryClick = { navController.navigate("medical_history") },
             onPrescriptionsClick = { navController.navigate("patient_prescription") },
             onMessagesClick = { navController.navigate("chat") },
-            onCalendarClick = { navController.navigate("calendar") }
+            onCalendarClick = { navController.navigate("calendar") },
+            onNewsletterClick = { navController.navigate("patient_newsletter") }
         )
 
         upcomingVisit?.let { visit ->
@@ -108,7 +109,8 @@ fun PatientHomeContent(
     onPrescriptionsClick: () -> Unit,
     onMessagesClick: () -> Unit,
     onMedicalHistoryClick: () -> Unit,
-    onCalendarClick: () -> Unit
+    onCalendarClick: () -> Unit,
+    onNewsletterClick: () -> Unit
 ) {
     Scaffold { paddingValues ->
         LazyColumn(
@@ -128,7 +130,8 @@ fun PatientHomeContent(
                     onPrescriptionsClick = onPrescriptionsClick,
                     onMessagesClick = onMessagesClick,
                     onMedicalHistoryClick = onMedicalHistoryClick,
-                    onCalendarClick = onCalendarClick
+                    onCalendarClick = onCalendarClick,
+                    onNewsletterClick = onNewsletterClick
                 )
             }
 
@@ -198,7 +201,8 @@ fun QuickActionsGrid(
     onPrescriptionsClick: () -> Unit,
     onMessagesClick: () -> Unit,
     onMedicalHistoryClick: () -> Unit,
-    onCalendarClick: () -> Unit
+    onCalendarClick: () -> Unit,
+    onNewsletterClick: () -> Unit
 ) {
     Column {
         Text(
@@ -208,7 +212,7 @@ fun QuickActionsGrid(
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceAround
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             ActionButton(
                 text = stringResource(R.string.patient_panel_find_doctor),
@@ -216,18 +220,25 @@ fun QuickActionsGrid(
                 onClick = onFindDoctorClick,
                 modifier = Modifier.weight(1f)
             )
-            Spacer(modifier = Modifier.width(12.dp))
             ActionButton(
                 text = stringResource(R.string.patient_panel_my_calendar),
                 icon = Icons.Filled.CalendarToday,
                 onClick = onCalendarClick,
                 modifier = Modifier.weight(1f)
             )
+            ActionButton(
+                text = stringResource(R.string.admin_newsletter),
+                icon = Icons.Filled.Description,
+                onClick = onNewsletterClick,
+                modifier = Modifier.weight(1f)
+            )
         }
+
+        Spacer(modifier = Modifier.height(12.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceAround
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             ActionButton(
                 text = stringResource(R.string.patient_panel_my_prescriptions),
@@ -235,14 +246,12 @@ fun QuickActionsGrid(
                 onClick = onPrescriptionsClick,
                 modifier = Modifier.weight(1f)
             )
-            Spacer(modifier = Modifier.width(12.dp))
             ActionButton(
                 text = stringResource(R.string.patient_panel_messages),
                 icon = Icons.Filled.Chat,
                 onClick = onMessagesClick,
                 modifier = Modifier.weight(1f)
             )
-            Spacer(modifier = Modifier.width(12.dp))
             ActionButton(
                 text = stringResource(R.string.patient_panel_medical_history),
                 icon = Icons.Filled.CalendarToday,
@@ -252,6 +261,7 @@ fun QuickActionsGrid(
         }
     }
 }
+
 
 @Composable
 fun ActionButton(
