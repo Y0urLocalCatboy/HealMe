@@ -10,8 +10,10 @@ package com.example.healme.data.models.user
  * @property name The name of the Patient.
  * @property surname The surname of the Patient.
  * @property dateOfBirth The date of birth of the Patient.
+ * @property newsletterOptIn Whether the patient wants to receive newsletters.
  */
 class Patient(
+    val newsletterOptIn: Boolean = false,
     id: String = "",
     email: String = "",
     name: String = "",
@@ -30,6 +32,7 @@ class Patient(
          */
         fun fromMap(data: Map<String, Any?>): Patient {
             return Patient(
+                newsletterOptIn = data["newsletterOptIn"] as? Boolean ?: false,
                 id = data["id"] as? String ?: "",
                 name = data["name"] as? String ?: "",
                 email = data["email"] as? String ?: "",

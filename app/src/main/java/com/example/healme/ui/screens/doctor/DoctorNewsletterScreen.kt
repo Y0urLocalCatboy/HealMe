@@ -1,32 +1,10 @@
-package com.example.healme.ui.screens.patient
+package com.example.healme.ui.screens.doctor
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -39,7 +17,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PatientNewsletterScreen(navController: NavHostController) {
+fun DoctorNewsletterScreen(navController: NavHostController) {
     val uid = FirebaseAuth.getInstance().currentUser?.uid
     val db = FirebaseFirestore.getInstance()
 
@@ -49,7 +27,7 @@ fun PatientNewsletterScreen(navController: NavHostController) {
 
     LaunchedEffect(uid) {
         uid?.let {
-            db.collection("patients").document(it).get().addOnSuccessListener { doc ->
+            db.collection("doctors").document(it).get().addOnSuccessListener { doc ->
                 optedIn = doc.getBoolean("newsletterOptIn") == true
                 loaded = true
             }
@@ -110,7 +88,7 @@ fun PatientNewsletterScreen(navController: NavHostController) {
                     onClick = {
                         uid?.let {
                             val appContext = context.applicationContext
-                            db.collection("patients").document(it)
+                            db.collection("doctors").document(it)
                                 .update("newsletterOptIn", optedIn)
                                 .addOnSuccessListener {
                                     message = appContext.resources.getString(R.string.newsletter_save_success)
@@ -123,7 +101,6 @@ fun PatientNewsletterScreen(navController: NavHostController) {
                 ) {
                     Text(stringResource(R.string.save_button))
                 }
-
 
                 Spacer(modifier = Modifier.height(12.dp))
 

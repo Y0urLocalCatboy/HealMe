@@ -14,6 +14,7 @@ package com.example.healme.data.models.user
 class Doctor(
     val specialization: String = "",
     val patients: MutableList<String?> = mutableListOf(),
+    val newsletterOptIn: Boolean = false,
     id: String = "",
     email: String = "",
     name: String = "",
@@ -22,8 +23,8 @@ class Doctor(
     fcmToken: String? = null
 ) : User(id, email, name, surname, dateOfBirth, fcmToken) {
 
-    companion object {
 
+    companion object {
         /**
          * Creates a Doctor object from firebase.
          *
@@ -34,6 +35,7 @@ class Doctor(
             return Doctor(
                 specialization = data["specialization"] as? String ?: "",
                 patients = data["patients"] as? MutableList<String?> ?: mutableListOf(),
+                newsletterOptIn = data["newsletterOptIn"] as? Boolean ?: false,
                 id = data["id"] as? String ?: "",
                 email = data["email"] as? String ?: "",
                 name = data["name"] as? String ?: "",

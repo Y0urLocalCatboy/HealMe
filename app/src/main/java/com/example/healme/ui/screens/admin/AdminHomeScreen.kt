@@ -53,7 +53,6 @@ fun AdminHomeScreen(
     val patientRole by rememberUpdatedState(newValue = stringResource(R.string.admin_panel_patient))
     val allRole by rememberUpdatedState(newValue = stringResource(R.string.admin_panel_all))
 
-    // Filtrowanie użytkowników
     val filteredUsers = remember(users, searchQuery, selectedRoleFilter) {
         users.filter { user ->
             val matchesSearch = searchQuery.isEmpty() ||
@@ -185,7 +184,7 @@ fun AdminHomeContent(
                 Button(
                     onClick = { navController.navigate("newsletter") },
                     modifier = Modifier
-                        .width(260.dp),
+                        .width(400.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.green))
                 ) {
                     Text(stringResource(R.string.admin_newsletter))

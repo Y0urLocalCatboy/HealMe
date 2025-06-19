@@ -24,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import java.time.LocalDate
@@ -62,7 +63,8 @@ fun DoctorHomeScreen(navController: NavHostController,
         onPatientsClick = { navController.navigate("doctor_patients") },
         onPrescriptionsClick = { navController.navigate("doctor_prescription") },
         onMessagesClick = { navController.navigate("doctor_chat") },
-        onProfileClick = { navController.navigate("doctor_change_user") }
+        onProfileClick = { navController.navigate("doctor_change_user")},
+        onNewsletterClick = { navController.navigate("doctor_newsletter")}
     )
 
 }
@@ -76,17 +78,13 @@ fun DoctorHomeContent(
     onPatientsClick: () -> Unit = {},
     onPrescriptionsClick: () -> Unit = {},
     onMessagesClick: () -> Unit = {},
-    onProfileClick: () -> Unit = {}
+    onProfileClick: () -> Unit = {},
+    onNewsletterClick: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        stringResource(R.string.doctor_panel_title),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                        },
+                title = { Text(stringResource(R.string.doctor_panel_title), style = MaterialTheme.typography.titleMedium) },
                 modifier = Modifier.fillMaxWidth(),
                 windowInsets = WindowInsets(0, 0, 0, 0),
                 actions = {
@@ -111,26 +109,22 @@ fun DoctorHomeContent(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
             item {
-                WelcomeSection(doctor?.get("surname") as? String?: "", doctor?.get("specialization") as? String?: "placeholder")
+                WelcomeSection(
+                    doctorName = doctor?.get("surname") as? String ?: "",
+                    specialization = doctor?.get("specialization") as? String ?: "placeholder"
+                )
             }
-
-            item {
-                TodayAppointmentsSection()
-            }
-
+            item { TodayAppointmentsSection() }
             item {
                 DoctorFunctionsSection(
                     onScheduleClick = onScheduleClick,
                     onPatientsClick = onPatientsClick,
-                    onPrescriptionsClick = onPrescriptionsClick
+                    onPrescriptionsClick = onPrescriptionsClick,
+                    onNewsletterClick = onNewsletterClick
                 )
             }
-
-            item {
-                RecentPatientsSection(patientList)
-            }
+            item { RecentPatientsSection(patientList) }
         }
     }
 }
@@ -231,7 +225,8 @@ fun AppointmentItem(time: String, patientName: String, reason: String) {
 fun DoctorFunctionsSection(
     onScheduleClick: () -> Unit,
     onPatientsClick: () -> Unit,
-    onPrescriptionsClick: () -> Unit
+    onPrescriptionsClick: () -> Unit,
+    onNewsletterClick: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -243,7 +238,7 @@ fun DoctorFunctionsSection(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             FunctionButton(
                 title = stringResource(R.string.doctor_panel_schedule),
@@ -263,7 +258,14 @@ fun DoctorFunctionsSection(
                 onClick = onPrescriptionsClick,
                 modifier = Modifier.weight(1f)
             )
+            FunctionButton(
+                title = stringResource(R.string.newsletter_title_patient),
+                icon = Icons.Default.Email,
+                onClick = { onNewsletterClick() },
+                modifier = Modifier.weight(1f)
+            )
         }
+
     }
 }
 
@@ -289,10 +291,17 @@ fun FunctionButton(
                 modifier = Modifier.size(32.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = title, textAlign = TextAlign.Center)
+            Text(
+                text = title,
+                fontSize = 9.sp,
+                textAlign = TextAlign.Center,
+                lineHeight = 15.sp,
+                maxLines = 1
+            )
         }
     }
 }
+
 
 @Composable
 fun RecentPatientsSection(patients: List<Patient>){

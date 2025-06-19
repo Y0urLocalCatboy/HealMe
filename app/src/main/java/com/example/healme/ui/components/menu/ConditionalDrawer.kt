@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
@@ -29,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.healme.R
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 /**
@@ -87,6 +89,25 @@ fun ConditionalDrawer(
                         },
                         icon = { Icon(Icons.Default.Chat, contentDescription = stringResource(R.string.patient_panel_chat)) }
                     )
+                    NavigationDrawerItem(
+                        label = { Text(stringResource(R.string.admin_panel_logout)) },
+                        selected = false,
+                        onClick = {
+                            FirebaseAuth.getInstance().signOut()
+                            navController.navigate("login") {
+                                popUpTo("welcome") { inclusive = true }
+                            }
+                            scope.launch { drawerState.close() }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Logout,
+                                contentDescription = stringResource(R.string.admin_panel_logout)
+                            )
+                        }
+                    )
+
+
                 }
             }
         ) {

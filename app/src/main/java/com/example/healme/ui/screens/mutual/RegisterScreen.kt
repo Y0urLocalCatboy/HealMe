@@ -91,7 +91,8 @@ fun RegisterScreen(
                         email = email,
                         name = name,
                         surname = surname,
-                        dateOfBirth = dateOfBirth
+                        dateOfBirth = dateOfBirth,
+                        newsletterOptIn = false
                     )
                     db.collection("patients").document(userId).set(newPatient)
                         .addOnSuccessListener {
