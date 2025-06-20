@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.example.healme.data.models.MedicalHistory
 import com.example.healme.data.models.Prescription
 import com.example.healme.data.models.user.Doctor
 import com.example.healme.data.models.user.Patient
@@ -57,4 +58,14 @@ class DoctorViewModel : ViewModel() {
         return fs.getPrescriptionsForPatient(patientId)
     }
 
+    /**
+     * Fetches the medical history of a patient.
+     *
+     * @param patientId The ID of the patient whose medical history is to be fetched.
+     *
+     * @return A list of MedicalHistory objects or null if no medical history is found.
+     */
+    suspend fun getPatientMedicalHistory(patientId: String): List<MedicalHistory>? {
+        return fs.getPatientMedicalHistory(patientId)
+    }
 }

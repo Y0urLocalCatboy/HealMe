@@ -123,6 +123,11 @@
     <string name="doctor_panel_latest_patients">Latest patients</string>
     <string name="doctor_panel_last_visit">Last visit</string>
     <string name="doctor_panel_fast_menu">Fast menu:</string>
+    <string name="doctor_panel_patient_details">Patient Details</string>
+    <string name="doctor_panel_medical_history">Medical History</string>
+    <string name="doctor_panel_no_medical_history_found">No medical history found for this patient.</string>
+    <string name="doctor_panel_no_visit_summary">No visit summary provided.</string>
+    <string name="doctor_panel_doctor">Doctor</string>
 
     <!-- Strings used for doctor panel, patients part -->
     <string name="doctor_patients_no_patients">No Patients Found</string>

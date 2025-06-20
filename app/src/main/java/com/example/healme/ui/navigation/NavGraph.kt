@@ -15,6 +15,7 @@ import com.example.healme.ui.screens.doctor.DoctorHomeScreen
 import com.example.healme.ui.screens.doctor.DoctorNewsletterScreen
 import com.example.healme.ui.screens.doctor.DoctorPatientsScreen
 import com.example.healme.ui.screens.doctor.DoctorAppointmentScreen
+import com.example.healme.ui.screens.doctor.DoctorPatientDetailsScreen
 import com.example.healme.ui.screens.mutual.ChangeUserScreen
 import com.example.healme.ui.screens.mutual.ChatScreen
 import com.example.healme.ui.screens.mutual.LoginScreen
@@ -126,6 +127,11 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
 
             composable("patient_newsletter") {
                 PatientNewsletterScreen(navController)
+            }
+
+            composable("doctor_patient_details/{patientId}") { backStackEntry ->
+                val patientId = backStackEntry.arguments?.getString("patientId") ?: ""
+                DoctorPatientDetailsScreen(navController = navController, patientId = patientId)
             }
         }
     }

@@ -65,7 +65,7 @@ fun DoctorPatientsScreen(
         patientList = patients,
         onNavigateBack = { navController.popBackStack() },
         onPatientClick = { patientId ->
-            // TODO: Nawigacja do szczegółów pacjenta na podstawie tego co Tomek napisał
+            navController.navigate("doctor_patient_details/$patientId")
         }
     )
 }
