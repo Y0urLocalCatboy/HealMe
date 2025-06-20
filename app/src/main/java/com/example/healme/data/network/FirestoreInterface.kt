@@ -279,4 +279,20 @@ interface FirestoreInterface {
      */
     suspend fun getDoctorAppointments(doctorId: String): Map<String, Map<String, Any>>?
 
+    /**
+     * Uploads a file to Firebase Storage and returns the download URL.
+     *
+     * @param uri The URI of the file to upload.
+     * @param fileName The name of the file to be saved in Firebase Storage.
+     * @param onSuccess Callback function invoked with the download URL on success.
+     * @param onFailure Callback function invoked with an exception on failure.
+     */
+    fun uploadFile(
+        uri: Uri,
+        fileName: String,
+        senderId: String,
+        receiverId: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (Exception) -> Unit
+    )
 }

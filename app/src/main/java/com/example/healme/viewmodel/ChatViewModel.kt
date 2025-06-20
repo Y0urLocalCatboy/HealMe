@@ -31,10 +31,10 @@ class ChatViewModel : ViewModel() {
      * @return A string indicating the validation result. Returns null if the message is valid.
      */
     @Composable
-    fun messageValidity(message: String) : String? {
+    fun messageValidity(message: String): String? {
         val minLength = 1
         val maxLength = 200
-        return when{
+        return when {
             message.length < minLength -> stringResource(R.string.chat_message_short)
             message.length > maxLength -> stringResource(R.string.chat_message_long)
             else -> return null
@@ -63,6 +63,7 @@ class ChatViewModel : ViewModel() {
 
                 now.get(Calendar.DATE) - messageTime.get(Calendar.DATE) == 1 ->
                     "${yesterday} ${timeFormat.format(date)}"
+
                 else -> "${dateFormat.format(date)} ${timeFormat.format(date)}"
             }
         } catch (e: Exception) {
@@ -107,6 +108,53 @@ class ChatViewModel : ViewModel() {
             },
             onFailure = { exception ->
                 onError(exception.message ?: "Image error")
+            }
+        )
+    }
+
+    /**
+     * Uploads a file and sends it as a message.
+     *
+     * @param uri The URI of the file to be uploaded.
+     * @param fileName The name of the file.
+     * @param currentUser The current Firebase user.
+     * @param chosenContact The contact to whom the message is sent.
+     * @param fs An instance of FirestoreClass for database operations.
+     * @param onError Callback function to handle errors.
+     */
+    fun uploadAndSendFile(
+        uri: Uri,
+        fileName: String,
+        currentUser: FirebaseUser?,
+        chosenContact: User?,
+        fs: FirestoreClass,
+        onError: (String) -> Unit
+    ) {
+        fs.uploadFile(
+            uri,
+            fileName,
+            currentUser?.uid ?: "",
+            chosenContact?.id ?: "",
+            onSuccess = { fileUrl ->
+                fs.saveMessage(
+                    Message(
+                        content = fileName,
+                        senderId = currentUser?.uid ?: "",
+                        receiverId = chosenContact?.id ?: "",
+                        timestamp = System.currentTimeMillis().toString(),
+                        fileUrl = fileUrl,
+                        fileName = fileName,
+                        type = MessageType.FILE
+                    ),
+                    onResult = { success, errorMsg ->
+                        if (!success) {
+                            onError(errorMsg)
+                        }
+                    }
+                )
+            },
+            onFailure = { exception ->
+                onError(exception.message ?: "File upload error")
             }
         )
     }

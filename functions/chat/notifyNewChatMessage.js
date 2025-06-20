@@ -76,7 +76,16 @@ module.exports = onDocumentUpdated("messages/{chatId}", async (event) => {
   const fcmToken = receiverData.fcmToken;
 
   const senderName = senderData ? `${senderData.name} ${senderData.surname}`.trim() : "Someone";
-  const notificationBody = newMessage.content || (newMessage.imageUrl ? "Sent you an image" : "You have a new message");
+  const messageType = newMessage.type;
+  const messageContent = newMessage.content;
+  let fallbackText = "You have a new message";
+
+  if (messageType === "IMAGE") {
+      fallbackText = "Sent you an image";
+  } else if (messageType === "FILE") {
+      fallbackText = "Sent you a file";
+  }
+  const notificationBody = messageContent || fallbackText;
 
   const payload = {
     token: fcmToken,

@@ -172,7 +172,9 @@ class FirestoreClass: FirestoreInterface {
             "senderId" to message.senderId,
             "timestamp" to message.timestamp,
             "type" to message.type.toString(),
-            "imageUrl" to (message.imageUrl ?: "")
+            "imageUrl" to (message.imageUrl ?: ""),
+            "fileUrl" to (message.fileUrl ?: ""),
+            "fileName" to (message.fileName ?: "")
         )
 
         val messageDate = Date(message.timestamp.toLong())
@@ -248,11 +250,13 @@ class FirestoreClass: FirestoreInterface {
                     for (document in querySnapshot.documents) {
                         val docP1 = document.getString("senderId") ?: ""
                         val docP2 = document.getString("receiverId") ?: ""
-                        val weeklyMessages = document.get("weeklymessages") as? List<Map<String, Any>> ?: continue
+                        val weeklyMessages =
+                            document.get("weeklymessages") as? List<Map<String, Any>> ?: continue
 
                         for (messageData in weeklyMessages) {
                             val msgSenderId = messageData["senderId"] as? String ?: ""
-                            val msgReceiverId = if (msgSenderId.isNotBlank() && msgSenderId == docP1) docP2 else docP1
+                            val msgReceiverId =
+                                if (msgSenderId.isNotBlank() && msgSenderId == docP1) docP2 else docP1
 
                             val message = Message(
                                 content = messageData["content"] as? String ?: "",
@@ -261,7 +265,8 @@ class FirestoreClass: FirestoreInterface {
                                 receiverId = msgReceiverId,
                                 imageUrl = (messageData["imageUrl"] as? String)?.takeIf { it.isNotEmpty() },
                                 type = try {
-                                    (messageData["type"] as? String)?.let { MessageType.valueOf(it) } ?: MessageType.TEXT
+                                    (messageData["type"] as? String)?.let { MessageType.valueOf(it) }
+                                        ?: MessageType.TEXT
                                 } catch (e: Exception) {
                                     MessageType.TEXT
                                 }
@@ -321,11 +326,13 @@ class FirestoreClass: FirestoreInterface {
                     for (document in snapshot.documents) {
                         val docP1 = document.getString("senderId") ?: ""
                         val docP2 = document.getString("receiverId") ?: ""
-                        val weeklyMessages = document.get("weeklymessages") as? List<Map<String, Any>> ?: continue
+                        val weeklyMessages =
+                            document.get("weeklymessages") as? List<Map<String, Any>> ?: continue
 
                         for (messageData in weeklyMessages) {
                             val msgSenderId = messageData["senderId"] as? String ?: ""
-                            val msgReceiverId = if (msgSenderId.isNotBlank() && msgSenderId == docP1) docP2 else docP1
+                            val msgReceiverId =
+                                if (msgSenderId.isNotBlank() && msgSenderId == docP1) docP2 else docP1
 
                             val message = Message(
                                 content = messageData["content"] as? String ?: "",
@@ -333,8 +340,11 @@ class FirestoreClass: FirestoreInterface {
                                 senderId = msgSenderId,
                                 receiverId = msgReceiverId,
                                 imageUrl = (messageData["imageUrl"] as? String)?.takeIf { it.isNotEmpty() },
+                                fileUrl = (messageData["fileUrl"] as? String)?.takeIf { it.isNotEmpty() },
+                                fileName = (messageData["fileName"] as? String)?.takeIf { it.isNotEmpty() },
                                 type = try {
-                                    (messageData["type"] as? String)?.let { MessageType.valueOf(it) } ?: MessageType.TEXT
+                                    (messageData["type"] as? String)?.let { MessageType.valueOf(it) }
+                                        ?: MessageType.TEXT
                                 } catch (e: Exception) {
                                     MessageType.TEXT
                                 }
@@ -348,7 +358,6 @@ class FirestoreClass: FirestoreInterface {
                 }
             }
     }
-
 
     override suspend fun isAdmin(email: String): Boolean {
         return try {
@@ -916,7 +925,8 @@ class FirestoreClass: FirestoreInterface {
     ) {
         db.runTransaction { transaction ->
             val snapshot = transaction.get(docRef)
-            val currentAppointments = snapshot.get("appointments") as? Map<String, Any?> ?: emptyMap()
+            val currentAppointments =
+                snapshot.get("appointments") as? Map<String, Any?> ?: emptyMap()
             val newId = "appointment${currentAppointments.size + 1}"
 
             Log.d("Firestore", "Current appointments count: ${currentAppointments.size}")
@@ -934,9 +944,6 @@ class FirestoreClass: FirestoreInterface {
             Log.e("Firestore", "Failed to save appointment: ${e.message}", e)
         }
     }
-
-
-
 
     override suspend fun getCurrentPatientName(userId: String): String? {
         return try {
@@ -963,5 +970,33 @@ class FirestoreClass: FirestoreInterface {
         }
     }
 
+    override fun uploadFile(
+        uri: Uri,
+        fileName: String,
+        senderId: String,
+        receiverId: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val fileRef =
+            FirebaseStorage.getInstance().reference.child("files/${UUID.randomUUID()}_$fileName")
 
+        val metadata = StorageMetadata.Builder()
+            .setCustomMetadata("senderId", senderId)
+            .setCustomMetadata("receiverId", receiverId)
+            .build()
+
+        fileRef.putFile(uri, metadata)
+            .addOnSuccessListener {
+                fileRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                    onSuccess(downloadUri.toString())
+                }.addOnFailureListener { exception ->
+                    onFailure(exception)
+                }
+            }
+            .addOnFailureListener { exception ->
+                onFailure(exception)
+
+            }
+    }
 }

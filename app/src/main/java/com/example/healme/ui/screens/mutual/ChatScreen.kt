@@ -1,8 +1,12 @@
 package com.example.healme.ui.screens.mutual
 
-import android.R.attr.navigationIcon
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
+import android.os.Environment
+import android.provider.OpenableColumns
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,11 +19,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import com.example.healme.data.models.Message
 import com.example.healme.data.models.user.Doctor
-import com.example.healme.data.models.user.Patient
 import com.example.healme.data.models.user.User
 import com.example.healme.data.network.FirestoreClass
 import com.example.healme.viewmodel.ChatViewModel
@@ -33,14 +35,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
@@ -69,6 +73,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -122,7 +127,28 @@ fun ChatScreen(
                 imagePreviewUri = it
                 showImagePreviewDialog = true
             } else {
-                // Optionally show a message that a contact must be selected first
+                sendErrorMessage = context.getString(R.string.chat_select_contact_prompt)
+            }
+        }
+    }
+
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            if (chosenContact != null) {
+                val fileName = getFileName(it, context)
+                chatViewModel.uploadAndSendFile(
+                    uri = it,
+                    fileName = fileName,
+                    currentUser = currentUser,
+                    chosenContact = chosenContact,
+                    fs = fs,
+                    onError = { errorMsg ->
+                        sendErrorMessage = errorMsg.takeIf { msg -> msg.isNotBlank() } ?: "File upload failed"
+                    }
+                )
+            } else {
                 sendErrorMessage = context.getString(R.string.chat_select_contact_prompt)
             }
         }
@@ -230,7 +256,8 @@ fun ChatScreen(
             messageListener?.remove()
         }
     }
-     lateinit var appTrueTime: TrueTime
+
+    lateinit var appTrueTime: TrueTime
 
     val messageInputError = if (showInputError) chatViewModel.messageValidity(messageText) else null
     val yesterday = stringResource(R.string.chat_yesterday)
@@ -295,7 +322,7 @@ fun ChatScreen(
             onNavigateBack = {
                 navController.popBackStack()
             },
-            messageInputError = messageInputError, // Use the validated error
+            messageInputError = messageInputError,
             formatTimestamp = { timestamp -> chatViewModel.formatTimestamp(timestamp, yesterday, today) },
             onPickImage = {
                 if (chosenContact != null) {
@@ -303,14 +330,28 @@ fun ChatScreen(
                 } else {
                     sendErrorMessage = context.getString(R.string.chat_select_contact_prompt)
                 }
+            },
+            onPickFile = {
+                if (chosenContact != null) {
+                    filePickerLauncher.launch("*/*")
+                } else {
+                    sendErrorMessage = context.getString(R.string.chat_select_contact_prompt)
+                }
             }
         )
-    } ?: run {
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(stringResource(R.string.chat_loading), style = MaterialTheme.typography.headlineSmall)
-        }
+            } ?: run {
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        stringResource(R.string.chat_loading),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                }
+            }
     }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -331,7 +372,8 @@ fun ChatContent(
     onNavigateBack: () -> Unit,
     messageInputError: String?,
     formatTimestamp: (String) -> String,
-    onPickImage: () -> Unit
+    onPickImage: () -> Unit,
+    onPickFile: () -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     var zoomedImageUrl by remember { mutableStateOf<String?>(null) }
@@ -347,7 +389,7 @@ fun ChatContent(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        if (isCurrentUserDoctor) { // Show back button only for doctors as per original logic
+                        if (isCurrentUserDoctor) {
                             IconButton(onClick = onNavigateBack) {
                                 Icon(
                                     imageVector = Icons.Filled.ArrowBack,
@@ -461,6 +503,15 @@ fun ChatContent(
                             contentDescription = stringResource(R.string.chat_pick_image_description)
                         )
                     }
+                    IconButton(
+                        onClick = onPickFile,
+                        enabled = chosenContact != null
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AttachFile,
+                            contentDescription = stringResource(R.string.chat_pick_file_description)
+                        )
+                    }
                     Button(
                         onClick = onSendMessage,
                         enabled = chosenContact != null && messageText.isNotBlank()
@@ -494,84 +545,65 @@ fun ChatContent(
                     .padding(horizontal = 16.dp),
                 reverseLayout = true
             ) {
-                items(messages) { msg ->
-                    val isUserMessage = msg.senderId == currentUser.id
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        horizontalArrangement = if (isUserMessage) Arrangement.End else Arrangement.Start
-                    ) {
-                        Card(
-                            modifier = Modifier
-                                .widthIn(max = 320.dp)
-                                .padding(
-                                    start = if (isUserMessage) 48.dp else 0.dp,
-                                    end = if (isUserMessage) 0.dp else 48.dp
-                                ),
-                            colors = CardDefaults.cardColors(
-                                containerColor = if (msg.imageUrl != null && msg.content.isBlank()) {
-                                    MaterialTheme.colorScheme.surfaceVariant
-                                } else if (isUserMessage) {
-                                    MaterialTheme.colorScheme.primaryContainer
-                                } else {
-                                    MaterialTheme.colorScheme.secondaryContainer
-                                }
-                            ),
-                            elevation = CardDefaults.cardElevation(2.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .padding(12.dp)
-                                    .fillMaxWidth()
-                            ) {
-                                var contentDisplayed = false
-                                if (msg.imageUrl != null) {
-                                    AsyncImage(
-                                        model = ImageRequest.Builder(LocalContext.current)
-                                            .data(msg.imageUrl)
-                                            .crossfade(true)
-                                            .build(),
-                                        contentDescription = if (msg.content.isNotBlank()) stringResource(R.string.chat_message_with_image_description) else stringResource(R.string.chat_image_message_description),
-                                        contentScale = ContentScale.Fit,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .heightIn(max = 250.dp)
-                                            .clip(MaterialTheme.shapes.medium)
-                                            .clickable { zoomedImageUrl = msg.imageUrl }
-                                    )
-                                    if (msg.content.isNotBlank()) {
-                                        Spacer(modifier = Modifier.height(8.dp))
+                items(messages) { message ->
+                    MessageBubble(
+                        message = message,
+                        isFromCurrentUser = message.senderId == currentUser.id,
+                        formatTimestamp = formatTimestamp,
+                        onImageClick = { imageUrl -> zoomedImageUrl = imageUrl },
+                        onFileClick = { fileUrl, fileName ->
+                            coroutineScope.launch(Dispatchers.IO) {
+                                try {
+                                    val url = URL(fileUrl)
+                                    val connection = url.openConnection()
+                                    connection.connect()
+
+                                    val input = connection.getInputStream()
+                                    val outputDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+                                    val outputFile = File(outputDir, fileName)
+
+                                    val output = FileOutputStream(outputFile)
+                                    val buffer = ByteArray(1024)
+                                    var bytesRead = input.read(buffer)
+
+                                    while (bytesRead != -1) {
+                                        output.write(buffer, 0, bytesRead)
+                                        bytesRead = input.read(buffer)
                                     }
-                                    contentDisplayed = true
-                                }
 
-                                if (msg.content.isNotBlank()) {
-                                    Text(
-                                        text = msg.content,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = if (isUserMessage) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer
-                                    )
-                                    contentDisplayed = true
-                                }
+                                    output.close()
+                                    input.close()
 
-                                if (contentDisplayed) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(top = 4.dp),
-                                        horizontalArrangement = Arrangement.End
-                                    ) {
-                                        Text(
-                                            text = formatTimestamp(msg.timestamp),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.outline
+                                    withContext(Dispatchers.Main) {
+                                        val intent = Intent(Intent.ACTION_VIEW)
+                                        val uri = FileProvider.getUriForFile(
+                                            context,
+                                            "${context.packageName}.provider",
+                                            outputFile
+                                        )
+
+                                        intent.setDataAndType(uri, getMimeType(fileName))
+                                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+                                        try {
+                                            context.startActivity(intent)
+                                        } catch (e: ActivityNotFoundException) {
+                                            snackbarHostState.showSnackbar(
+                                                context.getString(R.string.chat_file_download_failed)
+                                            )
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    withContext(Dispatchers.Main) {
+                                        snackbarHostState.showSnackbar(
+                                            "${e.message}" ?: context.getString(R.string.chat_file_download_failed)
                                         )
                                     }
                                 }
                             }
                         }
-                    }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }
@@ -626,6 +658,20 @@ fun ChatContent(
                 }
             }
         }
+    }
+}
+
+private fun getMimeType(fileName: String): String {
+    return when {
+        fileName.endsWith(".pdf", ignoreCase = true) -> "application/pdf"
+        fileName.endsWith(".doc", ignoreCase = true) || fileName.endsWith(".docx", ignoreCase = true) ->
+            "application/msword"
+        fileName.endsWith(".xls", ignoreCase = true) || fileName.endsWith(".xlsx", ignoreCase = true) ->
+            "application/vnd.ms-excel"
+        fileName.endsWith(".jpg", ignoreCase = true) || fileName.endsWith(".jpeg", ignoreCase = true) ->
+            "image/jpeg"
+        fileName.endsWith(".png", ignoreCase = true) -> "image/png"
+        else -> "*/*"
     }
 }
 
@@ -689,4 +735,111 @@ fun ImagePreviewDialog(
             }
         }
     }
+}
+
+@Composable
+fun MessageBubble(
+    message: Message,
+    isFromCurrentUser: Boolean,
+    formatTimestamp: (String) -> String,
+    onImageClick: (String) -> Unit,
+    onFileClick: (String, String) -> Unit
+) {
+    val bubbleColor = if (isFromCurrentUser)
+        MaterialTheme.colorScheme.primaryContainer
+    else
+        MaterialTheme.colorScheme.secondaryContainer
+
+    val bubbleAlignment = if (isFromCurrentUser) Alignment.End else Alignment.Start
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalAlignment = bubbleAlignment
+    ) {
+        Card(
+            modifier = Modifier.widthIn(max = 280.dp),
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(containerColor = bubbleColor)
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                when (message.type) {
+                    MessageType.TEXT -> {
+                        Text(text = message.content)
+                    }
+                    MessageType.IMAGE -> {
+                        AsyncImage(
+                            model = message.imageUrl,
+                            contentDescription = stringResource(R.string.chat_image_message_description),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 180.dp)
+                                .clip(MaterialTheme.shapes.small)
+                                .clickable { message.imageUrl?.let { onImageClick(it) } },
+                            contentScale = ContentScale.Crop
+                        )
+                        if (message.content.isNotBlank()) {
+                            Text(
+                                text = message.content,
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
+                    }
+                    MessageType.FILE -> {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    val url = message.fileUrl
+                                    val name = message.fileName ?: message.content
+                                    if (url != null && name.isNotBlank()) {
+                                        onFileClick(url, name)
+                                    }
+                                }
+                                .padding(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Description,
+                                contentDescription = stringResource(R.string.chat_file_attachment_icon_description),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = message.fileName ?: message.content)
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = formatTimestamp(message.timestamp),
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.align(Alignment.End)
+                )
+            }
+        }
+    }
+}
+
+@SuppressLint("Range")
+fun getFileName(uri: Uri, context: Context): String {
+    var result: String? = null
+    if (uri.scheme == "content") {
+        val cursor = context.contentResolver.query(uri, null, null, null, null)
+        try {
+            if (cursor != null && cursor.moveToFirst()) {
+                result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+            }
+        } finally {
+            cursor?.close()
+        }
+    }
+    if (result == null) {
+        result = uri.path
+        val cut = result?.lastIndexOf('/')
+        if (cut != null && cut != -1) {
+            result = result.substring(cut + 1)
+        }
+    }
+    return result ?: "unknown_file"
 }

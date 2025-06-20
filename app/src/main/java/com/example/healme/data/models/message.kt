@@ -8,6 +8,8 @@ package com.example.healme.data.models
  * @property receiverId The identifier of the user who received the message.
  * @property timestamp The timestamp of the message.
  * @property imageUrl The URL of the image attached to the message, if any.
+ * @property fileUrl The URL of the file attached to the message, if any.
+ * @property fileName The name of the file attached to the message, if any.
  * @property type The type of the message (text or image).
  */
 data class Message (val content: String = "",
@@ -15,6 +17,8 @@ data class Message (val content: String = "",
                     val receiverId: String = "",
                     val timestamp: String = "",
                     val imageUrl: String? = null,
+                    val fileUrl: String? = null,
+                    val fileName: String? = null,
                     val type: MessageType = MessageType.TEXT
 )
 {
@@ -47,6 +51,7 @@ data class Message (val content: String = "",
      */
     enum class MessageType {
         TEXT,
-        IMAGE
+        IMAGE,
+        FILE
     }
 }

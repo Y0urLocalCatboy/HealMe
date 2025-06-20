@@ -74,7 +74,10 @@
     <string name="chat_message_with_image_description">Image with message</string>
     <string name="chat_image_upload_error">Image upload failed. Please try again.</string>
     <string name="chat_send_message_error">Couldn\'t send message.</string>
-
+    <string name="chat_pick_file_description">Choose file</string>
+    <string name="chat_file_download_success">Download successful!</string>
+    <string name="chat_file_download_failed">An unexcepted error during download</string>
+    <string name="chat_file_attachment_icon_description">Icon</string>
 
     <!-- Strings used for editing profile -->
     <string name="edit_profile_title">Edit Profile</string>
