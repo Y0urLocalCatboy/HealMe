@@ -19,19 +19,19 @@ import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.healme.data.models.user.Patient
-import com.example.healme.viewmodel.AuthViewModel
+import com.example.healme.viewmodel.LoginViewModel
 import com.example.healme.R
 
 /**
  * Composable function for the Register screen.
  *
  * @param navController The NavController for navigation.
- * @param authViewModel The AuthViewModel for handling authentication logic.
+ * @param loginViewModel The LoginViewModel for handling authentication logic.
  */
 @Composable
 fun RegisterScreen(
     navController: NavController,
-    authViewModel: AuthViewModel = viewModel()
+    loginViewModel: LoginViewModel = viewModel()
 ) {
     val auth = FirebaseAuth.getInstance()
     val db = FirebaseFirestore.getInstance()
@@ -47,11 +47,11 @@ fun RegisterScreen(
     val passwordMismatchError = stringResource(R.string.register_password_mismatch)
     val registrationSuccess = stringResource(R.string.register_registration_successful)
 
-    val nameError = if (name.isNotEmpty()) authViewModel.nameValidity(name) else null
-    val surnameError = if (surname.isNotEmpty()) authViewModel.surnameValidity(surname) else null
-    val dobError = if (dateOfBirth.isNotEmpty()) authViewModel.ageValidity(dateOfBirth) else null
+    val nameError = if (name.isNotEmpty()) loginViewModel.nameValidity(name) else null
+    val surnameError = if (surname.isNotEmpty()) loginViewModel.surnameValidity(surname) else null
+    val dobError = if (dateOfBirth.isNotEmpty()) loginViewModel.ageValidity(dateOfBirth) else null
     val emailError = !Patterns.EMAIL_ADDRESS.matcher(email.toString().trim { it <= ' ' }).matches()
-    val passwordError = if (password.isNotEmpty()) authViewModel.passwordValidity(password) else null
+    val passwordError = if (password.isNotEmpty()) loginViewModel.passwordValidity(password) else null
     val isFormValid = name.isNotEmpty() && surname.isNotEmpty() && email.isNotEmpty() &&
             dateOfBirth.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty() &&
             nameError == null && surnameError == null && dobError == null && passwordError == null &&

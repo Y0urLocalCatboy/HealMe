@@ -1,147 +1,49 @@
 package com.example.healme.viewmodel
 
-import android.icu.text.SimpleDateFormat
-import android.icu.util.Calendar
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
+import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.example.healme.R
-import java.text.ParseException
-import java.util.Locale
+import com.example.healme.data.network.FirestoreClass
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 /**
- * ViewModel for handling authentication-related logic.
- *
- * @function nameValidity Validates a name according to specific rules.
- * @function ageValidity Validates if the user is at least 18 years old based on the provided date of birth.
- * @function surnameValidity Validates a surname according to specific rules.
- * @function passwordValidity Validates the password entered by the user.
+ * ViewModel for handling authentication and user role retrieval.
+ * This ViewModel interacts with Firebase Authentication and Firestore to determine the start destination
+ * based on the user's role.
  */
 class AuthViewModel : ViewModel() {
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val fs = FirestoreClass()
 
     /**
-     * Validates a name according to the following rules:
-     * - Cannot contain numbers
-     * - Cannot contain special characters
-     * - Cannot contain spaces
-     * - First letter must be uppercase
-     * - Must be between 2 and 15 characters
+     * Retrieves the start destination based on the current user's role.
+     * If the user is not authenticated, returns "login".
+     * If the user is authenticated, checks their role in Firestore and returns the corresponding destination.
      *
-     * @param name Name to validate
-     * @return Error message string if validation fails, null if validation passes
+     * @return The start destination as a String.
      */
-    @Composable
-    fun nameValidity(name: String): String? {
-        val minLength = 3
-        val numberCheck = name.any { it.isDigit() }
-        val specialCharCheck = name.any { "!@#$%^&*()_+-=[]{}|;:',.<>?".contains(it) }
-        val spaceCheck = name.any { it.isWhitespace() }
-        val firstUppercaseOnly = name[0].isUpperCase() && name.substring(1).all { it.isLowerCase() }
-        val isShort = name.length < minLength
-        val isLong = name.length > 15
-        return when {
-            numberCheck -> stringResource(R.string.name_validation_digit)
-            specialCharCheck -> stringResource(R.string.name_validation_special_char)
-            spaceCheck -> stringResource(R.string.name_validation_space)
-            isShort -> stringResource(R.string.name_validation_short)
-            isLong -> stringResource(R.string.name_validation_long)
-            !firstUppercaseOnly -> stringResource(R.string.name_validation_uppercase)
-            else -> null
-        }
-    }
-
-    /**
-     * Validates if the user is at least 18 years old based on the provided date of birth.
-     * The date of birth must be in format "dd-MM-yyyy".
-     * The user must be at least 18 years old and at most 110 years old.
-     *
-     * @param dateOfBirth Date of birth in format "dd-MM-yyyy"
-     * @return Error message string if validation fails, null if validation passes
-     */
-    @Composable
-    fun ageValidity(dateOfBirth: String): String? {
-        val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-        dateFormat.isLenient = false
-        val dob = try {
-            dateFormat.parse(dateOfBirth)
-        } catch (e: ParseException) {
-            return stringResource(R.string.birthdate_validation_invalid_birthdate)
+    suspend fun getStartDestination(): String {
+        val currentUser = auth.currentUser
+        if (currentUser == null) {
+            return "login"
         }
 
-        val today = Calendar.getInstance()
-        val birthdate = Calendar.getInstance()
-        birthdate.time = dob
+        return try {
+            val adminDoc = db.collection("admins").document(currentUser.uid).get().await()
+            if (adminDoc.exists()) return "admin"
 
-        var age = today.get(Calendar.YEAR) - birthdate.get(Calendar.YEAR)
-        if (today.get(Calendar.DAY_OF_YEAR) < birthdate.get(Calendar.DAY_OF_YEAR)) {
-            age--
-        }
+            val doctorDoc = db.collection("doctors").document(currentUser.uid).get().await()
+            if (doctorDoc.exists()) return "doctor"
 
-        return when {
-            age < 18 -> stringResource(R.string.birthdate_validation_invalid_age)
-            age > 110 -> stringResource(R.string.birthdate_validation_invalid_birthdate)
+            val patientDoc = db.collection("patients").document(currentUser.uid).get().await()
+            if (patientDoc.exists()) return "patient"
 
-            else -> null
-        }
-    }
-
-    /**
-     * Validates a surname according to the following rules:
-     * - Cannot contain numbers
-     * - Cannot contain special characters (except hyphen for compound surnames)
-     * - Cannot contain spaces (use hyphens instead)
-     * - First letter must be uppercase
-     * - Must be between 2 and 15 characters
-     *
-     * @param surname Surname to validate
-     * @return Error message string if validation fails, null if validation passes
-     */
-    @Composable
-    fun surnameValidity(surname: String): String? {
-        val minLength = 2
-        val numberCheck = surname.any { it.isDigit() }
-        val specialCharCheck = surname.any { "!@#$%^&*()_+=[]{}|;:',.<>?".contains(it) }
-        val spaceCheck = surname.any { it.isWhitespace() }
-        val firstUppercaseOnly = surname.split("-").all { part ->
-            part.isNotEmpty() && part[0].isUpperCase() && part.drop(1).all { it.isLowerCase() }
-        }
-        val isShort = surname.length < minLength
-        val isLong = surname.length > 15
-        return when {
-            numberCheck -> stringResource(R.string.surname_validation_digit)
-            specialCharCheck -> stringResource(R.string.surname_validation_special_char)
-            spaceCheck -> stringResource(R.string.surname_validation_hyphenated)
-            isShort -> stringResource(R.string.surname_validation_short)
-            isLong -> stringResource(R.string.surname_validation_long)
-            !firstUppercaseOnly -> stringResource(R.string.surname_validation_uppercase)
-            else -> null
-        }
-    }
-    /**
-     * Validates the password entered by the user.
-     * The password must:
-     * - Be at least 8 characters long
-     * - Contain at least one uppercase letter
-     * - Contain at least one number
-     * - Contain at least one special character
-     *
-     *
-     * @param password Password to validate.
-     * @return An error message if the password is invalid, null otherwise.
-     */
-    @Composable
-    fun passwordValidity(password: String): String? {
-        val minLength = 8
-        val hasUpperCase = password.any { it.isUpperCase() }
-        val hasNumber = password.any { it.isDigit() }
-        val hasSpecialChar = password.any { "!@#$%^&*()_+-=[]{}|;:',.<>?".contains(it) }
-
-        return when {
-            password.length < minLength -> stringResource(R.string.password_validation_length)
-            !hasUpperCase -> stringResource(R.string.password_validation_uppercase)
-            !hasNumber -> stringResource(R.string.password_validation_digit)
-            !hasSpecialChar -> stringResource(R.string.password_validation_special_char)
-            else -> null
+            "login"
+        } catch (e: Exception) {
+            Log.e("AuthViewModel", "Error fetching user role", e)
+            "login"
         }
     }
 }

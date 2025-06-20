@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,7 +37,7 @@ import com.example.healme.R
 import com.example.healme.data.models.user.User
 import com.example.healme.data.network.FirestoreClass
 import com.example.healme.viewmodel.AdminViewModel
-import com.example.healme.viewmodel.AuthViewModel
+import com.example.healme.viewmodel.LoginViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
@@ -47,13 +46,13 @@ import kotlinx.coroutines.launch
  *
  * @param navController The NavController used for navigation.
  * @param userId The ID of the user to be changed. Default is "null".
- * @param authViewModel The AuthViewModel instance used for authentication-related operations.
+ * @param loginViewModel The LoginViewModel instance used for authentication-related operations.
  * @param adminViewModel The AdminViewModel instance used for admin-related operations.
  */
 @Composable
 fun ChangeUserScreen(navController: NavController,
                      userId: String = "null",
-                     authViewModel: AuthViewModel = viewModel(),
+                     loginViewModel: LoginViewModel = viewModel(),
                      adminViewModel: AdminViewModel = viewModel()
 ){
     val fs = FirestoreClass()
@@ -76,9 +75,9 @@ fun ChangeUserScreen(navController: NavController,
 
     var specialization by remember { mutableStateOf("") }
 
-    val nameError = if (name.isNotEmpty()) authViewModel.nameValidity(name) else null
-    val surnameError = if (surname.isNotEmpty()) authViewModel.surnameValidity(surname) else null
-    val dobError = if (dateOfBirth.isNotEmpty()) authViewModel.ageValidity(dateOfBirth) else null
+    val nameError = if (name.isNotEmpty()) loginViewModel.nameValidity(name) else null
+    val surnameError = if (surname.isNotEmpty()) loginViewModel.surnameValidity(surname) else null
+    val dobError = if (dateOfBirth.isNotEmpty()) loginViewModel.ageValidity(dateOfBirth) else null
 
     val isFormValid = name.isNotEmpty() && surname.isNotEmpty() &&
             email.isNotEmpty() && dateOfBirth.isNotEmpty() &&

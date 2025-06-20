@@ -783,7 +783,7 @@ class FirestoreClass: FirestoreInterface {
 
             if (visitsToDelete.isNotEmpty()) {
                 val updates =
-                    visitsToDelete.associate { "visits.$it" to com.google.firebase.firestore.FieldValue.delete() }
+                    visitsToDelete.associate { "visits.$it" to FieldValue.delete() }
                 fs.collection("visits").document(patientId).update(updates).await()
             }
 

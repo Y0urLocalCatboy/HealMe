@@ -20,6 +20,7 @@ import com.example.healme.ui.screens.mutual.ChangeUserScreen
 import com.example.healme.ui.screens.mutual.ChatScreen
 import com.example.healme.ui.screens.mutual.LoginScreen
 import com.example.healme.ui.screens.mutual.RegisterScreen
+import com.example.healme.ui.screens.mutual.SplashScreen
 import com.example.healme.ui.screens.patient.AppointmentScreen
 import com.example.healme.ui.screens.patient.BookingConfirmationScreen
 import com.example.healme.ui.screens.patient.PatientCalendarScreen
@@ -50,18 +51,48 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     ) {
         NavHost(
             navController = navController,
-            startDestination = "login",
+            startDestination = "splash",
             modifier = modifier
         ) {
-            composable("login") { LoginScreen(navController) }
-            composable("register") { RegisterScreen(navController) }
-            composable("patient") { PatientHomeScreen(navController) }
-            composable("doctor") { DoctorHomeScreen(navController) }
-            composable("chat") { ChatScreen(navController) }
-            composable("change_user") { ChangeUserScreen(navController) }
-            composable("doctor_change_user") { ChangeUserScreen(navController) }
-            composable("doctor_chat") { ChatScreen(navController) }
-            composable("doctor_patients") { DoctorPatientsScreen(navController) }
+            composable("splash") {
+                SplashScreen(navController)
+            }
+
+            composable("login") {
+                LoginScreen(navController)
+            }
+
+            composable("register") {
+                RegisterScreen(navController)
+            }
+
+            composable("patient") {
+                PatientHomeScreen(navController)
+            }
+
+            composable("doctor") {
+                DoctorHomeScreen(navController)
+            }
+
+            composable("chat") {
+                ChatScreen(navController)
+            }
+
+            composable("change_user") {
+                ChangeUserScreen(navController)
+            }
+
+            composable("doctor_change_user") {
+                ChangeUserScreen(navController)
+            }
+
+            composable("doctor_chat") {
+                ChatScreen(navController)
+            }
+
+            composable("doctor_patients") {
+                DoctorPatientsScreen(navController)
+            }
 
             composable("newsletter") {
                 AdminNewsletterScreen(navController)

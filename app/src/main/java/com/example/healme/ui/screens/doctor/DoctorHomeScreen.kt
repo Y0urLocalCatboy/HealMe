@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -72,7 +73,15 @@ fun DoctorHomeScreen(navController: NavHostController, doctorViewModel: DoctorVi
         onMessagesClick = { navController.navigate("doctor_chat") },
         onProfileClick = { navController.navigate("doctor_change_user") },
         onNewsletterClick = { navController.navigate("doctor_newsletter") },
-        onAppointmentsClick = { navController.navigate("doctor_appointments") }
+        onAppointmentsClick = { navController.navigate("doctor_appointments") },
+        onLogoutClick = {
+            auth.signOut()
+            navController.navigate("splash") {
+                popUpTo(navController.graph.findStartDestination().id) {
+                    inclusive = true
+                }
+            }
+        }
     )
 }
 
@@ -89,6 +98,7 @@ fun DoctorHomeScreen(navController: NavHostController, doctorViewModel: DoctorVi
  * @param onProfileClick Callback when the profile button is clicked.
  * @param onNewsletterClick Callback when the newsletter button is clicked.
  * @param onAppointmentsClick Callback when the appointments button is clicked.
+ * @param onLogoutClick Callback when the logout button is clicked.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -102,7 +112,8 @@ fun DoctorHomeContent(
     onMessagesClick: () -> Unit = {},
     onProfileClick: () -> Unit = {},
     onNewsletterClick: () -> Unit = {},
-    onAppointmentsClick: () -> Unit = {}
+    onAppointmentsClick: () -> Unit = {},
+    onLogoutClick: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -116,6 +127,9 @@ fun DoctorHomeContent(
                     }
                     IconButton(onClick = onProfileClick) {
                         Icon(Icons.Default.Person, contentDescription = stringResource(R.string.doctor_panel_profile))
+                    }
+                    IconButton(onClick = onLogoutClick) {
+                        Icon(Icons.Default.Logout, contentDescription = stringResource(R.string.doctor_panel_logout))
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(

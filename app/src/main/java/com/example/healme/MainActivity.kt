@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
 
     /**
      * This function checks if the app has permission to post notifications.
-     * If not, it requests the permission from the user.
+     * If not it requests the permission from the user.
      */
     private fun askNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

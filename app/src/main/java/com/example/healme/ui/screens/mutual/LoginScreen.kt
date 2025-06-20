@@ -71,49 +71,45 @@ fun LoginScreen(navController: NavController) {
         Button(
             onClick = {
                 val firestore = FirestoreClass()
-                var isAdmin = false
-                var isDoctor = false
 
-                CoroutineScope(Dispatchers.Main).launch {
-                    isAdmin = firestore.isAdmin(email)
-                    isDoctor = firestore.isDoctor(email)
+                firestore.loginUser(email, password) { success, message ->
+                    if (success) {
+                        var currentUser = FirebaseAuth.getInstance().currentUser
+                        currentUser?.uid?.let { uid ->
+                            CoroutineScope(Dispatchers.Main).launch {
 
-                    firestore.loginUser(email, password) { success, message ->
-                        if (success) {
-                            val userType = when {
-                                isDoctor -> "doctors"
-                                !isAdmin -> "patients"
-                                else -> null // Do not update FCM token for admins
-                            }
+                                val isAdmin = firestore.isAdmin(email)
+                                val isDoctor = firestore.isDoctor(email)
 
-                            val currentUser = FirebaseAuth.getInstance().currentUser
-                            currentUser?.uid?.let { uid ->
-                                FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-                                    if (task.isSuccessful) {
-                                        val token = task.result
-                                        if (userType != null) {
+                                val userType = when {
+                                    isDoctor -> "doctors"
+                                    !isAdmin -> "patients"
+                                    else -> null
+                                }
+                                currentUser = FirebaseAuth.getInstance().currentUser
+                                userType?.let { type ->
+                                    FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                                        if (task.isSuccessful) {
                                             CoroutineScope(Dispatchers.IO).launch {
-                                                firestore.updateUserFcmToken(uid, userType, token)
+                                                firestore.updateUserFcmToken(uid, type, task.result)
                                             }
                                         }
                                     }
                                 }
-                            }
 
-                            if (isAdmin) {
-                                navController.navigate("admin")
-                            } else if (isDoctor) {
-                                navController.navigate("doctor") {
-                                    popUpTo("login") { inclusive = true }
-                                }
-                            } else {
-                                navController.navigate("patient") {
-                                    popUpTo("login") { inclusive = true }
+                                when {
+                                    isAdmin -> navController.navigate("admin")
+                                    isDoctor -> navController.navigate("doctor") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
+                                    else -> navController.navigate("patient") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
                                 }
                             }
-                        } else {
-                            errorMessage = message
                         }
+                    } else {
+                        errorMessage = message
                     }
                 }
             },

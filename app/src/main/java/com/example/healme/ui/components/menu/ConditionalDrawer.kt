@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.example.healme.R
 import com.google.firebase.auth.FirebaseAuth
@@ -95,7 +96,9 @@ fun ConditionalDrawer(
                         onClick = {
                             FirebaseAuth.getInstance().signOut()
                             navController.navigate("login") {
-                                popUpTo("welcome") { inclusive = true }
+                                popUpTo(navController.graph.id) {
+                                    inclusive = true
+                                }
                             }
                             scope.launch { drawerState.close() }
                         },
