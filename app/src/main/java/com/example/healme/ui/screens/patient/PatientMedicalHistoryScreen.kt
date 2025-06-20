@@ -16,7 +16,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 import androidx.navigation.NavController
 
-
+/**
+ * Composable function to display the Patient's Medical History screen.
+ *
+ * @param navController Navigation controller for navigating between screens.
+ */
 @Composable
 fun PatientMedicalHistoryScreen(navController: NavController) {
     val firestore = remember { FirestoreClass() }

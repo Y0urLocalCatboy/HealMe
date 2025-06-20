@@ -18,6 +18,14 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * Composable function to display the Booking Confirmation screen for a patient.
+ *
+ * @param doctorName The name of the doctor.
+ * @param doctorSurname The surname of the doctor.
+ * @param timestamp The timestamp of the booking in seconds.
+ * @param navController Navigation controller for navigating between screens.
+ */
 @Composable
 fun BookingConfirmationScreen(doctorName: String, doctorSurname: String, timestamp: Long, navController: NavController) {
     val formattedDate = SimpleDateFormat("EEE, dd MMM yyyy HH:mm", Locale.getDefault())

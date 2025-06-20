@@ -31,7 +31,11 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-
+/** DoctorPrescriptionsScreen.kt
+ *
+ * This file contains the Composable function for the Doctor's Prescriptions screen.
+ * It allows doctors to issue prescriptions to patients and view recent prescriptions.
+ */
 @Composable
 fun DoctorPrescriptionsScreen(
     navController: NavController,
@@ -116,8 +120,30 @@ fun DoctorPrescriptionsScreen(
     )
 }
 
+/** DoctorPrescriptionsContent.kt
+ *
+ * This file contains the Composable function that defines the UI for the Doctor's Prescriptions screen.
+ * It includes fields for entering medication details, selecting a patient, and displaying recent prescriptions.
+ *
+ * @param onNavigateBack Callback to navigate back to the previous screen.
+ * @param selectedPatient The currently selected patient for whom the prescription is being issued.
+ * @param medicationName The name of the medication being prescribed.
+ * @param dosage The dosage of the medication.
+ * @param instructions Additional instructions for the medication.
+ * @param errorMessage Error message to display if the form is invalid or if an error occurs.
+ * @param showPatientSelector Boolean flag to show or hide the patient selector dialog.
+ * @param patients List of patients available for selection.
+ * @param prescriptions List of recent prescriptions for the selected patient.
+ * @param isFormValid Boolean flag indicating if the form is valid for submission.
+ * @param onMedicationNameChange Callback to handle changes in the medication name field.
+ * @param onDosageChange Callback to handle changes in the dosage field.
+ * @param onInstructionsChange Callback to handle changes in the instructions field.
+ * @param onShowPatientSelector Callback to show or hide the patient selector dialog.
+ * @param onSelectPatient Callback to handle the selection of a patient from the patient selector dialog.
+ * @param onSavePrescription Callback to handle saving the prescription for the selected patient.
+ */
 @Composable
-fun DoctorPrescriptionsContent(
+private fun DoctorPrescriptionsContent(
     onNavigateBack: () -> Unit,
     selectedPatient: User?,
     medicationName: String,
@@ -305,8 +331,17 @@ fun DoctorPrescriptionsContent(
     }
 }
 
+/** PatientSelectorDialog
+ *
+ * This file contains the Composable function for displaying a dialog to select a patient.
+ * It lists all available patients and allows the doctor to select one for issuing a prescription.
+ *
+ * @param patients List of patients available for selection.
+ * @param onSelectPatient Callback to handle the selection of a patient.
+ * @param onDismiss Callback to dismiss the dialog.
+ */
 @Composable
-fun PatientSelectorDialog(
+private fun PatientSelectorDialog(
     patients: List<User>,
     onSelectPatient: (User) -> Unit,
     onDismiss: () -> Unit
@@ -342,8 +377,15 @@ fun PatientSelectorDialog(
     )
 }
 
+/** PrescriptionItem.kt
+ *
+ * This file contains the Composable function for displaying a single prescription item.
+ * It shows the medication name, date issued, dosage, instructions, patient ID, and status.
+ *
+ * @param prescription The prescription object to be displayed.
+ */
 @Composable
-fun PrescriptionItem(prescription: Prescription) {
+private fun PrescriptionItem(prescription: Prescription) {
     Card(
         modifier = Modifier
             .fillMaxWidth()

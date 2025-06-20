@@ -24,6 +24,11 @@ import com.example.healme.ui.theme.DarkTurquoise
 import com.example.healme.viewmodel.PatientViewModel
 import com.google.firebase.auth.FirebaseAuth
 
+/** Composable function to display the Patient's Prescriptions screen.
+ *
+ * @param navController Navigation controller for navigating between screens.
+ * @param patientViewModel ViewModel for managing patient's data and operations.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PatientPrescriptionsScreen(
@@ -106,6 +111,11 @@ fun PatientPrescriptionsScreen(
     }
 }
 
+/**
+ * Composable function to display a single prescription card.
+ *
+ * @param prescription The prescription data to display.
+ */
 @Composable
 fun PrescriptionCard(prescription: Prescription) {
     Card(

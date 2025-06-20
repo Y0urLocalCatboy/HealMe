@@ -28,7 +28,12 @@ import java.util.*
 import androidx.compose.ui.res.colorResource
 import com.example.healme.R
 
-
+/**
+ * Composable function to display a calendar picker for selecting a week and managing doctor availability.
+ *
+ * @param doctorId The ID of the doctor whose availability is being managed.
+ * @param onExit Callback function to handle exit action.
+ */
 @Composable
 fun CalendarPicker(doctorId: String, onExit: () -> Unit ) {
     var showDialog by remember { mutableStateOf(false) }
@@ -66,6 +71,13 @@ fun CalendarPicker(doctorId: String, onExit: () -> Unit ) {
         WeekSelectionDialog(onDismiss = { showDialog = false }, onWeekSelected = { selectedWeek = it })
     }
 }
+
+/**
+ * Composable function to display a dialog for selecting a week.
+ *
+ * @param onDismiss Callback function to handle dismiss action.
+ * @param onWeekSelected Callback function to handle week selection.
+ */
 @Composable
 fun WeekSelectionDialog(onDismiss: () -> Unit, onWeekSelected: (Date) -> Unit) {
     Dialog(onDismissRequest = onDismiss) {
@@ -107,6 +119,13 @@ fun WeekSelectionDialog(onDismiss: () -> Unit, onWeekSelected: (Date) -> Unit) {
     }
 }
 
+/**
+ * Composable function to display a picker for managing doctor availability.
+ *
+ * @param startDate The start date of the week for which availability is being managed.
+ * @param firestore Instance of FirestoreClass to interact with Firestore.
+ * @param doctorId The ID of the doctor whose availability is being managed.
+ */
 @Composable
 fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, doctorId: String) {
     val context = LocalContext.current

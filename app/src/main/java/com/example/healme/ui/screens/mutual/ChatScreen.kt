@@ -91,6 +91,7 @@ import java.net.URL
 /**
  * ChatScreen is a Composable function that displays the chat interface.
  *
+ * @param navController The NavController for navigating between screens.
  * @param viewModel The ChatViewModel instance for managing chat-related data.
  */
 @Composable
@@ -353,6 +354,28 @@ fun ChatScreen(
             }
     }
 
+/**
+ * ChatContent is a Composable function that displays the main chat interface.
+ *
+ * @param currentUser The current user in the chat.
+ * @param isCurrentUserDoctor Boolean indicating if the current user is a doctor.
+ * @param snackbarHostState The state of the Snackbar host for displaying messages.
+ * @param searchQuery The current search query for filtering contacts.
+ * @param onSearchQueryChange Callback function to handle search query changes.
+ * @param filteredContacts The list of contacts filtered by the search query.
+ * @param allContactsEmpty Boolean indicating if there are no contacts available.
+ * @param chosenContact The currently selected contact in the chat.
+ * @param onContactSelected Callback function invoked when a contact is selected.
+ * @param messages The list of messages in the chat.
+ * @param messageText The text input for sending messages.
+ * @param onMessageTextChange Callback function to handle changes in message text input.
+ * @param onSendMessage Callback function invoked when sending a message.
+ * @param onNavigateBack Callback function invoked when navigating back from the chat screen.
+ * @param messageInputError Error message to display for invalid message input.
+ * @param formatTimestamp Function to format timestamps of messages.
+ * @param onPickImage Callback function invoked when picking an image to send.
+ * @param onPickFile Callback function invoked when picking a file to send.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatContent(
@@ -661,6 +684,13 @@ fun ChatContent(
     }
 }
 
+/**
+ * Retrieves the file name from a URI.
+ *
+ * @param uri The URI of the file.
+ * @param context The context to access content resolver.
+ * @return The name of the file, or "unknown_file" if it cannot be determined.
+ */
 private fun getMimeType(fileName: String): String {
     return when {
         fileName.endsWith(".pdf", ignoreCase = true) -> "application/pdf"
@@ -675,6 +705,13 @@ private fun getMimeType(fileName: String): String {
     }
 }
 
+/**
+ * ImagePreviewDialog is a Composable function that displays a dialog for previewing an image before sending it.
+ *
+ * @param imageUri The URI of the image to be previewed.
+ * @param onDismiss Callback function invoked when the dialog is dismissed.
+ * @param onSend Callback function invoked when the user sends the image with an optional message.
+ */
 @Composable
 fun ImagePreviewDialog(
     imageUri: Uri,
@@ -737,6 +774,15 @@ fun ImagePreviewDialog(
     }
 }
 
+/**
+ * MessageBubble is a Composable function that displays a single message in the chat.
+ *
+ * @param message The message data to be displayed.
+ * @param isFromCurrentUser Boolean indicating if the message is from the current user.
+ * @param formatTimestamp Function to format the timestamp of the message.
+ * @param onImageClick Callback function invoked when an image in the message is clicked.
+ * @param onFileClick Callback function invoked when a file in the message is clicked.
+ */
 @Composable
 fun MessageBubble(
     message: Message,
@@ -821,6 +867,13 @@ fun MessageBubble(
     }
 }
 
+/**
+ * Retrieves the file name from a URI, handling both content and file schemes.
+ *
+ * @param uri The URI from which to extract the file name.
+ * @param context The context used to access the content resolver.
+ * @return The extracted file name or "unknown_file" if it cannot be determined.
+ */
 @SuppressLint("Range")
 fun getFileName(uri: Uri, context: Context): String {
     var result: String? = null

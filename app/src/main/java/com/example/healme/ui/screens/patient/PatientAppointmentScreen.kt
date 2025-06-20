@@ -23,6 +23,11 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * Composable function to display the Appointment screen for patients.
+ *
+ * @param navController Navigation controller for navigating between screens.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppointmentScreen(navController: NavController) {

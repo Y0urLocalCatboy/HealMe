@@ -43,6 +43,11 @@ import com.example.healme.data.models.user.Patient
 import com.example.healme.viewmodel.DoctorViewModel
 import com.google.firebase.auth.FirebaseAuth
 
+/**Composable function to display the Doctor's Patients screen.
+ *
+ * @param navController Navigation controller for navigating between screens.
+ * @param doctorViewModel ViewModel for managing doctor's data and operations.
+ */
 @Composable
 fun DoctorPatientsScreen(
     navController: NavHostController,
@@ -65,6 +70,13 @@ fun DoctorPatientsScreen(
     )
 }
 
+/**
+ * Composable function to display the content of the Doctor's Patients screen.
+ *
+ * @param patientList List of patients to display.
+ * @param onNavigateBack Callback to navigate back to the previous screen.
+ * @param onPatientClick Callback when a patient is clicked, passing the patient's ID.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DoctorPatientsContent(
@@ -118,6 +130,12 @@ fun DoctorPatientsContent(
     }
 }
 
+/**
+ * Composable function to display a single patient item in the list.
+ *
+ * @param patient The patient data to display.
+ * @param onPatientClick Callback when the patient item is clicked.
+ */
 @Composable
 fun PatientListItem(
     patient: Patient,

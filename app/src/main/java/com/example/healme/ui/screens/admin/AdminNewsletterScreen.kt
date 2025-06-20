@@ -21,6 +21,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
 
+/**
+ * Composable function to display the Admin Newsletter screen.
+ *
+ * @param navController Navigation controller for navigating between screens.
+ */
 @Composable
 fun AdminNewsletterScreen(navController: NavHostController) {
     var message by remember { mutableStateOf("") }

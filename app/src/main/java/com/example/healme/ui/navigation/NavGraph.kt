@@ -27,6 +27,11 @@ import com.example.healme.ui.screens.patient.PatientMedicalHistoryScreen
 import com.example.healme.ui.screens.patient.PatientPrescriptionsScreen
 import com.example.healme.ui.screens.patient.PatientNewsletterScreen
 
+/** Composable function to set up the navigation graph for the application.
+ *
+ * @param navController Navigation controller for managing navigation between screens.
+ * @param modifier Modifier to apply to the NavHost.
+ */
 @Composable
 fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route

@@ -43,8 +43,12 @@ import java.util.Date
 import java.util.Locale
 import com.instacart.library.truetime.TrueTimeRx
 
-
-
+/**
+ * Composable function to display the Doctor's Home screen.
+ *
+ * @param navController Navigation controller for navigating between screens.
+ * @param doctorViewModel ViewModel for managing doctor's data and operations.
+ */
 @Composable
 fun DoctorHomeScreen(navController: NavHostController, doctorViewModel: DoctorViewModel = viewModel()) {
     val auth = FirebaseAuth.getInstance()
@@ -72,6 +76,20 @@ fun DoctorHomeScreen(navController: NavHostController, doctorViewModel: DoctorVi
     )
 }
 
+/**
+ * Composable function to display the content of the Doctor's Home screen.
+ *
+ * @param doctor Doctor's data as a map.
+ * @param patientList List of patients to display.
+ * @param navController Navigation controller for navigating between screens.
+ * @param onScheduleClick Callback when the schedule button is clicked.
+ * @param onPatientsClick Callback when the patients button is clicked.
+ * @param onPrescriptionsClick Callback when the prescriptions button is clicked.
+ * @param onMessagesClick Callback when the messages button is clicked.
+ * @param onProfileClick Callback when the profile button is clicked.
+ * @param onNewsletterClick Callback when the newsletter button is clicked.
+ * @param onAppointmentsClick Callback when the appointments button is clicked.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DoctorHomeContent(
@@ -135,8 +153,14 @@ fun DoctorHomeContent(
     }
 }
 
+/**
+ * Composable function to display the welcome section on the Doctor's Home screen.
+ *
+ * @param doctorName Name of the doctor.
+ * @param specialization Specialization of the doctor.
+ */
 @Composable
-fun WelcomeSection(doctorName: String, specialization: String) {
+private fun WelcomeSection(doctorName: String, specialization: String) {
     val today = LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
 
     Card(
@@ -172,9 +196,13 @@ fun WelcomeSection(doctorName: String, specialization: String) {
     }
 }
 
-
+/**
+ * Composable function to display the upcoming appointments section on the Doctor's Home screen.
+ *
+ * @param navController Navigation controller for navigating to the appointments screen.
+ */
 @Composable
-fun UpcomingAppointmentsSection(navController: NavHostController) {
+private fun UpcomingAppointmentsSection(navController: NavHostController) {
     val TAG = "UpcomingAppointments"
 
     val firestore = remember { FirestoreClass() }
@@ -264,13 +292,15 @@ fun UpcomingAppointmentsSection(navController: NavHostController) {
     }
 }
 
-
-
-
-
-
+/**
+ * Composable function to display a single appointment item in the upcoming appointments section.
+ *
+ * @param time The time of the appointment.
+ * @param patientName The name of the patient.
+ * @param reason The reason for the appointment.
+ */
 @Composable
-fun AppointmentItem(time: String, patientName: String, reason: String) {
+private fun AppointmentItem(time: String, patientName: String, reason: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -290,8 +320,17 @@ fun AppointmentItem(time: String, patientName: String, reason: String) {
     }
 }
 
+/**
+ * Composable function to display the doctor's functions section on the Home screen.
+ *
+ * @param onScheduleClick Callback when the schedule button is clicked.
+ * @param onPatientsClick Callback when the patients button is clicked.
+ * @param onPrescriptionsClick Callback when the prescriptions button is clicked.
+ * @param onNewsletterClick Callback when the newsletter button is clicked.
+ * @param onAppointmentsClick Callback when the appointments button is clicked.
+ */
 @Composable
-fun DoctorFunctionsSection(
+private fun DoctorFunctionsSection(
     onScheduleClick: () -> Unit,
     onPatientsClick: () -> Unit,
     onPrescriptionsClick: () -> Unit,
@@ -350,8 +389,17 @@ fun DoctorFunctionsSection(
         }
     }
 }
+
+/**
+ * Composable function to display a button with an icon and title for the doctor's functions section.
+ *
+ * @param title The title of the button.
+ * @param icon The icon to display on the button.
+ * @param onClick Callback when the button is clicked.
+ * @param modifier Modifier to apply to the button.
+ */
 @Composable
-fun FunctionButton(
+private fun FunctionButton(
     title: String,
     icon: ImageVector,
     onClick: () -> Unit,
@@ -383,9 +431,13 @@ fun FunctionButton(
     }
 }
 
-
+/**
+ * Composable function to display the recent patients section on the Doctor's Home screen.
+ *
+ * @param patients List of recent patients to display.
+ */
 @Composable
-fun RecentPatientsSection(patients: List<Patient>){
+private fun RecentPatientsSection(patients: List<Patient>){
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = stringResource(R.string.doctor_panel_latest_patients),
@@ -404,8 +456,14 @@ fun RecentPatientsSection(patients: List<Patient>){
     }
 }
 
+/**
+ * Composable function to display a card for a single patient.
+ *
+ * @param name The name of the patient.
+ * @param lastVisit The last visit date of the patient.
+ */
 @Composable
-fun PatientCard(name: String, lastVisit: String) {
+private fun PatientCard(name: String, lastVisit: String) {
     Card(
         modifier = Modifier
             .width(150.dp)

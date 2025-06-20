@@ -15,6 +15,11 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * Composable function to display the Patient's Calendar screen.
+ *
+ * @param navController Navigation controller for navigating between screens.
+ */
 @Composable
 fun PatientCalendarScreen(navController: NavController) {
     val firestore = remember { FirestoreClass() }

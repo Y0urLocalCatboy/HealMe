@@ -15,6 +15,11 @@ import com.example.healme.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
+/**
+ * Composable function to display the Doctor's Newsletter screen.
+ *
+ * @param navController Navigation controller for navigating between screens.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DoctorNewsletterScreen(navController: NavHostController) {

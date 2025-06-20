@@ -18,6 +18,12 @@ import com.google.firebase.messaging.RemoteMessage
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
+    /**
+     * Called when a new token is generated for the device.
+     * This method updates the FCM token in the Firestore database based on the user type.
+     *
+     * @param token The new FCM token.
+     */
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         Log.d("FCM", "New FCM token generated: $token")
@@ -32,6 +38,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
+    /**
+     * Determines the user type (patient, doctor, or admin) and updates the FCM token in the corresponding Firestore collection.
+     *
+     * @param userId The ID of the authenticated user.
+     * @param token The FCM token to be updated.
+     */
     private fun determineUserTypeAndUpdateToken(userId: String, token: String) {
         FirebaseFirestore.getInstance().collection("patients").document(userId).get()
             .addOnSuccessListener { document ->
@@ -66,6 +78,13 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             }
     }
 
+    /**
+     * Updates the FCM token in the specified Firestore collection for the given user ID.
+     *
+     * @param collection The Firestore collection to update (patients, doctors, or admins).
+     * @param userId The ID of the user whose token is being updated.
+     * @param token The new FCM token to be saved.
+     */
     private fun updateTokenInCollection(collection: String, userId: String, token: String) {
         FirebaseFirestore.getInstance()
             .collection(collection)
@@ -79,7 +98,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             }
     }
 
-
+    /**
+     * Called when a message is received from Firebase Cloud Messaging.
+     * This method handles the notification payload and displays a notification to the user.
+     *
+     * @param remoteMessage The message received from FCM.
+     */
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 

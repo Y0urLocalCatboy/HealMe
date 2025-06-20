@@ -262,7 +262,6 @@ interface FirestoreInterface {
         onComplete: (() -> Unit)
     )
 
-
     /**
      * Retrieves the full name (name + surname) of a patient from Firestore.
      *

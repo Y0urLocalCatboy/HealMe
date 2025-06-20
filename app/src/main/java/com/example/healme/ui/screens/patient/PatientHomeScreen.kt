@@ -33,6 +33,12 @@ data class VisitData(
     val timestamp: Long
 )
 
+/**
+ * Composable function to display the Patient's Home screen.
+ *
+ * @param navController Navigation controller for navigating between screens.
+ * @param patientViewModel ViewModel for managing patient's data and operations.
+ */
 @Composable
 fun PatientHomeScreen(
     navController: NavController,
@@ -100,6 +106,19 @@ fun PatientHomeScreen(
     }
 }
 
+/**
+ * Composable function to display the content of the Patient's Home screen.
+ *
+ * @param patient The patient data to display.
+ * @param upcomingVisit The upcoming visit data to display.
+ * @param onVisitDetailsClick Callback when the visit details button is clicked.
+ * @param onFindDoctorClick Callback when the find doctor button is clicked.
+ * @param onPrescriptionsClick Callback when the prescriptions button is clicked.
+ * @param onMessagesClick Callback when the messages button is clicked.
+ * @param onMedicalHistoryClick Callback when the medical history button is clicked.
+ * @param onCalendarClick Callback when the calendar button is clicked.
+ * @param onNewsletterClick Callback when the newsletter button is clicked.
+ */
 @Composable
 fun PatientHomeContent(
     patient: Patient?,
@@ -171,6 +190,11 @@ fun PatientHomeContent(
     }
 }
 
+/**
+ * Composable function to display the welcome section for the patient.
+ *
+ * @param patientName The name of the patient to display in the welcome message.
+ */
 @Composable
 fun WelcomePatientSection(patientName: String) {
     Row(
@@ -195,6 +219,16 @@ fun WelcomePatientSection(patientName: String) {
     }
 }
 
+/**
+ * Composable function to display the quick actions grid for the patient.
+ *
+ * @param onFindDoctorClick Callback when the find doctor button is clicked.
+ * @param onPrescriptionsClick Callback when the prescriptions button is clicked.
+ * @param onMessagesClick Callback when the messages button is clicked.
+ * @param onMedicalHistoryClick Callback when the medical history button is clicked.
+ * @param onCalendarClick Callback when the calendar button is clicked.
+ * @param onNewsletterClick Callback when the newsletter button is clicked.
+ */
 @Composable
 fun QuickActionsGrid(
     onFindDoctorClick: () -> Unit,
@@ -262,7 +296,14 @@ fun QuickActionsGrid(
     }
 }
 
-
+/**
+ * Composable function to display an action button with an icon and text.
+ *
+ * @param text The text to display on the button.
+ * @param icon The icon to display on the button.
+ * @param onClick Callback when the button is clicked.
+ * @param modifier Modifier to apply to the button.
+ */
 @Composable
 fun ActionButton(
     text: String,
@@ -297,6 +338,12 @@ fun ActionButton(
     }
 }
 
+/**
+ * Composable function to display the upcoming appointment card.
+ *
+ * @param visitData The visit data containing doctor name, specialization, and timestamp.
+ * @param onDetailsClick Callback when the details button is clicked.
+ */
 @Composable
 fun UpcomingAppointmentCard(
     visitData: VisitData,
@@ -358,6 +405,12 @@ fun UpcomingAppointmentCard(
     }
 }
 
+/**
+ * Composable function to display the visit detail dialog.
+ *
+ * @param visitData The visit data containing doctor name, specialization, and timestamp.
+ * @param onDismiss Callback when the dialog is dismissed.
+ */
 @Composable
 fun VisitDetailDialog(
     visitData: VisitData,
@@ -393,6 +446,11 @@ fun VisitDetailDialog(
     )
 }
 
+/**
+ * Composable function to display a health tip card.
+ *
+ * This card displays a random health tip from a predefined list.
+ */
 @Composable
 fun HealthTipCard() {
     Card(

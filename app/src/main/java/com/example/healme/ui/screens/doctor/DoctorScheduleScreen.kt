@@ -26,6 +26,12 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * Composable function to display the calendar screen for a doctor to manage their availability.
+ *
+ * @param doctorId The ID of the doctor whose schedule is being managed.
+ * @param onExit Callback function to handle exit action from the screen.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(doctorId: String, onExit: () -> Unit) {
@@ -115,8 +121,15 @@ fun CalendarScreen(doctorId: String, onExit: () -> Unit) {
     }
 }
 
+/**
+ * Composable function to display the availability picker for a doctor.
+ *
+ * @param startDate The start date of the week for which availability is being managed.
+ * @param firestore Instance of FirestoreClass to interact with Firestore.
+ * @param doctorId The ID of the doctor whose availability is being managed.
+ */
 @Composable
-fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, doctorId: String) {
+private fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, doctorId: String) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
