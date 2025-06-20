@@ -61,7 +61,7 @@ fun ConditionalDrawer(
                     Text("HealMe App", modifier = Modifier.padding(16.dp))
                     NavigationDrawerItem(
                         label = { Text(stringResource(R.string.patient_panel_home)) },
-                        selected = navController.currentDestination?.route == "patient",
+                        selected = false,
                         onClick = {
                             navController.navigate("patient") {
                                 popUpTo("patient") { inclusive = true }

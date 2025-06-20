@@ -220,6 +220,10 @@ fun ChatScreen(
                 fs.doctorsFromPatient(appUser?.id ?: "") ?: emptyList()
             }
             allContacts = fetchedContacts.filterNotNull()
+
+            if (allContacts.isNotEmpty() && chosenContact == null) {
+                chosenContact = allContacts.first()
+            }
         }
     }
 
