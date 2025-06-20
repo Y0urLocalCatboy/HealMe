@@ -1,12 +1,21 @@
 package com.example.healme.ui.screens.mutual
 
 import android.util.Patterns
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material3.Button
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,6 +30,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.example.healme.data.models.user.Patient
 import com.example.healme.viewmodel.LoginViewModel
 import com.example.healme.R
+import java.time.Instant
+import java.time.ZoneId
+import androidx.compose.material3.DatePicker
 
 /**
  * Composable function for the Register screen.
@@ -43,6 +55,7 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
 
     val passwordMismatchError = stringResource(R.string.register_password_mismatch)
     val registrationSuccess = stringResource(R.string.register_registration_successful)
@@ -83,15 +96,21 @@ fun RegisterScreen(
                 return@RegisterContent
             }
 
-            auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+            val trimmedEmail = email.trim()
+            val trimmedPassword = password.trim()
+            val trimmedName = name.trim()
+            val trimmedSurname = surname.trim()
+            val trimmedDateOfBirth = dateOfBirth.trim()
+
+            auth.createUserWithEmailAndPassword(trimmedEmail, trimmedPassword).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val userId = auth.currentUser?.uid ?: ""
                     val newPatient = Patient(
                         id = userId,
-                        email = email,
-                        name = name,
-                        surname = surname,
-                        dateOfBirth = dateOfBirth,
+                        email = trimmedEmail,
+                        name = trimmedName,
+                        surname = trimmedSurname,
+                        dateOfBirth = trimmedDateOfBirth,
                         newsletterOptIn = false
                     )
                     db.collection("patients").document(userId).set(newPatient)
@@ -136,6 +155,7 @@ fun RegisterScreen(
  * @param onRegisterClick Callback for when the register button is clicked.
  * @param onLoginClick Callback for when the login button is clicked.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RegisterContent(
     name: String,
@@ -160,6 +180,40 @@ private fun RegisterContent(
     onRegisterClick: () -> Unit,
     onLoginClick: () -> Unit
 ) {
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState(
+            selectableDates = object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    return utcTimeMillis <= System.currentTimeMillis()
+                }
+            }
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let { millis ->
+                        val localDate = Instant.ofEpochMilli(millis)
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDate()
+                        onDateOfBirthChange("${localDate.dayOfMonth}-${localDate.monthValue}-${localDate.year}")
+                    }
+                    showDatePicker = false
+                }) {
+                    Text(stringResource(R.string.confirm_button))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text(stringResource(R.string.cancel_button))
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -211,13 +265,20 @@ private fun RegisterContent(
             onValueChange = {
                 val validChars = it.filter { char -> char.isDigit() || char == '-' }
                 onDateOfBirthChange(validChars)
-            },
+                            },
             label = { Text(stringResource(R.string.register_birthdate_long)) },
             isError = dobError != null,
             supportingText = { dobError?.let { Text(it) } },
+            readOnly = true,
+            trailingIcon = {
+                IconButton(onClick = { showDatePicker = true }) {
+                    Icon(Icons.Default.CalendarToday, contentDescription = "")
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp)
+                .clickable { showDatePicker = true }
         )
 
         OutlinedTextField(

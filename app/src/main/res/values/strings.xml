@@ -24,6 +24,7 @@
     <string name="register_birthdate_long">Birthdate (day - month - year)</string>
     <string name="register_invalid_email">Please enter a valid email address</string>
 
+
     <!-- Strings used for name and surname validation -->
     <string name="name_validation_digit">Name cannot contain numbers</string>
     <string name="name_validation_special_char">Name cannot contain special characters</string>
