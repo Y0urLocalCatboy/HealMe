@@ -10,8 +10,12 @@ const sendAppointmentReminders = require("./reminders/sendAppointmentReminders")
 const notifyNewVisit = require("./visits/notifyNewVisit");
 const notifyNewChatMessage = require("./chat/notifyNewChatMessage");
 const triggerNewsletterNotifications = require("./newsletter/triggerNewsletterNotifications");
+const cleanOldAvailabilities = require("./past_appointments/cleanOldAvailabilities");
 
 exports.sendAppointmentReminders = sendAppointmentReminders;
 exports.notifyNewVisit = notifyNewVisit;
 exports.notifyNewChatMessage = notifyNewChatMessage;
 exports.triggerNewsletterNotifications = triggerNewsletterNotifications;
+//exports.cleanOldAvailabilities = cleanOldAvailabilities;
+
+exports.cleanOldAvailabilities = cleanOldAvailabilities;

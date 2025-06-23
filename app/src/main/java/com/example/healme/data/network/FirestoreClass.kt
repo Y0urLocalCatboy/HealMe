@@ -735,22 +735,24 @@ class FirestoreClass: FirestoreInterface {
             val docSnapshot = fs.collection("visits").document(patientId).get().await()
             if (!docSnapshot.exists()) return null
 
-            val visitsMap =
-                docSnapshot.get("visits") as? Map<String, Map<String, Any>> ?: return null
+            val visitsMap = docSnapshot.get("visits") as? Map<String, Map<String, Any>> ?: return null
 
-            val now = System.currentTimeMillis() / 1000
+            val currentTimestamp = try {
+                TrueTimeRx.now().toInstant().epochSecond
+            } catch (e: Exception) {
+                Calendar.getInstance().timeInMillis / 1000
+            }
 
             val upcomingVisitEntry = visitsMap.mapNotNull { (_, data) ->
                 val timestamp = data["timestamp"] as? Long ?: return@mapNotNull null
                 val doctorId = data["doctorId"] as? String ?: return@mapNotNull null
 
-                if (timestamp > now) {
+                if (timestamp > currentTimestamp) {
                     Visit(doctorId = doctorId, patientId = patientId, timestamp = timestamp)
                 } else null
             }.minByOrNull { it.timestamp } ?: return null
 
-            val doctorSnapshot =
-                fs.collection("doctors").document(upcomingVisitEntry.doctorId).get().await()
+            val doctorSnapshot = fs.collection("doctors").document(upcomingVisitEntry.doctorId).get().await()
             val doctor = doctorSnapshot.toObject(Doctor::class.java) ?: return null
 
             Pair(upcomingVisitEntry, doctor)
@@ -759,6 +761,7 @@ class FirestoreClass: FirestoreInterface {
         }
     }
 
+
     override suspend fun cleanUpPastVisits(patientId: String) {
         try {
             val visitDoc = fs.collection("visits").document(patientId).get().await()
@@ -766,7 +769,11 @@ class FirestoreClass: FirestoreInterface {
 
             val visitsMap = visitDoc.get("visits") as? Map<String, Map<String, Any>> ?: return
 
-            val currentTimestamp = TrueTimeRx.now().toInstant().epochSecond
+            val currentTimestamp = try {
+                TrueTimeRx.now().toInstant().epochSecond
+            } catch (e: Exception) {
+                Calendar.getInstance().timeInMillis / 1000
+            }
 
             val historyDoc = fs.collection("medicalHistory").document(patientId).get().await()
             val medicalRecords =
@@ -791,6 +798,7 @@ class FirestoreClass: FirestoreInterface {
         }
     }
 
+
     override suspend fun cleanUpPastAppointments(doctorId: String) {
         try {
             val docRef = fs.collection("appointments").document(doctorId).get().await()
@@ -798,7 +806,11 @@ class FirestoreClass: FirestoreInterface {
 
             val appointmentsMap = docRef.get("appointments") as? Map<String, Map<String, Any>> ?: return
 
-            val currentTimestamp = TrueTimeRx.now().toInstant().epochSecond
+            val currentTimestamp = try {
+                TrueTimeRx.now().toInstant().epochSecond
+            } catch (e: Exception) {
+                Calendar.getInstance().timeInMillis / 1000
+            }
 
             val pastAppointments = appointmentsMap.filter { (_, appointmentData) ->
                 val timestamp = appointmentData["timestamp"] as? Long ?: return@filter false
@@ -819,6 +831,7 @@ class FirestoreClass: FirestoreInterface {
             println("Error cleaning past appointments for doctor $doctorId: ${e.message}")
         }
     }
+
 
     override suspend fun updateUserFcmToken(userId: String, userType: String, token: String) {
         try {
