@@ -23,6 +23,7 @@ import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageMetadata
+import com.instacart.library.truetime.TrueTimeRx
 import kotlinx.coroutines.tasks.await
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -758,7 +759,6 @@ class FirestoreClass: FirestoreInterface {
         }
     }
 
-    //TODO zmiana z czasu systemowego na firebasowy jak zrobisz to w czacie
     override suspend fun cleanUpPastVisits(patientId: String) {
         try {
             val visitDoc = fs.collection("visits").document(patientId).get().await()
@@ -766,7 +766,7 @@ class FirestoreClass: FirestoreInterface {
 
             val visitsMap = visitDoc.get("visits") as? Map<String, Map<String, Any>> ?: return
 
-            val currentTimestamp = System.currentTimeMillis() / 1000
+            val currentTimestamp = TrueTimeRx.now().toInstant().epochSecond
 
             val historyDoc = fs.collection("medicalHistory").document(patientId).get().await()
             val medicalRecords =
@@ -782,13 +782,41 @@ class FirestoreClass: FirestoreInterface {
             }.keys
 
             if (visitsToDelete.isNotEmpty()) {
-                val updates =
-                    visitsToDelete.associate { "visits.$it" to FieldValue.delete() }
+                val updates = visitsToDelete.associate { "visits.$it" to FieldValue.delete() }
                 fs.collection("visits").document(patientId).update(updates).await()
             }
 
         } catch (e: Exception) {
             println("Error during visit cleanup for patient $patientId: ${e.message}")
+        }
+    }
+
+    override suspend fun cleanUpPastAppointments(doctorId: String) {
+        try {
+            val docRef = fs.collection("appointments").document(doctorId).get().await()
+            if (!docRef.exists()) return
+
+            val appointmentsMap = docRef.get("appointments") as? Map<String, Map<String, Any>> ?: return
+
+            val currentTimestamp = TrueTimeRx.now().toInstant().epochSecond
+
+            val pastAppointments = appointmentsMap.filter { (_, appointmentData) ->
+                val timestamp = appointmentData["timestamp"] as? Long ?: return@filter false
+                timestamp < currentTimestamp
+            }
+
+            if (pastAppointments.isEmpty()) return
+
+            val pastDocRef = fs.collection("pastappointments").document(doctorId)
+            pastDocRef.set(mapOf("appointments" to pastAppointments), SetOptions.merge()).await()
+
+            val updates = pastAppointments.keys.associate { "appointments.$it" to FieldValue.delete() }
+            fs.collection("appointments").document(doctorId).update(updates).await()
+
+            println("Successfully cleaned past appointments for doctor $doctorId")
+
+        } catch (e: Exception) {
+            println("Error cleaning past appointments for doctor $doctorId: ${e.message}")
         }
     }
 
@@ -969,6 +997,23 @@ class FirestoreClass: FirestoreInterface {
             null
         }
     }
+
+    override suspend fun getPastAppointments(doctorId: String): Map<String, Map<String, Any>>? {
+        return try {
+            val snapshot = FirebaseFirestore.getInstance()
+                .collection("pastappointments")
+                .document(doctorId)
+                .get()
+                .await()
+
+            val appointmentsMap = snapshot.get("appointments") as? Map<String, Map<String, Any>>
+            appointmentsMap
+        } catch (e: Exception) {
+            Log.e("Firestore", "Failed to fetch past appointments", e)
+            null
+        }
+    }
+
 
     override fun uploadFile(
         uri: Uri,

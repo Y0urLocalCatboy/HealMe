@@ -195,21 +195,72 @@ interface FirestoreInterface {
      * @param patientId The ID of the patient.
      * @return List of prescriptions for the specified patient.
      */
+    /**
+     * Retrieves all prescriptions assigned to a specific patient.
+     *
+     * @param patientId The ID of the patient whose prescriptions are being fetched.
+     * @return A list of Prescription objects for the specified patient.
+     */
     suspend fun getPrescriptionsForPatient(patientId: String): List<Prescription>
 
+    /**
+     * Retrieves all past and future visits for a specific patient.
+     *
+     * @param patientId The ID of the patient whose visit records are being retrieved.
+     * @return A list of pairs where each pair contains the timestamp of the visit and the associated doctor ID.
+     */
     suspend fun getPatientVisits(patientId: String): List<Pair<Long, String>>
 
+    /**
+     * Books a new visit for a patient with a specific doctor at a specified time.
+     *
+     * @param doctorId The ID of the doctor for the visit.
+     * @param patientId The ID of the patient who is booking the visit.
+     * @param timestamp The time (in UTC seconds) at which the visit is scheduled.
+     */
     suspend fun bookVisit(doctorId: String, patientId: String, timestamp: Long)
 
+    /**
+     * Retrieves all timestamps for future visits booked with a given doctor.
+     *
+     * @param doctorId The ID of the doctor whose appointments are being fetched.
+     * @return A list of timestamps representing booked appointment times.
+     */
     suspend fun getBookedTimestampsForDoctor(doctorId: String): List<Long>
 
+    /**
+     * Adds a medical record to the patient's medical history after a completed visit.
+     *
+     * @param patientId The ID of the patient.
+     * @param doctorId The ID of the doctor who conducted the visit.
+     * @param timestamp The timestamp of the visit that resulted in this medical record.
+     */
     suspend fun addMedicalRecord(patientId: String, doctorId: String, timestamp: Long)
 
+    /**
+     * Retrieves the entire medical history for a specific patient.
+     *
+     * @param patientId The ID of the patient whose medical history is being fetched.
+     * @return A list of MedicalHistory entries associated with the patient.
+     */
     suspend fun getPatientMedicalHistory(patientId: String): List<MedicalHistory>
 
+    /**
+     * Retrieves the next upcoming visit scheduled for a patient.
+     *
+     * @param patientId The ID of the patient.
+     * @return A Pair containing the Visit object and the associated Doctor, or null if no future visit is scheduled.
+     */
     suspend fun getUpcomingVisitForPatient(patientId: String): Pair<Visit, Doctor>?
 
+    /**
+     * Cleans up past visits for a patient by deleting entries whose timestamps have passed
+     * and are already saved in the medical history.
+     *
+     * @param patientId The ID of the patient whose past visits should be cleaned.
+     */
     suspend fun cleanUpPastVisits(patientId: String)
+
 
     /**
      * Updates the FCM token for a given user.
@@ -294,4 +345,27 @@ interface FirestoreInterface {
         onSuccess: (String) -> Unit,
         onFailure: (Exception) -> Unit
     )
+
+    /**
+     * Cleans up past doctor appointments for a given doctor.
+     * Saves them to `pastappointments` collection before deletion.
+     *
+     * @param doctorId The ID of the doctor.
+     */
+    suspend fun cleanUpPastAppointments(doctorId: String)
+
+    /**
+     * Retrieves past appointments for a specific doctor from the Firestore `pastappointments` collection.
+     *
+     * Each document in the collection represents a doctor and contains a nested `appointments` map
+     * with appointment identifiers as keys and appointment data (e.g., timestamp, patientId) as values.
+     *
+     * @param doctorId The unique ID of the doctor whose past appointments are being fetched.
+     * @return A map of past appointment entries where the key is the appointment ID and the value is a map of appointment details,
+     *         or null if the document does not exist or fetching fails.
+     */
+    suspend fun getPastAppointments(doctorId: String): Map<String, Map<String, Any>>?
+
+
+
 }

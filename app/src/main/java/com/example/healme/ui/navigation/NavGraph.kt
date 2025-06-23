@@ -28,6 +28,8 @@ import com.example.healme.ui.screens.patient.PatientHomeScreen
 import com.example.healme.ui.screens.patient.PatientMedicalHistoryScreen
 import com.example.healme.ui.screens.patient.PatientPrescriptionsScreen
 import com.example.healme.ui.screens.patient.PatientNewsletterScreen
+import com.example.healme.ui.screens.doctor.DoctorPastAppointmentScreen
+
 
 /** Composable function to set up the navigation graph for the application.
  *
@@ -164,6 +166,11 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
                 val patientId = backStackEntry.arguments?.getString("patientId") ?: ""
                 DoctorPatientDetailsScreen(navController = navController, patientId = patientId)
             }
+
+            composable("doctor_past_appointments") {
+                DoctorPastAppointmentScreen(navController)
+            }
+
         }
     }
 }

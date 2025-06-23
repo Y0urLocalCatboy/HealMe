@@ -44,6 +44,7 @@ import java.util.Date
 import java.util.Locale
 import com.instacart.library.truetime.TrueTimeRx
 
+
 /**
  * Composable function to display the Doctor's Home screen.
  *
@@ -54,13 +55,14 @@ import com.instacart.library.truetime.TrueTimeRx
 fun DoctorHomeScreen(navController: NavHostController, doctorViewModel: DoctorViewModel = viewModel()) {
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
-    val coroutineScope = rememberCoroutineScope()
     var doctor by remember { mutableStateOf<MutableMap<String, Any?>?>(null) }
     var patients by remember { mutableStateOf<List<Patient>>(emptyList()) }
 
     LaunchedEffect(currentUser?.uid) {
-        doctor = doctorViewModel.getDoctorById(currentUser?.uid.toString()) as MutableMap<String, Any?>?
-        patients = doctorViewModel.getDoctorsPatients(currentUser?.uid.toString()) ?: emptyList()
+        val uid = currentUser?.uid.toString()
+        doctor = doctorViewModel.getDoctorById(uid) as MutableMap<String, Any?>?
+        patients = doctorViewModel.getDoctorsPatients(uid) ?: emptyList()
+        doctorViewModel.cleanUpPastAppointments(uid)
     }
 
     DoctorHomeContent(
@@ -74,6 +76,7 @@ fun DoctorHomeScreen(navController: NavHostController, doctorViewModel: DoctorVi
         onProfileClick = { navController.navigate("doctor_change_user") },
         onNewsletterClick = { navController.navigate("doctor_newsletter") },
         onAppointmentsClick = { navController.navigate("doctor_appointments") },
+        onPastAppointmentsClick = { navController.navigate("doctor_past_appointments") },
         onLogoutClick = {
             auth.signOut()
             navController.navigate("splash") {
@@ -113,6 +116,7 @@ fun DoctorHomeContent(
     onProfileClick: () -> Unit = {},
     onNewsletterClick: () -> Unit = {},
     onAppointmentsClick: () -> Unit = {},
+    onPastAppointmentsClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ) {
     Scaffold(
@@ -159,7 +163,8 @@ fun DoctorHomeContent(
                     onPatientsClick = onPatientsClick,
                     onPrescriptionsClick = onPrescriptionsClick,
                     onNewsletterClick = onNewsletterClick,
-                    onAppointmentsClick = onAppointmentsClick
+                    onAppointmentsClick = onAppointmentsClick,
+                    onPastAppointmentsClick = onPastAppointmentsClick
                 )
             }
             item { RecentPatientsSection(patientList) }
@@ -349,7 +354,8 @@ private fun DoctorFunctionsSection(
     onPatientsClick: () -> Unit,
     onPrescriptionsClick: () -> Unit,
     onNewsletterClick: () -> Unit,
-    onAppointmentsClick: () -> Unit
+    onAppointmentsClick: () -> Unit,
+    onPastAppointmentsClick: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -397,6 +403,12 @@ private fun DoctorFunctionsSection(
                     title = stringResource(R.string.doctor_fast_menu_appointments),
                     icon = Icons.Default.Info,
                     onClick = onAppointmentsClick,
+                    modifier = Modifier.weight(1f)
+                )
+                FunctionButton(
+                    title = stringResource(R.string.pastappointments),
+                    icon = Icons.Default.History,
+                    onClick = onPastAppointmentsClick,
                     modifier = Modifier.weight(1f)
                 )
             }

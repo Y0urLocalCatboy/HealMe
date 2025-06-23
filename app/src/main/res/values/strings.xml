@@ -266,6 +266,16 @@
     <string name="doctor_panel_no_today_appointments">No appointments today</string>
     <string name="doctor_fast_menu_appointments">Appointments</string>
     <string name="doctor_title_appointments">Upcoming appointments</string>
+    <string name="pastappointments">Past visits</string>
+
+
+    <!-- Strings for DoctorPastAppointmentScreen -->
+    <string name="doctor_past_appointments_title">Past Appointments</string>
+    <string name="doctor_past_appointments_back">Back</string>
+    <string name="doctor_past_appointments_loading">Loading...</string>
+    <string name="doctor_past_appointments_none">No past appointments found.</string>
+    <string name="doctor_past_appointments_patient_id">Patient Name: %1$s</string>
+    <string name="doctor_past_appointments_date_time">Date &amp; Time: %1$s</string>
 
 
 </resources>
