@@ -775,8 +775,6 @@ class FirestoreClass: FirestoreInterface {
                 Calendar.getInstance().timeInMillis / 1000
             }
 
-            val gracePeriod = 300L
-
             val historyDoc = fs.collection("medicalHistory").document(patientId).get().await()
             val medicalRecords =
                 historyDoc.get("records") as? Map<String, Map<String, Any>> ?: emptyMap()
@@ -787,7 +785,7 @@ class FirestoreClass: FirestoreInterface {
 
             val visitsToDelete = visitsMap.filter { (_, visitData) ->
                 val timestamp = visitData["timestamp"] as? Long ?: return@filter false
-                (timestamp < (currentTimestamp - gracePeriod)) && timestamp in medicalTimestamps
+                timestamp < currentTimestamp && timestamp in medicalTimestamps
             }.keys
 
             if (visitsToDelete.isNotEmpty()) {
