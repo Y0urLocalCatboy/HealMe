@@ -44,3 +44,6 @@ class HealMeApp : Application() {
         disposables.clear()
     }
 }
+
+
+
