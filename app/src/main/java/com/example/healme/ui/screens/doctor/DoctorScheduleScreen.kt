@@ -20,18 +20,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.healme.R
 import com.example.healme.data.network.FirestoreClass
+import com.instacart.library.truetime.TrueTimeRx
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
-/**
- * Composable function to display the calendar screen for a doctor to manage their availability.
- *
- * @param doctorId The ID of the doctor whose schedule is being managed.
- * @param onExit Callback function to handle exit action from the screen.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(doctorId: String, onExit: () -> Unit) {
@@ -64,7 +59,6 @@ fun CalendarScreen(doctorId: String, onExit: () -> Unit) {
                     navigationIconContentColor = Color.White
                 )
             )
-
         }
     ) { padding ->
         Column(
@@ -116,18 +110,10 @@ fun CalendarScreen(doctorId: String, onExit: () -> Unit) {
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-
         }
     }
 }
 
-/**
- * Composable function to display the availability picker for a doctor.
- *
- * @param startDate The start date of the week for which availability is being managed.
- * @param firestore Instance of FirestoreClass to interact with Firestore.
- * @param doctorId The ID of the doctor whose availability is being managed.
- */
 @Composable
 private fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, doctorId: String) {
     val context = LocalContext.current
@@ -168,6 +154,14 @@ private fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, docto
             }
         } catch (e: Exception) {
             Toast.makeText(context, "Failed to load availability or bookings", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val nowEpoch = remember {
+        try {
+            TrueTimeRx.now().time / 1000
+        } catch (e: Exception) {
+            System.currentTimeMillis() / 1000
         }
     }
 
@@ -213,10 +207,9 @@ private fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, docto
                         set(Calendar.MILLISECOND, 0)
                     }.timeInMillis / 1000
 
-                    val now = System.currentTimeMillis() / 1000
                     val status = availabilityMap[timestamp] ?: "unavailable"
                     val isBooked = status == "booked"
-                    val isPast = timestamp < now
+                    val isPast = timestamp < nowEpoch
 
                     val backgroundColor = when {
                         isPast -> colorResource(id = R.color.dark_uneditable_gray)

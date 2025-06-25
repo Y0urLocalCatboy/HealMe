@@ -194,18 +194,19 @@ fun AppointmentScreen(navController: NavController) {
                             onClick = {
                                 scope.launch {
                                     try {
-                                        firestore.bookVisit(doctor.id, userId, timestamp)
+                                        val bookingTimestamp = timestamp
+
+                                        android.util.Log.d("BookingTime", "Used slot timestamp: $bookingTimestamp (${Date(bookingTimestamp * 1000)})")
+
+                                        firestore.bookVisit(doctor.id, userId, bookingTimestamp)
 
                                         val patientName = firestore.getCurrentPatientName(userId) ?: ""
-                                        firestore.saveDoctorAppointment(doctor.id, patientName, timestamp) {
-                                            navController.navigate("confirmation/${doctor.name}/${doctor.surname}/$timestamp")
+                                        firestore.saveDoctorAppointment(doctor.id, patientName, bookingTimestamp) {
+                                            navController.navigate("confirmation/${doctor.name}/${doctor.surname}/$bookingTimestamp")
                                         }
-
-
-
-                                        navController.navigate("confirmation/${doctor.name}/${doctor.surname}/$timestamp")
                                     } catch (e: Exception) {
                                         Toast.makeText(context, context.getString(R.string.appointment_screen_booking_failed_toast), Toast.LENGTH_SHORT).show()
+                                        android.util.Log.e("BookingTime", "Booking failed: ${e.message}")
                                     }
                                 }
                             },
@@ -213,6 +214,7 @@ fun AppointmentScreen(navController: NavController) {
                         ) {
                             Text(stringResource(R.string.appointment_screen_book_slot_button, formatted))
                         }
+
                     }
                 }
             }

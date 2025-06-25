@@ -16,6 +16,4 @@ exports.sendAppointmentReminders = sendAppointmentReminders;
 exports.notifyNewVisit = notifyNewVisit;
 exports.notifyNewChatMessage = notifyNewChatMessage;
 exports.triggerNewsletterNotifications = triggerNewsletterNotifications;
-//exports.cleanOldAvailabilities = cleanOldAvailabilities;
-
 exports.cleanOldAvailabilities = cleanOldAvailabilities;

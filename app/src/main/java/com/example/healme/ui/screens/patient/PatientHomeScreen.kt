@@ -350,6 +350,12 @@ fun UpcomingAppointmentCard(
     onDetailsClick: () -> Unit
 ) {
     val appointmentDate = remember(visitData.timestamp) {
+        val timeMillis = try {
+            com.instacart.library.truetime.TrueTime.now().time
+        } catch (e: Exception) {
+            System.currentTimeMillis()
+        }
+
         SimpleDateFormat("EEEE, dd MMMM yyyy 'at' HH:mm", Locale.getDefault())
             .format(Date(visitData.timestamp * 1000))
     }
@@ -404,6 +410,7 @@ fun UpcomingAppointmentCard(
         }
     }
 }
+
 
 /**
  * Composable function to display the visit detail dialog.

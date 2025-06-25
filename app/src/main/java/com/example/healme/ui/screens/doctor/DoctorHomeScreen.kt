@@ -243,8 +243,13 @@ private fun UpcomingAppointmentsSection(navController: NavHostController) {
         }
     }
 
-    val now = TrueTimeRx.now()
-    val startEpoch = now.toInstant().epochSecond
+    val nowMillis = try {
+        com.instacart.library.truetime.TrueTimeRx.now().time
+    } catch (e: Exception) {
+        System.currentTimeMillis()
+    }
+
+    val startEpoch = nowMillis / 1000
     val endEpoch = startEpoch + 7 * 86400
 
     Log.d(TAG, "Time range: $startEpoch to $endEpoch (${Date(startEpoch * 1000)} to ${Date(endEpoch * 1000)})")
@@ -310,6 +315,7 @@ private fun UpcomingAppointmentsSection(navController: NavHostController) {
         }
     }
 }
+
 
 /**
  * Composable function to display a single appointment item in the upcoming appointments section.
