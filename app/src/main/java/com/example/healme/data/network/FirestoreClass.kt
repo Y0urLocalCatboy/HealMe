@@ -31,6 +31,8 @@ import org.json.JSONObject
 import java.util.Calendar
 import java.util.Date
 import java.util.UUID
+import kotlin.text.get
+import kotlin.text.set
 
 
 /**
@@ -486,7 +488,21 @@ class FirestoreClass: FirestoreInterface {
 
     override suspend fun updateDoctorAvailability(doctorId: String, updateMap: Map<String, Any?>) {
         try {
-            fs.collection("availability").document(doctorId).update(updateMap).await()
+            val docRef = fs.collection("availability").document(doctorId)
+            fs.runTransaction { transaction ->
+                val snapshot = transaction.get(docRef)
+
+                if (!snapshot.exists()) {
+                    transaction.set(docRef, mapOf("weeklyAvailability" to emptyMap<String, Any>()))
+                }
+
+                val nonNullUpdateMap = updateMap.filterValues { it != null } as Map<String, Any>
+                if (nonNullUpdateMap.isNotEmpty()) {
+                    transaction.update(docRef, nonNullUpdateMap)
+                }
+
+                null
+            }.await()
         } catch (e: Exception) {
             throw Exception("updateDoctorAvailability: ${e.message}")
         }
