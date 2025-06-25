@@ -7,8 +7,11 @@ import com.example.healme.data.models.Prescription
 import com.example.healme.data.models.Visit
 import com.example.healme.data.models.user.*
 import com.google.firebase.firestore.ListenerRegistration
-import kotlinx.coroutines.tasks.await
 
+/**
+ * Interface defining methods for interacting with Firestore and Firebase services.
+ * This includes user management, messaging, appointments, and medical records.
+ */
 interface FirestoreInterface {
 
     /**
@@ -64,8 +67,6 @@ interface FirestoreInterface {
      * Saves a message to Firestore.
      *
      * @param message The message content.
-     * @param senderId The ID of the sender.
-     * @param receiverId The ID of the receiver.
      * @param onResult Callback function with result (success, message).
      */
     fun saveMessage(
@@ -137,7 +138,8 @@ interface FirestoreInterface {
      * @param doctorId ID of the doctor.
      * @param availabilityMap Availability data to update.
      */
-    suspend fun updateDoctorAvailability(doctorId: String, availabilityMap: Map<String, Any?>)
+    suspend fun updateDoctorAvailability(doctorId: String,
+                                         availabilityMap: Map<String, Any?>)
 
     /**
      * Retrieves availability data for a doctor.
@@ -152,7 +154,8 @@ interface FirestoreInterface {
      * @param id The ID of the user to convert.
      * @param onResult Callback function with result (success, message).
      */
-    suspend fun changeToAdmin(id: String, onResult: (Boolean, String) -> Unit)
+    suspend fun changeToAdmin(id: String,
+                              onResult: (Boolean, String) -> Unit)
 
     /**
      * Retrieves all doctors from the database.
@@ -195,12 +198,7 @@ interface FirestoreInterface {
         onResult: (Boolean, String) -> Unit
     )
 
-    /**
-     * Retrieves all prescriptions for a specific patient.
-     *
-     * @param patientId The ID of the patient.
-     * @return List of prescriptions for the specified patient.
-     */
+
     /**
      * Retrieves all prescriptions assigned to a specific patient.
      *
@@ -224,7 +222,10 @@ interface FirestoreInterface {
      * @param patientId The ID of the patient who is booking the visit.
      * @param timestamp The time (in UTC seconds) at which the visit is scheduled.
      */
-    suspend fun bookVisit(doctorId: String, patientId: String, timestamp: Long)
+    suspend fun bookVisit(doctorId: String,
+                          patientId: String,
+                          timestamp: Long
+    )
 
     /**
      * Retrieves all timestamps for future visits booked with a given doctor.
@@ -241,7 +242,10 @@ interface FirestoreInterface {
      * @param doctorId The ID of the doctor who conducted the visit.
      * @param timestamp The timestamp of the visit that resulted in this medical record.
      */
-    suspend fun addMedicalRecord(patientId: String, doctorId: String, timestamp: Long)
+    suspend fun addMedicalRecord(patientId: String,
+                                 doctorId: String,
+                                 timestamp: Long
+    )
 
     /**
      * Retrieves the entire medical history for a specific patient.
@@ -275,7 +279,10 @@ interface FirestoreInterface {
      * @param userType The type of the user ("patient", "doctor", or "admin").
      * @param token The new FCM token.
      */
-    suspend fun updateUserFcmToken(userId: String, userType: String, token: String)
+    suspend fun updateUserFcmToken(userId: String,
+                                   userType: String,
+                                   token: String
+    )
 
     /**
      * Retrieves the FCM token for a given user.
@@ -284,7 +291,9 @@ interface FirestoreInterface {
      * @param userType The type of the user ("patient", "doctor", or "admin").
      * @return The FCM token, or null if not found.
      */
-    suspend fun getUserFcmToken(userId: String, userType: String): String?
+    suspend fun getUserFcmToken(userId: String,
+                                userType: String
+    ): String?
 
     /**
      * Sends a push notification using Firebase Cloud Messaging (FCM) to a specific device token.
@@ -293,7 +302,10 @@ interface FirestoreInterface {
      * @param title The title of the notification message.
      * @param message The body content of the notification.
      */
-    suspend fun sendNotificationToToken(token: String, title: String, message: String)
+    suspend fun sendNotificationToToken(token: String,
+                                        title: String,
+                                        message: String
+    )
 
     /**
      * Uploads an image to Firebase Storage and returns the download URL.
@@ -302,7 +314,10 @@ interface FirestoreInterface {
      * @param onSuccess Callback function invoked with the download URL on success.
      * @param onFailure Callback function invoked with an exception on failure.
      */
-    fun uploadImage(uri: Uri, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit)
+    fun uploadImage(uri: Uri,
+                    onSuccess: (String) -> Unit,
+                    onFailure: (Exception) -> Unit
+    )
 
     /**
      * Saves an appointment for a specific doctor to Firestore.
@@ -372,6 +387,14 @@ interface FirestoreInterface {
      */
     suspend fun getPastAppointments(doctorId: String): Map<String, Map<String, Any>>?
 
-
+    /**
+     * Updates the status of a specific prescription in Firestore.
+     *
+     * @param prescriptionId The ID of the prescription to update.
+     * @param newStatus The new status to set for the prescription.
+     */
+    suspend fun updatePrescriptionStatus(prescriptionId: String,
+                                         newStatus: String
+    )
 
 }

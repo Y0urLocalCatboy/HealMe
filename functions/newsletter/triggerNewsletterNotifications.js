@@ -1,5 +1,11 @@
 // functions/newsletter/triggerNewsletterNotifications.js
 
+/**
+* Firebase Cloud Function to send newsletters to users based on their roles.
+* It checks the current time against the newsletter timestamp and sends notifications
+* to users who have opted in for newsletters.
+* The function runs every 10 minutes.
+*/
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { logger } = require("firebase-functions");
 const admin = require("firebase-admin");

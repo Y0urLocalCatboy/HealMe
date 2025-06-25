@@ -54,4 +54,25 @@ class PatientViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Updates the status of a prescription.
+     *
+     * @param prescriptionId The ID of the prescription to update.
+     * @param newStatus The new status for the prescription.
+     * @param onResult Callback function invoked with the result of the operation.
+     */
+    fun updatePrescriptionStatus(
+        prescriptionId: String,
+        newStatus: String,
+        onResult: (Boolean) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                fs.updatePrescriptionStatus(prescriptionId, newStatus)
+                onResult(true)
+            } catch (e: Exception) {
+                onResult(false)
+            }
+        }
+    }
 }

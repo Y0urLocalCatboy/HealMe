@@ -9,6 +9,7 @@ package com.example.healme.data.models.user
  * @property surname The surname of the Doctor.
  * @property dateOfBirth The date of birth of the Doctor.
  * @property specialization The speciality of the Doctor.
+ * @property newsletterOptIn Whether the doctor wants to receive newsletters.
  *
  */
 class Doctor(

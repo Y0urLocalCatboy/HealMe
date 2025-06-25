@@ -27,6 +27,13 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * Composable function to display the Doctor's Calendar screen.
+ * Allows doctors to select a week and manage their availability.
+ *
+ * @param doctorId The ID of the doctor whose calendar is being managed.
+ * @param onExit Callback function to handle exit action from the screen.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(doctorId: String, onExit: () -> Unit) {
@@ -114,6 +121,13 @@ fun CalendarScreen(doctorId: String, onExit: () -> Unit) {
     }
 }
 
+/**
+ * Composable function to display the availability picker for a doctor.
+ * Allows the doctor to set their availability for a week.
+ *
+ * @param startDate The start date of the week for which availability is being set.
+ * @param firestore Instance of FirestoreClass to interact
+ */
 @Composable
 private fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, doctorId: String) {
     val context = LocalContext.current
@@ -261,15 +275,22 @@ private fun AvailabilityPicker(startDate: Date, firestore: FirestoreClass, docto
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()
         ) {
+
             Box(modifier = Modifier.size(26.dp).background(green))
             Text(" ${stringResource(R.string.calendar_screen_available)}", fontSize = 14.sp)
+
             Spacer(modifier = Modifier.width(12.dp))
+
             Box(modifier = Modifier.size(26.dp).background(gray))
             Text(" ${stringResource(R.string.calendar_screen_unavailable)}", fontSize = 14.sp)
+
             Spacer(modifier = Modifier.width(12.dp))
+
             Box(modifier = Modifier.size(26.dp).background(darkerRed))
             Text(" ${stringResource(R.string.calendar_screen_booked)}", fontSize = 14.sp)
+
             Spacer(modifier = Modifier.width(12.dp))
+
             Box(modifier = Modifier.size(26.dp).background(colorResource(id = R.color.dark_uneditable_gray)))
             Text(" ${stringResource(R.string.calendar_screen_past)}", fontSize = 14.sp)
         }

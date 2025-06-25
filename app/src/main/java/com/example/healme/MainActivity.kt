@@ -8,7 +8,6 @@ import androidx.activity.compose.setContent
 import androidx.navigation.compose.rememberNavController
 import com.example.healme.ui.navigation.NavGraph
 import com.example.healme.ui.theme.HealMeTheme
-import android.app.Application
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.result.contract.ActivityResultContracts

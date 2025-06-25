@@ -1,3 +1,11 @@
+// functions/past_appointments/cleanOldAvailabilities.js
+
+/**
+* Firebase Cloud Function to clean up old availability slots in the Firestore database.
+* It runs every 30 minutes and removes slots that are in the past.
+* The function checks the 'availability' collection and updates each document's 'weeklyAvailability' field.
+*/
+
 const { initializeApp, applicationDefault } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");

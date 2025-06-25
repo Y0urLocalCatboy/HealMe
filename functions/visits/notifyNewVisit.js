@@ -1,3 +1,11 @@
+// functions/visits/notifyNewVisit.js
+
+/**
+* Firebase Cloud Function to notify patients of new appointments.
+* It triggers on document writes to the "visits" collection and sends
+* notifications to patients when a new visit is added.
+*/
+
 const { onDocumentWritten } = require("firebase-functions/v2/firestore");
 const admin = require("firebase-admin");
 const { logger } = require("firebase-functions");

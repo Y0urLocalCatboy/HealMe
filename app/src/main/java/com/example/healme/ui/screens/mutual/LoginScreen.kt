@@ -13,10 +13,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.healme.R
 import com.example.healme.data.network.FirestoreClass
 import com.google.firebase.auth.FirebaseAuth
@@ -45,7 +43,7 @@ fun LoginScreen(navController: NavController) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            painter = painterResource(id = R.drawable.logohealme),
+            painter = painterResource(id = R.drawable.logohealmemain),
             contentDescription = "App Logo",
             modifier = Modifier
                 .size(260.dp)

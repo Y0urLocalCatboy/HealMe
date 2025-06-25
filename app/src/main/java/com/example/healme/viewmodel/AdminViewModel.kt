@@ -3,7 +3,6 @@ package com.example.healme.viewmodel
 import com.google.firebase.firestore.ListenerRegistration
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.healme.R
 import com.example.healme.data.models.user.Doctor
 import com.example.healme.data.models.user.Patient
 import com.example.healme.data.models.user.User
@@ -11,7 +10,7 @@ import com.example.healme.data.network.FirestoreClass
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlin.collections.remove
+
 /**
  * ViewModel class for managing admin-related data and operations.
  *

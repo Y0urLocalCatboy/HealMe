@@ -1,3 +1,12 @@
+// functions/reminders/sendAppointmentReminders.js
+
+/**
+* Firebase Cloud Function to send appointment reminders to patients.
+* It checks for appointments scheduled within the next 24 hours and sends
+* notifications to patients with valid FCM tokens.
+* The function runs every hour.
+*/
+
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const admin = require("firebase-admin");
 const { logger } = require("firebase-functions");

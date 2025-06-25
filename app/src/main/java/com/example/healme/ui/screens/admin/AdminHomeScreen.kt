@@ -31,8 +31,6 @@ import com.example.healme.data.models.user.User
 import com.example.healme.ui.components.menu.CalendarPicker
 import com.example.healme.viewmodel.AdminViewModel
 import com.google.firebase.auth.FirebaseAuth
-import kotlin.text.compareTo
-import kotlin.text.get
 
 /**
  * AdminHomeScreen is the main screen for the admin panel.

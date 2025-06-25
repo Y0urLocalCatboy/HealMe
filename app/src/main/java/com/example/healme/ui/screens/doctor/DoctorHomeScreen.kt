@@ -39,10 +39,8 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.text.SimpleDateFormat
-import java.time.ZoneId
 import java.util.Date
 import java.util.Locale
-import com.instacart.library.truetime.TrueTimeRx
 
 
 /**

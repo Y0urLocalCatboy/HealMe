@@ -9,13 +9,16 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.healme.MainActivity
-import com.example.healme.R
-import com.example.healme.data.network.FirestoreClass
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
+/**
+ * MyFirebaseMessagingService is a custom Firebase Messaging Service that handles FCM token updates
+ * and incoming messages. It updates the FCM token in Firestore based on the user type (patient, doctor, or admin)
+ * and displays notifications when messages are received.
+ */
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     /**
@@ -127,6 +130,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
+    /**
+     * Displays a notification with the given title and message.
+     *
+     * @param title The title of the notification.
+     * @param message The message content of the notification.
+     */
     private fun showNotification(title: String, message: String) {
         Log.d("FCM", "Attempting to show notification: $title - $message")
 

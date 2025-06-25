@@ -27,7 +27,6 @@ import com.example.healme.R
 fun PatientMedicalHistoryScreen(navController: NavController) {
     val firestore = remember { FirestoreClass() }
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
 
     var records by remember { mutableStateOf<List<MedicalHistory>>(emptyList()) }
@@ -52,7 +51,7 @@ fun PatientMedicalHistoryScreen(navController: NavController) {
             LazyColumn {
                 items(records.sortedByDescending { it.timestamp }) { record ->
                     val dateFormatted = SimpleDateFormat("EEE, dd MMM yyyy HH:mm", Locale.getDefault())
-                        .format(Date(record.timestamp * 1000)) // convert to milliseconds
+                        .format(Date(record.timestamp * 1000))
 
                     Card(
                         modifier = Modifier

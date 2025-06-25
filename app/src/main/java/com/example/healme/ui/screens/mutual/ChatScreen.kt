@@ -608,7 +608,7 @@ fun ChatContent(
                                             outputFile
                                         )
 
-                                        intent.setDataAndType(uri, getMimeType(fileName))
+                                        intent.setDataAndType(uri, getFileType(fileName))
                                         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
                                         try {
@@ -691,10 +691,10 @@ fun ChatContent(
  * Retrieves the file name from a URI.
  *
  * @param uri The URI of the file.
- * @param context The context to access content resolver.
+ *
  * @return The name of the file, or "unknown_file" if it cannot be determined.
  */
-private fun getMimeType(fileName: String): String {
+private fun getFileType(fileName: String): String {
     return when {
         fileName.endsWith(".pdf", ignoreCase = true) -> "application/pdf"
         fileName.endsWith(".doc", ignoreCase = true) || fileName.endsWith(".docx", ignoreCase = true) ->

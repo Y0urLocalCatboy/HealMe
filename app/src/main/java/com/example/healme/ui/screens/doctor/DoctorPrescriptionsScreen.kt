@@ -1,3 +1,5 @@
+package com.example.healme.ui.screens.doctor
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -57,10 +59,13 @@ fun DoctorPrescriptionsScreen(
     val currentUser = auth.currentUser
     var patients by remember { mutableStateOf<List<Patient>>(emptyList()) }
     var prescriptions by remember { mutableStateOf<List<Prescription>?>(emptyList()) }
+    var doctor: Map<String, Any?>? by remember { mutableStateOf(null) }
 
     LaunchedEffect(key1 = selectedPatient) {
         coroutineScope.launch {
             patients = viewModel.getDoctorsPatients(currentUser?.uid.toString()) ?: emptyList()
+            doctor = viewModel.getDoctorById(currentUser?.uid?: "" )
+
             if (selectedPatient != null) {
                 prescriptions = viewModel.loadPrescriptions(selectedPatient?.id?:"") ?: emptyList()
             } else {
@@ -98,7 +103,7 @@ fun DoctorPrescriptionsScreen(
                 instructions = instructions,
                 dateIssued = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                     .format(Date()),
-                doctorName = "Dr.",
+                doctorName = "${doctor?.get("name")?.toString() ?: " "} ${doctor?.get("surname")?.toString() ?: ""}",
                 status = "Active"
             )
             coroutineScope.launch {

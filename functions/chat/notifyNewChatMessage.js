@@ -1,3 +1,10 @@
+// functions/chat/notifyNewMessage.js
+
+/**
+* @description Firebase Cloud Function to send notifications for new chat messages.
+* It triggers on updates to the "messages" collection and sends notifications
+* to the receiver of the message if they have an FCM token.
+*/
 const { onDocumentUpdated } = require("firebase-functions/v2/firestore");
 const admin = require("firebase-admin");
 const { logger } = require("firebase-functions");

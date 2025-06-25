@@ -1,6 +1,6 @@
 package com.example.healme.ui.navigation
 
-import DoctorPrescriptionsScreen
+import com.example.healme.ui.screens.doctor.DoctorPrescriptionsScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController

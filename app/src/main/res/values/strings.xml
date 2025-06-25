@@ -191,6 +191,10 @@
     <string name="patient_prescriptions_error">Could not load prescriptions. Please try again.</string>
     <string name="patient_prescriptions_no_data">Failed to load prescriptions.</string>
     <string name="patient_prescriptions_error_message">User not logged in.</string>
+    <string name="patient_prescriptions_generate_pdf_button">Generate PDF</string>
+    <string name="patient_prescriptions_pdf_generated_toast">Prescription saved to PDF</string>
+    <string name="patient_prescriptions_pdf_generation_failed">Error generating PDF</string>
+    <string name="patient_prescriptions_status_update_failed">Failed to update prescription status.</string>
 
     <!-- String used for back arrow top bar -->
     <string name="back_arrow">Back</string>
@@ -283,6 +287,5 @@
     <string name="doctor_past_appointments_none">No past appointments found.</string>
     <string name="doctor_past_appointments_patient_id">Patient Name: %1$s</string>
     <string name="doctor_past_appointments_date_time">Date &amp; Time: %1$s</string>
-
 
 </resources>

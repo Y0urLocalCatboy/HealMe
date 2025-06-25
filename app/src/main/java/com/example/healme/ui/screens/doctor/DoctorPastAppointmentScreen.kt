@@ -1,6 +1,5 @@
 package com.example.healme.ui.screens.doctor
 
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items

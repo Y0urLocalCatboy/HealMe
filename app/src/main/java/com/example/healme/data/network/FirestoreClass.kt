@@ -2,7 +2,6 @@ package com.example.healme.data.network
 
 import android.net.Uri
 import android.util.Log
-import androidx.compose.ui.res.stringResource
 import com.example.healme.data.models.MedicalHistory
 import com.example.healme.data.models.Message
 import com.example.healme.data.models.Message.MessageType
@@ -11,8 +10,7 @@ import com.example.healme.data.models.Visit
 import com.example.healme.data.models.user.Doctor
 import com.example.healme.data.models.user.Patient
 import com.example.healme.data.models.user.User
-import com.example.healme.data.network.FirestoreInterface
-import com.google.android.gms.tasks.Task
+
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
@@ -33,11 +31,13 @@ import org.json.JSONObject
 import java.util.Calendar
 import java.util.Date
 import java.util.UUID
-import kotlin.text.get
-import kotlin.text.set
-import kotlin.toString
 
 
+/**
+ * FirestoreClass is an implementation of FirestoreInterface that provides methods
+ * to interact with Firebase Firestore and Firebase Authentication.
+ *
+ */
 class FirestoreClass: FirestoreInterface {
 
     private val db = Firebase.firestore
@@ -1057,5 +1057,16 @@ class FirestoreClass: FirestoreInterface {
                 onFailure(exception)
 
             }
+    }
+
+    override suspend fun updatePrescriptionStatus(prescriptionId: String, newStatus: String) {
+        try {
+            db.collection("prescriptions")
+                .document(prescriptionId)
+                .update("status", newStatus)
+                .await()
+        } catch (e: Exception) {
+            throw Exception("Failed to update prescription status: ${e.message}")
+        }
     }
 }
