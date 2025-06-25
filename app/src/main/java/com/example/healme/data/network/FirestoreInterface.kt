@@ -198,7 +198,6 @@ interface FirestoreInterface {
         onResult: (Boolean, String) -> Unit
     )
 
-
     /**
      * Retrieves all prescriptions assigned to a specific patient.
      *
@@ -397,4 +396,29 @@ interface FirestoreInterface {
                                          newStatus: String
     )
 
+    /**
+     * Adds a patient to a doctor's list of patients in Firestore.
+     *
+     * @param doctorId The ID of the doctor to whom the patient is being added.
+     * @param patientId The ID of the patient being added.
+     * @param onResult Callback function with result (success, message).
+     */
+    suspend fun addPatientToDoctor(
+        doctorId: String,
+        patientId: String,
+        onResult: (Boolean, String) -> Unit
+    )
+
+    /**
+     * Removes a patient from a doctor's list of patients in Firestore.
+     *
+     * @param doctorId The ID of the doctor from whom the patient is being removed.
+     * @param patientId The ID of the patient being removed.
+     * @param onResult Callback function with result (success, message).
+     */
+    suspend fun removePatientFromDoctor(
+        doctorId: String,
+        patientId: String,
+        onResult: (Boolean, String) -> Unit
+    )
 }

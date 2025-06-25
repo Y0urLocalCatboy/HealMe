@@ -10,7 +10,6 @@ import com.example.healme.data.models.Visit
 import com.example.healme.data.models.user.Doctor
 import com.example.healme.data.models.user.Patient
 import com.example.healme.data.models.user.User
-
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
@@ -31,8 +30,7 @@ import org.json.JSONObject
 import java.util.Calendar
 import java.util.Date
 import java.util.UUID
-import kotlin.text.get
-import kotlin.text.set
+
 
 
 /**
@@ -751,7 +749,8 @@ class FirestoreClass: FirestoreInterface {
             val docSnapshot = fs.collection("visits").document(patientId).get().await()
             if (!docSnapshot.exists()) return null
 
-            val visitsMap = docSnapshot.get("visits") as? Map<String, Map<String, Any>> ?: return null
+            val visitsMap =
+                docSnapshot.get("visits") as? Map<String, Map<String, Any>> ?: return null
 
             val currentTimestamp = try {
                 TrueTimeRx.now().toInstant().epochSecond
@@ -768,7 +767,8 @@ class FirestoreClass: FirestoreInterface {
                 } else null
             }.minByOrNull { it.timestamp } ?: return null
 
-            val doctorSnapshot = fs.collection("doctors").document(upcomingVisitEntry.doctorId).get().await()
+            val doctorSnapshot =
+                fs.collection("doctors").document(upcomingVisitEntry.doctorId).get().await()
             val doctor = doctorSnapshot.toObject(Doctor::class.java) ?: return null
 
             Pair(upcomingVisitEntry, doctor)
@@ -815,13 +815,13 @@ class FirestoreClass: FirestoreInterface {
     }
 
 
-
     override suspend fun cleanUpPastAppointments(doctorId: String) {
         try {
             val docRef = fs.collection("appointments").document(doctorId).get().await()
             if (!docRef.exists()) return
 
-            val appointmentsMap = docRef.get("appointments") as? Map<String, Map<String, Any>> ?: return
+            val appointmentsMap =
+                docRef.get("appointments") as? Map<String, Map<String, Any>> ?: return
 
             val currentTimestamp = try {
                 TrueTimeRx.now().toInstant().epochSecond
@@ -839,7 +839,8 @@ class FirestoreClass: FirestoreInterface {
             val pastDocRef = fs.collection("pastappointments").document(doctorId)
             pastDocRef.set(mapOf("appointments" to pastAppointments), SetOptions.merge()).await()
 
-            val updates = pastAppointments.keys.associate { "appointments.$it" to FieldValue.delete() }
+            val updates =
+                pastAppointments.keys.associate { "appointments.$it" to FieldValue.delete() }
             fs.collection("appointments").document(doctorId).update(updates).await()
 
             println("Successfully cleaned past appointments for doctor $doctorId")
@@ -1083,6 +1084,34 @@ class FirestoreClass: FirestoreInterface {
                 .await()
         } catch (e: Exception) {
             throw Exception("Failed to update prescription status: ${e.message}")
+        }
+    }
+
+    override suspend fun addPatientToDoctor(
+        doctorId: String,
+        patientId: String,
+        onResult: (Boolean, String) -> Unit
+    ) {
+        try {
+            val doctorRef = db.collection("doctors").document(doctorId)
+            doctorRef.update("patients", FieldValue.arrayUnion(patientId)).await()
+            onResult(true, "Success")
+        } catch (e: Exception) {
+            onResult(false, "${e.message}" ?: "Failed to add patient to doctor")
+        }
+    }
+
+    override suspend fun removePatientFromDoctor(
+        doctorId: String,
+        patientId: String,
+        onResult: (Boolean, String) -> Unit
+    ) {
+        try {
+            val doctorRef = db.collection("doctors").document(doctorId)
+            doctorRef.update("patients", FieldValue.arrayRemove(patientId)).await()
+            onResult(true, "Success")
+        } catch (e: Exception) {
+            onResult(false, "${e.message}" ?: "Failed to remove patient from doctor")
         }
     }
 }

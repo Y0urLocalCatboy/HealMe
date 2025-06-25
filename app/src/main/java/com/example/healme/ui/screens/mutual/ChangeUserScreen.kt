@@ -28,8 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -41,7 +41,15 @@ import com.example.healme.viewmodel.AdminViewModel
 import com.example.healme.viewmodel.LoginViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
-import kotlin.text.get
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.RadioButton
+import androidx.compose.runtime.collectAsState
+import com.example.healme.data.models.user.Patient
+
 
 /**
  * ChangeUserScreen is a Composable function that displays a screen for changing user information.
@@ -60,6 +68,7 @@ fun ChangeUserScreen(navController: NavController,
 
     val fs = FirestoreClass()
     val auth = FirebaseAuth.getInstance()
+    val context = LocalContext.current
 
     val currentUserId = if(userId != "null") userId else auth.currentUser?.uid
     val coroutineScope = rememberCoroutineScope()
@@ -93,6 +102,12 @@ fun ChangeUserScreen(navController: NavController,
     var initialSpecialization by remember { mutableStateOf("") }
 
     var showConfirmDialog by remember { mutableStateOf(false) }
+    var showAddPatientDialog by remember { mutableStateOf(false) }
+    var showResultDialog by remember { mutableStateOf(false) }
+    var resultMessage by remember { mutableStateOf("") }
+    val allPatients by adminViewModel.allPatients.collectAsState()
+    var showRemovePatientDialog by remember { mutableStateOf(false) }
+    val doctorPatients by adminViewModel.doctorPatients.collectAsState()
 
     var dataLoaded by remember { mutableStateOf(false) }
     LaunchedEffect(currentUserId) {
@@ -126,6 +141,11 @@ fun ChangeUserScreen(navController: NavController,
             initialDateOfBirth = loadedDob
 
             dataLoaded = true
+        }
+
+        if (adminMode || isDoctor) {
+            adminViewModel.loadAllPatients()
+            currentUserId?.let { adminViewModel.loadPatientsForDoctor(it)}
         }
     }
 
@@ -175,6 +195,66 @@ fun ChangeUserScreen(navController: NavController,
         )
     }
 
+    if (showAddPatientDialog) {
+        AddPatientDialog(
+            patients = allPatients,
+            onDismiss = { showAddPatientDialog = false },
+            onConfirm = { patientId ->
+                showAddPatientDialog = false
+                coroutineScope.launch {
+                    currentUserId?.let { doctorId ->
+                        fs.addPatientToDoctor(doctorId, patientId) { success, message ->
+                            resultMessage = if (success) {
+                                context.getString(R.string.edit_profile_add_patient_success)
+                            } else {
+                                context.getString(R.string.edit_profile_add_patient_failure, message)
+                            }
+                            showResultDialog = true
+                        }
+                    }
+                }
+            }
+        )
+    }
+
+    if (showRemovePatientDialog) {
+        RemovePatientDialog(
+            patients = doctorPatients,
+            onDismiss = { showRemovePatientDialog = false },
+            onConfirm = { patientId ->
+                showRemovePatientDialog = false
+                coroutineScope.launch {
+                    currentUserId?.let { doctorId ->
+                        fs.removePatientFromDoctor(doctorId, patientId) { success, message ->
+                            resultMessage = if (success) {
+                                context.getString(R.string.edit_profile_remove_patient_success)
+                            } else {
+                                context.getString(R.string.edit_profile_remove_patient_failure, message)
+                            }
+                            showResultDialog = true
+                            if (success) {
+                                adminViewModel.loadPatientsForDoctor(doctorId)
+                            }
+                        }
+                    }
+                }
+            }
+        )
+    }
+
+    if (showResultDialog) {
+        AlertDialog(
+            onDismissRequest = { showResultDialog = false },
+            title = { Text(stringResource(R.string.edit_profile_operation_result_title)) },
+            text = { Text(resultMessage) },
+            confirmButton = {
+                Button(onClick = { showResultDialog = false }) {
+                    Text(stringResource(R.string.confirm_button))
+                }
+            }
+        )
+    }
+
     ChangeUserContent(
         adminMode = adminMode,
         isDoctor = isDoctor,
@@ -207,6 +287,12 @@ fun ChangeUserScreen(navController: NavController,
         },
         onNavigateBack = {
             navController.popBackStack()
+        },
+        onAddPatientClick = {
+            showAddPatientDialog = true
+        },
+        onRemovePatientClick = {
+            showRemovePatientDialog = true
         }
     )
 }
@@ -257,8 +343,10 @@ fun ChangeUserContent(
     onSaveClick: () -> Unit,
     onToggleDoctorStatus: () -> Unit = {},
     onCancelClick: () -> Unit = {},
-    onNavigateBack: () -> Unit = {}
-    ) {
+    onNavigateBack: () -> Unit = {},
+    onAddPatientClick: () -> Unit = {},
+    onRemovePatientClick: () -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -267,7 +355,7 @@ fun ChangeUserContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        if(isDoctor){
+        if (isDoctor) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -284,7 +372,30 @@ fun ChangeUserContent(
                 }
             }
         }
+
         Spacer(modifier = Modifier.height(8.dp))
+
+        if (adminMode || isDoctor) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                Button(
+                    onClick = onAddPatientClick,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(stringResource(R.string.edit_profile_add_patient))
+                }
+                Spacer(Modifier.width(8.dp))
+                Button(
+                    onClick = onRemovePatientClick,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(stringResource(R.string.edit_profile_remove_patient))
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(errorMessage, color = Color.Red, fontSize = 14.sp)
         if (adminMode) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 Button(
@@ -490,6 +601,126 @@ fun ConfirmChangesDialog(
         },
         confirmButton = {
             Button(onClick = onConfirm) {
+                Text(stringResource(R.string.confirm_button))
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel_button))
+            }
+        }
+    )
+}
+
+/**
+ * AddPatientDialog is a Composable function that displays a dialog to add a patient to a doctor's list.
+ *
+ * @param patients The list of all patients available for selection.
+ * @param onDismiss Callback for dismissing the dialog.
+ * @param onConfirm Callback for confirming the addition of a patient.
+ */
+@Composable
+fun AddPatientDialog(
+    patients: List<Patient>,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var selectedPatientId by remember { mutableStateOf<String?>(null) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.edit_profile_select_patient_title)) },
+        text = {
+            if (patients.isEmpty()) {
+                Text("No patients available to add.")
+            } else {
+                LazyColumn {
+                    items(patients) { patient ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable { selectedPatientId = patient.id }
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = (selectedPatientId == patient.id),
+                                onClick = { selectedPatientId = patient.id }
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text("${patient.name} ${patient.surname}")
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    selectedPatientId?.let { onConfirm(it) }
+                },
+                enabled = selectedPatientId != null
+            ) {
+                Text(stringResource(R.string.confirm_button))
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel_button))
+            }
+        }
+    )
+}
+
+/**
+ * RemovePatientDialog is a Composable function that displays a dialog to remove a patient from a doctor's list.
+ *
+ * @param patients The list of patients associated with the doctor.
+ * @param onDismiss Callback for dismissing the dialog.
+ * @param onConfirm Callback for confirming the removal of a patient.
+ */
+@Composable
+fun RemovePatientDialog(
+    patients: List<Patient>,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var selectedPatientId by remember { mutableStateOf<String?>(null) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.edit_profile_select_patient_to_remove_title)) },
+        text = {
+            if (patients.isEmpty()) {
+                Text(stringResource(R.string.edit_profile_no_patients_to_remove))
+            } else {
+                LazyColumn {
+                    items(patients) { patient ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable { selectedPatientId = patient.id }
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = (selectedPatientId == patient.id),
+                                onClick = { selectedPatientId = patient.id }
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text("${patient.name} ${patient.surname}")
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    selectedPatientId?.let { onConfirm(it) }
+                },
+                enabled = selectedPatientId != null && patients.isNotEmpty()
+            ) {
                 Text(stringResource(R.string.confirm_button))
             }
         },

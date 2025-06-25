@@ -94,10 +94,21 @@
     <string name="edit_profile_confirm_role">Role</string>
     <string name="edit_profile_confirm_role_doctor">Doctor</string>
     <string name="edit_profile_confirm_role_patient">Patient</string>
+    <string name="edit_profile_add_patient">Add Patient</string>
+    <string name="edit_profile_select_patient_title">Select Patient to Add</string>
+    <string name="edit_profile_operation_result_title">Operation Result</string>
+    <string name="edit_profile_add_patient_success">Patient added successfully.</string>
+    <string name="edit_profile_add_patient_failure">Error: %1$s</string>
+    <string name="edit_profile_remove_patient">Remove Patient</string>
+    <string name="edit_profile_select_patient_to_remove_title">Select Patient to Remove</string>
+    <string name="edit_profile_remove_patient_success">Patient removed successfully.</string>
+    <string name="edit_profile_remove_patient_failure">Error removing patient: %1$s</string>
+    <string name="edit_profile_no_patients_to_remove">This doctor has no patients to remove.</string>
+
 
     <!-- Strings used for administrator panel -->
     <string name="admin_panel_title">Administrator Panel</string>
-    <string name="admin_panel_admin">Administrator</string>
+    <string name="admin_panel_admin">Admin</string>
     <string name="admin_panel_doctor">Doctor</string>
     <string name="admin_panel_patient">Patient</string>
     <string name="admin_panel_next">Next user</string>

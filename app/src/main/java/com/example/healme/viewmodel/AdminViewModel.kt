@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+
 /**
  * ViewModel class for managing admin-related data and operations.
  *
@@ -34,11 +35,42 @@ class AdminViewModel : ViewModel() {
 
     private val allUsers = mutableListOf<User>()
 
+    private val _allPatients = MutableStateFlow<List<Patient>>(emptyList())
+    val allPatients: StateFlow<List<Patient>> = _allPatients
+
+    private val _doctorPatients = MutableStateFlow<List<Patient>>(emptyList())
+    val doctorPatients: StateFlow<List<Patient>> = _doctorPatients
+
+    /**
+     * Loads patients associated with a specific doctor and updates the _doctorPatients flow.
+     *
+     * @param doctorId The ID of the doctor whose patients are to be loaded.
+     */
+    fun loadPatientsForDoctor(doctorId: String) {
+        viewModelScope.launch {
+            val patients = firestoreClass.patientsFromDoctor(doctorId)
+            _doctorPatients.value = patients ?: emptyList()
+        }
+    }
+
+    /**
+     * Loads all patients from Firestore and updates the _allPatients flow.
+     */
+    fun loadAllPatients() {
+        viewModelScope.launch {
+            val patients = firestoreClass.getAllPatients()
+            if (patients != null) {
+                _allPatients.value = patients
+            }
+        }
+    }
+
     /**
      * Initializes the ViewModel and starts listening for users.
      */
     init {
         startListeningForUsers()
+        loadAllPatients()
     }
 
     private var patientListener: ListenerRegistration? = null
@@ -126,4 +158,6 @@ class AdminViewModel : ViewModel() {
         doctorListener?.remove()
         super.onCleared()
     }
+
+
 }
