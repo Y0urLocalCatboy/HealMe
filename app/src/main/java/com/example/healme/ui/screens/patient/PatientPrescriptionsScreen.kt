@@ -2,6 +2,7 @@ package com.example.healme.ui.screens.patient
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.pdf.PdfDocument
 import android.os.Environment
@@ -9,6 +10,9 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,9 +35,12 @@ import com.google.firebase.auth.FirebaseAuth
 import java.io.File
 import java.io.FileOutputStream
 import androidx.core.graphics.scale
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.qrcode.QRCodeWriter
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import androidx.core.graphics.set
 
 /** Composable function to display the Patient's Prescriptions screen.
  *
@@ -174,6 +181,11 @@ fun PrescriptionCard(prescription: Prescription,
     val statusUpdateFailedToast =
         stringResource(R.string.patient_prescriptions_status_update_failed)
 
+    val qrGeneratedToast =
+        stringResource(id = R.string.patient_prescriptions_qr_generated_toast)
+    val qrGenerationFailedToast =
+        stringResource(id = R.string.patient_prescriptions_qr_generation_failed)
+
     var status by remember(prescription.status) { mutableStateOf(prescription.status) }
 
     Card(
@@ -257,121 +269,212 @@ fun PrescriptionCard(prescription: Prescription,
                 Spacer(modifier = Modifier.height(8.dp))
 
                 if(prescription.status == "Active") {
-                    Button(
-                        onClick = {
-                            try {
-                                val pdfDocument = PdfDocument()
-                                val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create()
-                                val page = pdfDocument.startPage(pageInfo)
-                                val canvas = page.canvas
-                                val paint = android.graphics.Paint()
+                    Row {
+                        IconButton(
+                            onClick = {
+                                try {
+                                    val prescriptionInfo = """
+                                    Medication: ${prescription.medicationName}
+                                    Dosage: ${prescription.dosage}
+                                    Instructions: ${prescription.instructions}
+                                    Date Issued: ${prescription.dateIssued}
+                                    Issued by: Dr. ${prescription.doctorName}
+                                """.trimIndent()
 
-                                paint.textSize = 20f
-                                paint.isFakeBoldText = true
-                                canvas.drawText("Prescription Details", 40f, 50f, paint)
-                                paint.isFakeBoldText = false
-                                paint.textSize = 14f
-
-                                var yPos = 80f
-                                val lineSpacing = 20f
-
-                                canvas.drawText(
-                                    "Medication: ${prescription.medicationName}",
-                                    40f,
-                                    yPos,
-                                    paint
-                                ); yPos += lineSpacing
-                                canvas.drawText(
-                                    "Dosage: ${prescription.dosage}",
-                                    40f,
-                                    yPos,
-                                    paint
-                                ); yPos += lineSpacing
-                                canvas.drawText(
-                                    "Instructions: ${prescription.instructions}",
-                                    40f,
-                                    yPos,
-                                    paint
-                                ); yPos += lineSpacing
-                                canvas.drawText(
-                                    "Date Issued: ${prescription.dateIssued}",
-                                    40f,
-                                    yPos,
-                                    paint
-                                ); yPos += lineSpacing
-                                canvas.drawText(
-                                    "Issued by: Dr. ${prescription.doctorName}",
-                                    40f,
-                                    yPos,
-                                    paint
-                                ); yPos += lineSpacing
-                                canvas.drawText("Status: Active", 40f, yPos, paint)
-
-                                val logoBitmap = BitmapFactory.decodeResource(
-                                    context.resources,
-                                    R.drawable.logohealme
-                                )
-                                val scaledLogo = logoBitmap.scale(80, 80, false)
-                                canvas.drawBitmap(
-                                    scaledLogo,
-                                    (pageInfo.pageWidth - scaledLogo.width - 40).toFloat(),
-                                    (pageInfo.pageHeight - scaledLogo.height - 40).toFloat(),
-                                    null
-                                )
-
-                                pdfDocument.finishPage(page)
-
-                                val outputDir =
-                                    context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
-                                val file = File(outputDir, "Prescription_${prescription.id}.pdf")
-                                pdfDocument.writeTo(FileOutputStream(file))
-                                pdfDocument.close()
-
-                                val fileUri = FileProvider.getUriForFile(
-                                    context,
-                                    "${context.packageName}.provider",
-                                    file
-                                )
-                                val intent = Intent(Intent.ACTION_VIEW).apply {
-                                    setDataAndType(fileUri, "application/pdf")
-                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                }
-                                context.startActivity(intent)
-                                Toast.makeText(context, pdfGeneratedToast, Toast.LENGTH_LONG).show()
-
-                                if (!status.equals("Filled", ignoreCase = true)) {
-                                    patientViewModel.updatePrescriptionStatus(
-                                        prescription.id,
-                                        "Filled"
-                                    ) { success ->
-                                        if (success) {
-                                            status = "Filled"
-                                        } else {
-                                            Toast.makeText(
-                                                context,
-                                                statusUpdateFailedToast,
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+                                    val writer = QRCodeWriter()
+                                    val bitMatrix = writer.encode(
+                                        prescriptionInfo,
+                                        BarcodeFormat.QR_CODE,
+                                        512,
+                                        512
+                                    )
+                                    val width = bitMatrix.width
+                                    val height = bitMatrix.height
+                                    val bmp =
+                                        Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+                                    for (x in 0 until width) {
+                                        for (y in 0 until height) {
+                                            bmp[x, y] =
+                                                if (bitMatrix[x, y]) android.graphics.Color.BLACK else android.graphics.Color.WHITE
                                         }
                                     }
+                                    val downloadsDir =
+                                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+
+                                    if (!downloadsDir.exists()) {
+                                        downloadsDir.mkdirs()
+                                    }
+                                    val file = File(downloadsDir, "Prescription-QR-${prescription.id}.png")
+
+
+                                    FileOutputStream(file).use { out ->
+                                        bmp.compress(Bitmap.CompressFormat.PNG, 100, out)
+                                    }
+
+                                    Toast.makeText(context, qrGeneratedToast, Toast.LENGTH_LONG)
+                                        .show()
+
+                                    if (!status.equals("Filled", ignoreCase = true)) {
+                                        patientViewModel.updatePrescriptionStatus(
+                                            prescription.id,
+                                            "Filled"
+                                        ) { success ->
+                                            if (success) {
+                                                status = "Filled"
+                                            } else {
+                                                Toast.makeText(
+                                                    context,
+                                                    statusUpdateFailedToast,
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        }
+                                    }
+
+                                    navController.popBackStack()
+                                    navController.navigate("patient")
+
+                                } catch (e: Exception) {
+                                    Toast.makeText(
+                                        context,
+                                        "$qrGenerationFailedToast: ${e.message}",
+                                        Toast.LENGTH_LONG
+                                    ).show()
                                 }
-
-                                navController.popBackStack()
-                                navController.navigate("patient")
-
-                            } catch (e: ActivityNotFoundException) {
-                                Toast.makeText(context, "No PDF viewer found.", Toast.LENGTH_SHORT)
-                                    .show()
-                            } catch (e: Exception) {
-                                Toast.makeText(
-                                    context,
-                                    "$pdfGenerationFailedToast: ${e.message}",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            }
+                            },
+                            modifier = Modifier.padding(end = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.QrCode,
+                                contentDescription = stringResource(id = R.string.patient_prescriptions_generate_qr_button)
+                            )
                         }
-                    ) {
-                        Text(stringResource(id = R.string.patient_prescriptions_generate_pdf_button))
+                        IconButton(
+                            onClick = {
+                                try {
+                                    val pdfDocument = PdfDocument()
+                                    val pageInfo =
+                                        PdfDocument.PageInfo.Builder(595, 842, 1).create()
+                                    val page = pdfDocument.startPage(pageInfo)
+                                    val canvas = page.canvas
+                                    val paint = android.graphics.Paint()
+
+                                    paint.textSize = 20f
+                                    paint.isFakeBoldText = true
+                                    canvas.drawText("Prescription Details", 40f, 50f, paint)
+                                    paint.isFakeBoldText = false
+                                    paint.textSize = 14f
+
+                                    var yPos = 80f
+                                    val lineSpacing = 20f
+
+                                    canvas.drawText(
+                                        "Medication: ${prescription.medicationName}",
+                                        40f,
+                                        yPos,
+                                        paint
+                                    ); yPos += lineSpacing
+                                    canvas.drawText(
+                                        "Dosage: ${prescription.dosage}",
+                                        40f,
+                                        yPos,
+                                        paint
+                                    ); yPos += lineSpacing
+                                    canvas.drawText(
+                                        "Instructions: ${prescription.instructions}",
+                                        40f,
+                                        yPos,
+                                        paint
+                                    ); yPos += lineSpacing
+                                    canvas.drawText(
+                                        "Date Issued: ${prescription.dateIssued}",
+                                        40f,
+                                        yPos,
+                                        paint
+                                    ); yPos += lineSpacing
+                                    canvas.drawText(
+                                        "Issued by: Dr. ${prescription.doctorName}",
+                                        40f,
+                                        yPos,
+                                        paint
+                                    ); yPos += lineSpacing
+                                    canvas.drawText("Status: Active", 40f, yPos, paint)
+
+                                    val logoBitmap = BitmapFactory.decodeResource(
+                                        context.resources,
+                                        R.drawable.logohealme
+                                    )
+                                    val scaledLogo = logoBitmap.scale(80, 80, false)
+                                    canvas.drawBitmap(
+                                        scaledLogo,
+                                        (pageInfo.pageWidth - scaledLogo.width - 40).toFloat(),
+                                        (pageInfo.pageHeight - scaledLogo.height - 40).toFloat(),
+                                        null
+                                    )
+
+                                    pdfDocument.finishPage(page)
+
+                                    val outputDir =
+                                        context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+                                    val file =
+                                        File(outputDir, "Prescription_${prescription.id}.pdf")
+                                    pdfDocument.writeTo(FileOutputStream(file))
+                                    pdfDocument.close()
+
+                                    val fileUri = FileProvider.getUriForFile(
+                                        context,
+                                        "${context.packageName}.provider",
+                                        file
+                                    )
+                                    val intent = Intent(Intent.ACTION_VIEW).apply {
+                                        setDataAndType(fileUri, "application/pdf")
+                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    }
+                                    context.startActivity(intent)
+                                    Toast.makeText(context, pdfGeneratedToast, Toast.LENGTH_LONG)
+                                        .show()
+
+                                    if (!status.equals("Filled", ignoreCase = true)) {
+                                        patientViewModel.updatePrescriptionStatus(
+                                            prescription.id,
+                                            "Filled"
+                                        ) { success ->
+                                            if (success) {
+                                                status = "Filled"
+                                            } else {
+                                                Toast.makeText(
+                                                    context,
+                                                    statusUpdateFailedToast,
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        }
+                                    }
+
+                                    navController.popBackStack()
+                                    navController.navigate("patient")
+
+                                } catch (e: ActivityNotFoundException) {
+                                    Toast.makeText(
+                                        context,
+                                        "No PDF viewer found.",
+                                        Toast.LENGTH_SHORT
+                                    )
+                                        .show()
+                                } catch (e: Exception) {
+                                    Toast.makeText(
+                                        context,
+                                        "$pdfGenerationFailedToast: ${e.message}",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.PictureAsPdf,
+                                contentDescription = stringResource(id = R.string.patient_prescriptions_generate_pdf_button)
+                            )
+                        }
                     }
                 }
             }

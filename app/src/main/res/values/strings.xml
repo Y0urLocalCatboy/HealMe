@@ -195,6 +195,9 @@
     <string name="patient_prescriptions_pdf_generated_toast">Prescription saved to PDF</string>
     <string name="patient_prescriptions_pdf_generation_failed">Error generating PDF</string>
     <string name="patient_prescriptions_status_update_failed">Failed to update prescription status.</string>
+    <string name="patient_prescriptions_generate_qr_button">Generate QR</string>
+    <string name="patient_prescriptions_qr_generated_toast">QR code saved to Downloads</string>
+    <string name="patient_prescriptions_qr_generation_failed">Error generating QR code</string>
 
     <!-- String used for back arrow top bar -->
     <string name="back_arrow">Back</string>

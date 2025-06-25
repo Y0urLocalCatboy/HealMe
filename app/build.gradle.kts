@@ -87,6 +87,8 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation("com.google.firebase:firebase-messaging-ktx")
 
+    implementation("com.google.zxing:core:3.5.1")
+
     implementation(libs.truetime)
     implementation(libs.truetime.rx)
 
