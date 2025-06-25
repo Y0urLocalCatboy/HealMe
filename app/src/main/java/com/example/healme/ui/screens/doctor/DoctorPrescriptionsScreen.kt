@@ -31,10 +31,14 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-/** DoctorPrescriptionsScreen.kt
+/**
+ * DoctorPrescriptionsScreen.kt
  *
  * This file contains the Composable function for the Doctor's Prescriptions screen.
  * It allows doctors to issue prescriptions to patients and view recent prescriptions.
+ *
+ * @param navController The NavController used for navigation between screens.
+ * @param viewModel The ViewModel responsible for handling the business logic of the screen.
  */
 @Composable
 fun DoctorPrescriptionsScreen(

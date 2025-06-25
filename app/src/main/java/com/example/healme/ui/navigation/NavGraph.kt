@@ -37,7 +37,8 @@ import com.example.healme.ui.screens.doctor.DoctorPastAppointmentScreen
  * @param modifier Modifier to apply to the NavHost.
  */
 @Composable
-fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
+fun NavGraph(navController: NavHostController,
+             modifier: Modifier = Modifier) {
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
 
     val drawerEnabledRoutes = listOf(

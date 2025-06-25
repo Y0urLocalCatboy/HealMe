@@ -9,9 +9,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.healme.viewmodel.AuthViewModel
 
+/**
+ * SplashScreen is a composable function that displays a loading indicator while the app is
+ * determining the start destination based on the user's authentication state.
+ *
+ * @param navController The NavHostController used for navigation.
+ * @param authViewModel The ViewModel responsible for authentication logic.
+ */
 @Composable
 fun SplashScreen(
     navController: NavHostController,

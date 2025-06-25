@@ -262,7 +262,6 @@ fun ChatScreen(
         }
     }
 
-    lateinit var appTrueTime: TrueTime
 
     val messageInputError = if (showInputError) chatViewModel.messageValidity(messageText) else null
     val yesterday = stringResource(R.string.chat_yesterday)

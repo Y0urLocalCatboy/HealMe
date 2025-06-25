@@ -338,16 +338,3 @@ private fun RegisterContent(
         }
     }
 }
-
-/**
- * Preview function for the Register screen.
- */
-@Preview(showBackground = true)
-@Composable
-fun PreviewRegisterScreen() {
-    RegisterContent(name = "", surname = "", email = "", dateOfBirth = "", password = "", confirmPassword = "",
-        errorMessage = null, nameError = null, surnameError = null, dobError = null, passwordError = null,
-        emailError = false, isFormValid = false, onNameChange = {}, onSurnameChange = {}, onEmailChange = {},
-        onDateOfBirthChange = {}, onPasswordChange = {}, onConfirmPasswordChange = {}, onRegisterClick = {},
-        onLoginClick = {})
-}

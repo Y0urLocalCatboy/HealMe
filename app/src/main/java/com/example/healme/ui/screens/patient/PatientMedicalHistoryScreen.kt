@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.healme.data.models.MedicalHistory
 import com.example.healme.data.network.FirestoreClass
@@ -15,6 +16,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.navigation.NavController
+import com.example.healme.R
 
 /**
  * Composable function to display the Patient's Medical History screen.
@@ -76,7 +78,7 @@ fun PatientMedicalHistoryScreen(navController: NavController) {
             onClick = { navController.popBackStack() },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
-            Text("Back")
+            Text(stringResource(R.string.back_button))
         }
     }
 }

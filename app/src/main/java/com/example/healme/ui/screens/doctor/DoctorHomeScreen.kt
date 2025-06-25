@@ -127,18 +127,18 @@ fun DoctorHomeContent(
                 windowInsets = WindowInsets(0, 0, 0, 0),
                 actions = {
                     IconButton(onClick = onMessagesClick) {
-                        Icon(Icons.Default.Email, contentDescription = stringResource(R.string.doctor_panel_chat))
+                        Icon(Icons.Default.Email, contentDescription = stringResource(R.string.doctor_panel_chat), tint = MaterialTheme.colorScheme.onTertiary)
                     }
                     IconButton(onClick = onProfileClick) {
-                        Icon(Icons.Default.Person, contentDescription = stringResource(R.string.doctor_panel_profile))
+                        Icon(Icons.Default.Person, contentDescription = stringResource(R.string.doctor_panel_profile), tint = MaterialTheme.colorScheme.onTertiary)
                     }
                     IconButton(onClick = onLogoutClick) {
-                        Icon(Icons.Default.Logout, contentDescription = stringResource(R.string.doctor_panel_logout))
+                        Icon(Icons.Default.Logout, contentDescription = stringResource(R.string.doctor_panel_logout), tint = MaterialTheme.colorScheme.onTertiary)
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onTertiary
                 )
             )
         }

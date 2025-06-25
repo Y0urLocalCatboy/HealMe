@@ -25,6 +25,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+/**
+ * LoginScreen is a composable function that displays the login screen for the application.
+ * It allows users to enter their email and password, and handles login logic.
+ *
+ * @param navController The NavController used for navigation between screens.
+ */
 @Composable
 fun LoginScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
@@ -136,14 +142,5 @@ fun LoginScreen(navController: NavController) {
             modifier = Modifier.clickable { navController.navigate("register") },
             color = MaterialTheme.colorScheme.primary
         )
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun LoginScreenPreview() {
-    MaterialTheme {
-        LoginScreen(navController = rememberNavController())
     }
 }

@@ -27,29 +27,31 @@ private val LightColorScheme = lightColorScheme(
     onBackground = Black,
     onSurface = Black,
     error = Crimson,
-    surfaceVariant = SurfaceVariant,
+    surfaceVariant = LightGray,
     primaryContainer = Success,
-    secondaryContainer = UnavailableGray,
-
-    )
+    secondaryContainer = SoftBlue
+)
 
 private val DarkColorScheme = darkColorScheme(
     primary = LightGreen,
     secondary = Turquoise,
     tertiary = SoftBlue,
-    background = Black,
-    surface = LightGray,
+    background = DarkGray,
+    surface = MediumGray,
     onPrimary = Black,
     onSecondary = Black,
     onTertiary = Black,
     onBackground = White,
     onSurface = White,
-    error = Crimson,
-    surfaceVariant = SurfaceVariant,
-    primaryContainer = Success,
-    secondaryContainer = UnavailableGray,
-
-    )
+    error = SoftRed,
+    surfaceVariant = DarkGreen,
+    primaryContainer = DarkSuccess,
+    secondaryContainer = DarkSuccess
+)
+/**
+ * HealMeTheme is a custom theme for the HealMe app, providing light and dark color schemes.
+ * The theme applies the appropriate color scheme based on system settings.
+ */
 @Composable
 fun HealMeTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

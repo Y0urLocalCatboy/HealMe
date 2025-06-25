@@ -84,6 +84,11 @@ fun DoctorPastAppointmentScreen(
     }
 }
 
+/**
+ * Composable function to display a single past appointment item.
+ *
+ * @param appointment The appointment data to display.
+ */
 @Composable
 private fun PastAppointmentItem(appointment: Map<String, Any>) {
     val patientId = appointment["patientId"] as? String ?: "Unknown"

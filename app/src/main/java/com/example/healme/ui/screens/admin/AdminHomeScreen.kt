@@ -5,7 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
@@ -128,6 +130,26 @@ fun AdminHomeScreen(
     )
 }
 
+/**
+ * AdminHomeContent displays the main content of the admin panel.
+ *
+ * @param users The list of users to display.
+ * @param roles The list of roles corresponding to the users.
+ * @param selectedIndex The index of the currently selected user.
+ * @param onSelectedIndexChange Callback function to handle index changes.
+ * @param specificRole The specific role of the selected user.
+ * @param onEditUser Callback function to handle user edit action.
+ * @param onLogOut Callback function to handle logout action.
+ * @param searchQuery The current search query.
+ * @param onSearchQueryChange Callback function to handle search query changes.
+ * @param selectedRoleFilter The currently selected role filter.
+ * @param onRoleFilterChange Callback function to handle role filter changes.
+ * @param doctorRole The string representation of the doctor role.
+ * @param patientRole The string representation of the patient role.
+ * @param adminRole The string representation of the admin role.
+ * @param allRole The string representation of all users role.
+ * @param navController The NavHostController used for navigation.
+ */
 @Composable
 fun AdminHomeContent(
     users: List<User>,
@@ -147,10 +169,13 @@ fun AdminHomeContent(
     allRole: String,
     navController: NavHostController
 ) {
+    val scrollState = rememberScrollState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
+            .verticalScroll(scrollState)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
@@ -192,8 +217,6 @@ fun AdminHomeContent(
             }
         }
 
-
-
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
@@ -206,7 +229,6 @@ fun AdminHomeContent(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Filtry według roli
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly

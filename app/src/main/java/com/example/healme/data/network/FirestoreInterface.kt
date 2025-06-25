@@ -146,6 +146,12 @@ interface FirestoreInterface {
      */
     suspend fun getDoctorAvailability(doctorId: String): Map<Long, String>
 
+    /**
+     * Changes a user's role to admin.
+     *
+     * @param id The ID of the user to convert.
+     * @param onResult Callback function with result (success, message).
+     */
     suspend fun changeToAdmin(id: String, onResult: (Boolean, String) -> Unit)
 
     /**

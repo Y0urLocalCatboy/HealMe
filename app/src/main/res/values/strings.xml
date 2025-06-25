@@ -87,6 +87,13 @@
     <string name="edit_profile_patient_to_doctor">Patient to Doctor</string>
     <string name="edit_profile_doctor_to_patient">Doctor to Patient</string>
     <string name="edit_profile_cancel">Cancel</string>
+    <string name="edit_profile_confirm_title">Confirm Changes</string>
+    <string name="edit_profile_confirm_question">Are you sure you want to save these changes?</string>
+    <string name="edit_profile_confirm_change_from_to">%1$s: %2$s  →  %3$s</string>
+    <string name="edit_profile_confirm_no_changes">No changes were made.</string>
+    <string name="edit_profile_confirm_role">Role</string>
+    <string name="edit_profile_confirm_role_doctor">Doctor</string>
+    <string name="edit_profile_confirm_role_patient">Patient</string>
 
     <!-- Strings used for administrator panel -->
     <string name="admin_panel_title">Administrator Panel</string>

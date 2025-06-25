@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,6 +41,7 @@ import com.example.healme.viewmodel.AdminViewModel
 import com.example.healme.viewmodel.LoginViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
+import kotlin.text.get
 
 /**
  * ChangeUserScreen is a Composable function that displays a screen for changing user information.
@@ -55,6 +57,7 @@ fun ChangeUserScreen(navController: NavController,
                      loginViewModel: LoginViewModel = viewModel(),
                      adminViewModel: AdminViewModel = viewModel()
 ){
+
     val fs = FirestoreClass()
     val auth = FirebaseAuth.getInstance()
 
@@ -70,7 +73,6 @@ fun ChangeUserScreen(navController: NavController,
     var isDoctor by remember { mutableStateOf(false) }
     var changesMade by remember { mutableStateOf(false) }
 
-
     var errorMessage by remember { mutableStateOf("") }
 
     var specialization by remember { mutableStateOf("") }
@@ -83,21 +85,94 @@ fun ChangeUserScreen(navController: NavController,
             email.isNotEmpty() && dateOfBirth.isNotEmpty() &&
             nameError == null && surnameError == null && dobError == null
 
+    var initialName by remember { mutableStateOf("") }
+    var initialSurname by remember { mutableStateOf("") }
+    var initialEmail by remember { mutableStateOf("") }
+    var initialDateOfBirth by remember { mutableStateOf("") }
+    var initialIsDoctor by remember { mutableStateOf(false) }
+    var initialSpecialization by remember { mutableStateOf("") }
+
+    var showConfirmDialog by remember { mutableStateOf(false) }
+
     var dataLoaded by remember { mutableStateOf(false) }
     LaunchedEffect(currentUserId) {
         if (!dataLoaded) {
             val userData = fs.loadUser(currentUserId ?: "")
             user = userData?.toMutableMap()
+
+            val loadedIsDoctor = user?.get("specialization") != null
             isDoctor = user?.get("specialization") != null
+
             if(isDoctor) {
-                specialization = user?.get("specialization") as String? ?: ""
+                val loadedSpecialization = if (loadedIsDoctor) user?.get("specialization") as String? ?: "" else ""
+                specialization = loadedSpecialization
+                initialSpecialization = loadedSpecialization
             }
-            name = user?.get("name") as? String ?: ""
-            surname = user?.get("surname") as? String ?: ""
-            email = user?.get("email") as? String ?: ""
-            dateOfBirth = user?.get("dateOfBirth") as? String ?: ""
+
+            val loadedName = user?.get("name") as? String ?: ""
+            name = loadedName
+            initialName = loadedName
+
+            val loadedSurname = user?.get("surname") as? String ?: ""
+            surname = loadedSurname
+            initialSurname = loadedSurname
+
+            val loadedEmail = user?.get("email") as? String ?: ""
+            email = loadedEmail
+            initialEmail = loadedEmail
+
+            val loadedDob = user?.get("dateOfBirth") as? String ?: ""
+            dateOfBirth = loadedDob
+            initialDateOfBirth = loadedDob
+
             dataLoaded = true
         }
+    }
+
+    if (showConfirmDialog) {
+        ConfirmChangesDialog(
+            name = name, initialName = initialName,
+            surname = surname, initialSurname = initialSurname,
+            email = email, initialEmail = initialEmail,
+            dateOfBirth = dateOfBirth, initialDateOfBirth = initialDateOfBirth,
+            isDoctor = isDoctor, initialIsDoctor = initialIsDoctor,
+            specialization = specialization, initialSpecialization = initialSpecialization,
+            onConfirm = {
+                showConfirmDialog = false
+                if (isFormValid) {
+                    val updateData = mapOf(
+                        "name" to name,
+                        "surname" to surname,
+                        "email" to email,
+                        "dateOfBirth" to dateOfBirth
+                    ).toMutableMap()
+
+                    if (isDoctor) {
+                        updateData["specialization"] = specialization
+                    } else if (changesMade) {
+                        updateData.remove("specialization")
+                    }
+
+                    try {
+                        coroutineScope.launch {
+                            try {
+                                fs.updateUser(User.fromMap(user as Map<String, Any>), updateData)
+                            } catch (e: Exception) {
+                                errorMessage = e.message ?: "it shouldn't happen (onSaveClick changeuserScreen)"
+                            }
+                            if (changesMade) {
+                                adminViewModel.changeUserType(User.fromMap(user as Map<String, Any>))
+                                changesMade = false
+                            }
+                        }
+                        navController.popBackStack()
+                    } catch (e: Exception) {
+                        errorMessage = e.message ?: "it shouldn't happen (DITTO changeuserScreen)"
+                    }
+                }
+            },
+            onDismiss = { showConfirmDialog = false }
+        )
     }
 
     ChangeUserContent(
@@ -120,35 +195,7 @@ fun ChangeUserScreen(navController: NavController,
         onSpecializationChange = { specialization = it },
         onSaveClick = {
             if (isFormValid) {
-                val updateData = mapOf(
-                    "name" to name,
-                    "surname" to surname,
-                    "email" to email,
-                    "dateOfBirth" to dateOfBirth
-                ).toMutableMap()
-
-                if (isDoctor) {
-                    updateData["specialization"] = specialization
-                } else if (changesMade) {
-                    updateData.remove("specialization")
-                }
-
-                try {
-                    coroutineScope.launch {
-                        try {
-                            fs.updateUser(User.fromMap(user as Map<String, Any>), updateData)
-                        } catch (e: Exception) {
-                            errorMessage = e.message ?: "it shouldn't happen (onSaveClick changeuserScreen)"
-                        }
-                        if (changesMade) {
-                            adminViewModel.changeUserType(User.fromMap(user as Map<String, Any>))
-                            changesMade = false
-                        }
-                    }
-                    navController.popBackStack()
-                } catch (e: Exception) {
-                    errorMessage = e.message ?: "it shouldn't happen (DITTO changeuserScreen)"
-                }
+                showConfirmDialog = true
             }
         },
         onToggleDoctorStatus = {
@@ -368,30 +415,88 @@ fun ChangeUserContent(
 }
 
 /**
- * Preview for ChangeUserContent.
+ * ConfirmChangesDialog is a Composable function that displays a dialog to confirm changes made by the user.
+ *
+ * @param name The new name of the user.
+ * @param initialName The initial name of the user before changes.
+ * @param surname The new surname of the user.
+ * @param initialSurname The initial surname of the user before changes.
+ * @param email The new email of the user.
+ * @param initialEmail The initial email of the user before changes.
+ * @param dateOfBirth The new date of birth of the user.
+ * @param initialDateOfBirth The initial date of birth of the user before changes.
+ * @param isDoctor Indicates if the user is a doctor.
+ * @param initialIsDoctor Indicates if the user was a doctor before changes.
+ * @param specialization The new specialization of the doctor (if applicable).
+ * @param initialSpecialization The initial specialization of the doctor before changes (if applicable).
+ * @param onConfirm Callback for confirming changes.
+ * @param onDismiss Callback for dismissing the dialog without confirming changes.
  */
-@Preview(showBackground = true)
 @Composable
-fun ChangeUserContentPreview() {
-    ChangeUserContent(
-        adminMode = true,
-        isDoctor = true,
-        name = "Gregory",
-        nameError = null,
-        surname = "House",
-        surnameError = null,
-        email = "greg.house@wp.pl",
-        dateOfBirth = "1990-01-01",
-        dobError = null,
-        specialization = "pediatrist",
-        errorMessage = "",
-        isFormValid = true,
-        onNameChange = {},
-        onSurnameChange = {},
-        onEmailChange = {},
-        onDateOfBirthChange = {},
-        onSpecializationChange = {},
-        onSaveClick = {},
-        onToggleDoctorStatus = {}
+fun ConfirmChangesDialog(
+    name: String,
+    initialName: String,
+    surname: String,
+    initialSurname: String,
+    email: String,
+    initialEmail: String,
+    dateOfBirth: String,
+    initialDateOfBirth: String,
+    isDoctor: Boolean,
+    initialIsDoctor: Boolean,
+    specialization: String,
+    initialSpecialization: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.edit_profile_confirm_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(R.string.edit_profile_confirm_question))
+                Spacer(Modifier.height(8.dp))
+
+                val changesText = mutableListOf<String>()
+                if (name != initialName) {
+                    changesText.add(stringResource(R.string.edit_profile_confirm_change_from_to, stringResource(R.string.register_name), initialName, name))
+                }
+                if (surname != initialSurname) {
+                    changesText.add(stringResource(R.string.edit_profile_confirm_change_from_to, stringResource(R.string.register_surname), initialSurname, surname))
+                }
+                if (email != initialEmail) {
+                    changesText.add(stringResource(R.string.edit_profile_confirm_change_from_to, stringResource(R.string.register_email), initialEmail, email))
+                }
+                if (dateOfBirth != initialDateOfBirth) {
+                    changesText.add(stringResource(R.string.edit_profile_confirm_change_from_to, stringResource(R.string.register_birthdate_long), initialDateOfBirth, dateOfBirth))
+                }
+                if (isDoctor != initialIsDoctor) {
+                    val from = if (initialIsDoctor) stringResource(R.string.edit_profile_confirm_role_doctor) else stringResource(R.string.edit_profile_confirm_role_patient)
+                    val to = if (isDoctor) stringResource(R.string.edit_profile_confirm_role_doctor) else stringResource(R.string.edit_profile_confirm_role_patient)
+                    changesText.add(stringResource(R.string.edit_profile_confirm_change_from_to, stringResource(R.string.edit_profile_confirm_role), from, to))
+                }
+                if (isDoctor && specialization != initialSpecialization) {
+                    changesText.add(stringResource(R.string.edit_profile_confirm_change_from_to, stringResource(R.string.edit_profile_specialization), initialSpecialization, specialization))
+                }
+
+                if (changesText.isNotEmpty()) {
+                    changesText.forEach { change ->
+                        Text(text = change, style = MaterialTheme.typography.bodyMedium)
+                    }
+                } else {
+                    Text(stringResource(R.string.edit_profile_confirm_no_changes))
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = onConfirm) {
+                Text(stringResource(R.string.confirm_button))
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel_button))
+            }
+        }
     )
 }
