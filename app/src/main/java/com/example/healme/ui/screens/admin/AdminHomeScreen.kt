@@ -46,7 +46,7 @@ fun AdminHomeScreen(
     val users by adminViewModel.users.collectAsState()
     var selectedIndex by remember { mutableStateOf(0) }
     var searchQuery by remember { mutableStateOf("") }
-    var selectedRoleFilter by remember { mutableStateOf("") } // Pusty string oznacza "Wszyscy"
+    var selectedRoleFilter by remember { mutableStateOf("") }
 
     val adminRole by rememberUpdatedState(newValue = stringResource(R.string.admin_panel_admin))
     val doctorRole by rememberUpdatedState(newValue = stringResource(R.string.admin_panel_doctor))
